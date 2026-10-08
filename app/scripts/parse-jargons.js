@@ -805,6 +805,59 @@ const combinators = combinatorsSource
     }
   : null;
 
+// Levels behind the graph's simpler views: Essentials is the first ~30 terms a
+// C# developer meets, Everything adds the niche ones, the rest are Practical
+const ESSENTIAL_TERMS = `
+  function pure-function first-class-function higher-order-functions-hof lambda closure recursion
+  partial-function total-function
+  currying partial-application function-composition pipe lazy-evaluation
+  immutability side-effects referential-transparency value idempotence
+  algebraic-data-type sum-type product-type option either pattern-matching type-signatures unit-type
+  functor monad monoid applicative-functor foldable monad-comprehension
+  io`.split(/\s+/).filter(Boolean);
+const NICHE_TERMS = `
+  auto-currying continuation-passing-style
+  algebraic-effects free-monad continuation-monad
+  constant equational-reasoning
+  semigroupoid endofunctor kleisli-category endomorphism hylomorphism paramorphism apomorphism
+  functor-category initial-and-terminal-objects product-and-coproduct duality monoidal-category
+  adjunction yoneda-lemma
+  constant-functor constant-monad pointed-functor group semiring comonad monoidal-functor profunctor
+  arrow magma setoid
+  alpha-conversion eta-conversion reduction-strategy church-encoding fixed-point-combinator combinatory-logic
+  prism iso traversal zipper dependent-type existential-type rank-n-type generalized-algebraic-data-type
+  linear-type refinement-type phantom-type`.split(/\s+/).filter(Boolean);
+
+for (const id of [...ESSENTIAL_TERMS, ...NICHE_TERMS]) {
+  if (!termIds.has(id)) throw new Error(`Unknown term in level lists: ${id}`);
+}
+entries.forEach(entry => {
+  entry.level = ESSENTIAL_TERMS.includes(entry.id) ? 'essentials'
+    : NICHE_TERMS.includes(entry.id) ? 'everything'
+    : 'practical';
+});
+
+// Learning paths (learning-paths.md): each `## Title` section is a path, its
+// first paragraph the intro, and each numbered `[Term](readme.md#id): note`
+// item a step
+const pathsPath = [path.join(__dirname, '../../learning-paths.md'), path.join(__dirname, '../learning-paths.md')]
+  .find(p => fs.existsSync(p));
+const pathsSource = pathsPath ? fs.readFileSync(pathsPath, 'utf8') : '';
+const learningPaths = pathsSource.split(/^## /m).slice(1).map(section => {
+  const [titleLine, ...rest] = section.split('\n');
+  const title = titleLine.trim();
+  const body = rest.join('\n').trim();
+  const intro = body.split(/\n\s*\n/)[0].trim();
+  const steps = [...body.matchAll(/^\d+\.\s+\[[^\]]+\]\(readme\.md#([\w-]+)\):\s*(.+)$/gm)]
+    .map(([, termId, note]) => {
+      if (!termIds.has(termId)) throw new Error(`Learning path "${title}" links to unknown term: ${termId}`);
+      // Notes follow a colon in the markdown; shown alone they start a sentence
+      const text = note.trim();
+      return { termId, note: text[0].toUpperCase() + text.slice(1) };
+    });
+  return { id: slugify(title.replace(/C#/g, 'csharp')), title, intro, steps };
+});
+
 const output = {
   meta: {
     title: "FP Jargon",
@@ -817,11 +870,13 @@ const output = {
   categories: CATEGORIES,
   terms: entries,
   combinators,
+  paths: learningPaths,
   graph: {
     nodes: entries.map(e => ({
       id: e.id,
       name: e.title,
       category: e.category,
+      level: e.level,
       val: e.relatedIds.length + (e.depth === 2 ? 4 : 2),
       summary: e.summary
     })),

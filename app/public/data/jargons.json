@@ -95,7 +95,8 @@
       "crossRefs": [],
       "relatedIds": [
         "currying"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "first-class-function",
@@ -145,7 +146,8 @@
         "value",
         "function-composition",
         "currying"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "higher-order-functions-hof",
@@ -191,7 +193,8 @@
         "first-class-function",
         "declarative-programming",
         "pipe"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "closure",
@@ -227,7 +230,8 @@
         "higher-order-functions-hof",
         "free-and-bound-variables",
         "first-class-function"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "partial-application",
@@ -254,7 +258,8 @@
       "relatedIds": [
         "currying",
         "higher-order-functions-hof"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "currying",
@@ -288,7 +293,8 @@
         "adjunction",
         "first-class-function",
         "constant-function"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "auto-currying",
@@ -321,7 +327,8 @@
       "crossRefs": [],
       "relatedIds": [
         "currying"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "function-composition",
@@ -357,7 +364,8 @@
         "first-class-function",
         "pipe",
         "arrow"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "pipe",
@@ -407,7 +415,8 @@
         "function-composition",
         "point-free-style",
         "higher-order-functions-hof"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "continuation",
@@ -440,7 +449,8 @@
         "algebraic-effects",
         "continuation-passing-style",
         "continuation-monad"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "continuation-passing-style",
@@ -482,7 +492,8 @@
         "continuation",
         "continuation-monad",
         "trampoline"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "io",
@@ -531,7 +542,8 @@
         "thunk",
         "free-monad",
         "value"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "recursion",
@@ -576,7 +588,8 @@
         "catamorphism",
         "anamorphism",
         "foldable"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "tail-call",
@@ -624,7 +637,8 @@
         "recursion",
         "trampoline",
         "continuation-passing-style"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "trampoline",
@@ -665,7 +679,8 @@
         "recursion",
         "tail-call",
         "continuation-passing-style"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "thunk",
@@ -701,7 +716,8 @@
         "io",
         "reduction-strategy",
         "eager-evaluation"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "algebraic-effects",
@@ -753,7 +769,8 @@
         "side-effects",
         "free-monad",
         "unit-type"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "declarative-programming",
@@ -792,7 +809,8 @@
         "higher-order-functions-hof",
         "pure-function",
         "monad-comprehension"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "pure-function",
@@ -840,7 +858,8 @@
         "immutability",
         "property-based-testing",
         "either"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "immutability",
@@ -896,7 +915,8 @@
         "pure-function",
         "linear-type",
         "zipper"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "side-effects",
@@ -929,7 +949,8 @@
         "linear-type",
         "memoization",
         "function"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "idempotence",
@@ -954,7 +975,8 @@
       "relatedIds": [
         "pure-function",
         "memoization"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "point-free-style",
@@ -988,7 +1010,8 @@
         "eta-conversion",
         "combinatory-logic",
         "pipe"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "predicate",
@@ -1010,7 +1033,8 @@
         "higher-order-functions-hof",
         "contravariant-functor",
         "refinement-type"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "contracts",
@@ -1030,7 +1054,8 @@
       "crossRefs": [],
       "relatedIds": [
         "type-signatures"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "category",
@@ -1068,7 +1093,8 @@
         "arrow",
         "endofunctor",
         "monoidal-category"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "semigroupoid",
@@ -1102,7 +1128,8 @@
         "category",
         "function-composition",
         "semigroup"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "value",
@@ -1124,7 +1151,8 @@
         "constant",
         "first-class-function",
         "io"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "constant",
@@ -1152,7 +1180,8 @@
         "referential-transparency",
         "constant-function",
         "value"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "constant-function",
@@ -1176,7 +1205,8 @@
         "constant",
         "constant-functor",
         "currying"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "constant-functor",
@@ -1200,7 +1230,8 @@
         "constant-function",
         "constant-monad",
         "functor"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "constant-monad",
@@ -1223,7 +1254,8 @@
       "relatedIds": [
         "constant-functor",
         "monad"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "laws",
@@ -1278,7 +1310,8 @@
         "monad",
         "equational-reasoning",
         "monoid"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "functor",
@@ -1350,7 +1383,8 @@
         "monad",
         "monad-transformer",
         "sum-type"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "endofunctor",
@@ -1399,7 +1433,8 @@
         "endomorphism",
         "category",
         "functor-category"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "pointed-functor",
@@ -1422,7 +1457,8 @@
         "applicative-functor",
         "lift",
         "monad"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "lift",
@@ -1455,7 +1491,8 @@
         "applicative-functor",
         "functor",
         "pointed-functor"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "referential-transparency",
@@ -1487,7 +1524,8 @@
         "beta-reduction",
         "immutability",
         "function"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "equational-reasoning",
@@ -1515,7 +1553,8 @@
         "beta-reduction",
         "property-based-testing",
         "laws"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "property-based-testing",
@@ -1570,7 +1609,8 @@
         "pure-function",
         "equational-reasoning",
         "monoid"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "memoization",
@@ -1610,7 +1650,8 @@
         "referential-transparency",
         "idempotence",
         "side-effects"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "lambda",
@@ -1645,7 +1686,8 @@
         "lambda-calculus",
         "expression-tree",
         "type-inference"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "lambda-calculus",
@@ -1695,7 +1737,8 @@
         "church-encoding",
         "combinatory-logic",
         "fixed-point-combinator"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "free-and-bound-variables",
@@ -1738,7 +1781,8 @@
         "functional-combinator",
         "alpha-conversion",
         "beta-reduction"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "alpha-conversion",
@@ -1780,7 +1824,8 @@
       "relatedIds": [
         "free-and-bound-variables",
         "beta-reduction"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "beta-reduction",
@@ -1829,7 +1874,8 @@
         "pure-function",
         "reduction-strategy",
         "free-and-bound-variables"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "eta-conversion",
@@ -1868,7 +1914,8 @@
       "relatedIds": [
         "point-free-style",
         "fixed-point-combinator"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "reduction-strategy",
@@ -1917,7 +1964,8 @@
         "lazy-evaluation",
         "eager-evaluation",
         "thunk"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "church-encoding",
@@ -1976,7 +2024,8 @@
         "rank-n-type",
         "sum-type",
         "combinatory-logic"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "fixed-point-combinator",
@@ -2028,7 +2077,8 @@
         "eager-evaluation",
         "functional-combinator",
         "lambda-calculus"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "combinatory-logic",
@@ -2086,7 +2136,8 @@
         "point-free-style",
         "lambda-calculus",
         "church-encoding"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "functional-combinator",
@@ -2121,7 +2172,8 @@
         "free-and-bound-variables",
         "fixed-point-combinator",
         "combinatory-logic"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "lazy-evaluation",
@@ -2163,7 +2215,8 @@
         "reduction-strategy",
         "eager-evaluation",
         "generator"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "eager-evaluation",
@@ -2210,7 +2263,8 @@
         "side-effects",
         "thunk",
         "generator"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "generator",
@@ -2259,7 +2313,8 @@
         "lazy-evaluation",
         "anamorphism",
         "eager-evaluation"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "monoid",
@@ -2330,7 +2385,8 @@
         "laws",
         "homomorphism",
         "newtype"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "group",
@@ -2370,7 +2426,8 @@
         "monoid",
         "type-class",
         "semiring"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "semiring",
@@ -2413,7 +2470,8 @@
         "group",
         "monoid",
         "type-class"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "monad",
@@ -2479,7 +2537,8 @@
         "adjunction",
         "sum-type",
         "never-type"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "monad-comprehension",
@@ -2536,7 +2595,8 @@
         "declarative-programming",
         "continuation-monad",
         "structural-typing"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "comonad",
@@ -2566,7 +2626,8 @@
         "monad",
         "duality",
         "adjunction"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "kleisli-composition",
@@ -2599,7 +2660,8 @@
         "kleisli-category",
         "arrow",
         "option"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "kleisli-category",
@@ -2641,7 +2703,8 @@
         "monad",
         "category",
         "option"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "free-monad",
@@ -2689,7 +2752,8 @@
         "io",
         "algebraic-effects",
         "expression-tree"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "monad-transformer",
@@ -2729,7 +2793,8 @@
         "either",
         "functor",
         "applicative-functor"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "reader-monad",
@@ -2780,7 +2845,8 @@
         "state-monad",
         "algebraic-effects",
         "monad-transformer"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "writer-monad",
@@ -2822,7 +2888,8 @@
         "monad",
         "monoid",
         "state-monad"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "state-monad",
@@ -2870,7 +2937,8 @@
         "side-effects",
         "monad-transformer",
         "adjunction"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "continuation-monad",
@@ -2923,7 +2991,8 @@
         "monad",
         "continuation",
         "monad-comprehension"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "fallible",
@@ -2981,7 +3050,8 @@
         "side-effects",
         "reader-monad",
         "monad-transformer"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "applicative-functor",
@@ -3030,7 +3100,8 @@
         "arrow",
         "monad-transformer",
         "monoidal-category"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "monoidal-functor",
@@ -3083,7 +3154,8 @@
         "applicative-functor",
         "functor",
         "monoid"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "bifunctor",
@@ -3131,7 +3203,8 @@
         "product-type",
         "profunctor",
         "monoidal-category"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "variance",
@@ -3185,7 +3258,8 @@
         "functor",
         "contravariant-functor",
         "profunctor"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "contravariant-functor",
@@ -3235,7 +3309,8 @@
         "predicate",
         "profunctor",
         "variance"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "profunctor",
@@ -3270,7 +3345,8 @@
         "lens",
         "variance",
         "arrow"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "arrow",
@@ -3324,7 +3400,8 @@
         "function-composition",
         "applicative-functor",
         "monad"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "alternative",
@@ -3366,7 +3443,8 @@
         "applicative-functor",
         "monoid",
         "option"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "morphism",
@@ -3391,7 +3469,8 @@
         "homomorphism",
         "natural-transformation",
         "isomorphism"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "homomorphism",
@@ -3427,7 +3506,8 @@
         "endomorphism",
         "isomorphism",
         "monoid"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "endomorphism",
@@ -3450,7 +3530,8 @@
       "relatedIds": [
         "homomorphism",
         "endofunctor"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "isomorphism",
@@ -3476,7 +3557,8 @@
         "iso",
         "monoidal-category",
         "morphism"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "catamorphism",
@@ -3506,7 +3588,8 @@
         "church-encoding",
         "recursion",
         "duality"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "anamorphism",
@@ -3566,7 +3649,8 @@
         "generator",
         "foldable",
         "duality"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "hylomorphism",
@@ -3593,7 +3677,8 @@
       "relatedIds": [
         "anamorphism",
         "catamorphism"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "paramorphism",
@@ -3616,7 +3701,8 @@
       "crossRefs": [],
       "relatedIds": [
         "catamorphism"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "apomorphism",
@@ -3634,7 +3720,8 @@
       "crossRefs": [],
       "relatedIds": [
         "anamorphism"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "natural-transformation",
@@ -3679,7 +3766,8 @@
         "rank-n-type",
         "functor-category",
         "yoneda-lemma"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "functor-category",
@@ -3723,7 +3811,8 @@
         "yoneda-lemma",
         "endofunctor",
         "adjunction"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "initial-and-terminal-objects",
@@ -3773,7 +3862,8 @@
         "category",
         "product-type",
         "sum-type"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "product-and-coproduct",
@@ -3821,7 +3911,8 @@
         "sum-type",
         "either",
         "duality"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "duality",
@@ -3867,7 +3958,8 @@
         "catamorphism",
         "anamorphism",
         "monad"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "monoidal-category",
@@ -3917,7 +4009,8 @@
         "category",
         "never-type",
         "applicative-functor"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "adjunction",
@@ -3967,7 +4060,8 @@
         "comonad",
         "functor-category",
         "monad"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "yoneda-lemma",
@@ -4011,7 +4105,8 @@
         "rank-n-type",
         "natural-transformation",
         "functor-category"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "setoid",
@@ -4035,7 +4130,8 @@
       "crossRefs": [],
       "relatedIds": [
         "semigroup"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "magma",
@@ -4078,7 +4174,8 @@
         "semigroup",
         "monoid",
         "group"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "semigroup",
@@ -4105,7 +4202,8 @@
         "setoid",
         "semigroupoid",
         "magma"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "foldable",
@@ -4130,7 +4228,8 @@
         "anamorphism",
         "recursion",
         "higher-kinded-type"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "traversable",
@@ -4172,7 +4271,8 @@
         "functor",
         "applicative-functor",
         "traversal"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "lens",
@@ -4210,7 +4310,8 @@
         "profunctor",
         "traversal",
         "zipper"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "prism",
@@ -4250,7 +4351,8 @@
         "option",
         "iso",
         "traversal"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "iso",
@@ -4289,7 +4391,8 @@
         "lens",
         "prism",
         "isomorphism"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "traversal",
@@ -4320,7 +4423,8 @@
         "prism",
         "traversable",
         "zipper"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "zipper",
@@ -4369,7 +4473,8 @@
         "immutability",
         "algebraic-data-type",
         "traversal"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "type-signatures",
@@ -4413,7 +4518,8 @@
         "dependent-type",
         "contracts",
         "type-inference"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "parametricity",
@@ -4462,7 +4568,8 @@
         "existential-type",
         "rank-n-type",
         "type-inference"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "type-class",
@@ -4522,7 +4629,8 @@
         "laws",
         "group",
         "semiring"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "higher-kinded-type",
@@ -4576,7 +4684,8 @@
         "rank-n-type",
         "foldable",
         "expression-problem"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "phantom-type",
@@ -4616,7 +4725,8 @@
         "newtype",
         "smart-constructor",
         "refinement-type"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "newtype",
@@ -4671,7 +4781,8 @@
         "structural-typing",
         "refinement-type",
         "monoid"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "smart-constructor",
@@ -4724,7 +4835,8 @@
         "refinement-type",
         "option",
         "either"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "refinement-type",
@@ -4776,7 +4888,8 @@
         "dependent-type",
         "predicate",
         "newtype"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "dependent-type",
@@ -4832,7 +4945,8 @@
         "smart-constructor",
         "refinement-type",
         "generalized-algebraic-data-type"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "existential-type",
@@ -4876,7 +4990,8 @@
         "parametricity",
         "rank-n-type",
         "type-class"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "rank-n-type",
@@ -4924,7 +5039,8 @@
         "higher-kinded-type",
         "parametricity",
         "yoneda-lemma"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "generalized-algebraic-data-type",
@@ -4971,7 +5087,8 @@
         "sum-type",
         "expression-problem",
         "dependent-type"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "type-inference",
@@ -5020,7 +5137,8 @@
         "type-signatures",
         "parametricity",
         "lambda"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "structural-typing",
@@ -5067,7 +5185,8 @@
         "newtype",
         "monad-comprehension",
         "type-class"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "linear-type",
@@ -5114,7 +5233,8 @@
       "relatedIds": [
         "side-effects",
         "immutability"
-      ]
+      ],
+      "level": "everything"
     },
     {
       "id": "expression-problem",
@@ -5164,7 +5284,8 @@
         "type-class",
         "generalized-algebraic-data-type",
         "higher-kinded-type"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "algebraic-data-type",
@@ -5188,7 +5309,8 @@
         "pattern-matching",
         "generalized-algebraic-data-type",
         "zipper"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "sum-type",
@@ -5254,7 +5376,8 @@
         "initial-and-terminal-objects",
         "functor",
         "monad"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "product-type",
@@ -5288,7 +5411,8 @@
         "bifunctor",
         "product-and-coproduct",
         "initial-and-terminal-objects"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "unit-type",
@@ -5324,7 +5448,8 @@
         "initial-and-terminal-objects",
         "monoidal-category",
         "algebraic-effects"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "never-type",
@@ -5382,7 +5507,8 @@
         "initial-and-terminal-objects",
         "monoidal-category",
         "monad"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "pattern-matching",
@@ -5435,7 +5561,8 @@
         "option",
         "either",
         "expression-tree"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "option",
@@ -5478,7 +5605,8 @@
         "kleisli-category",
         "functor",
         "kleisli-composition"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "either",
@@ -5532,7 +5660,8 @@
         "smart-constructor",
         "product-and-coproduct",
         "pure-function"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "expression-tree",
@@ -5581,7 +5710,8 @@
         "free-monad",
         "pattern-matching",
         "lambda"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "function",
@@ -5609,7 +5739,8 @@
         "referential-transparency",
         "side-effects",
         "partial-function"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "partial-function",
@@ -5633,7 +5764,8 @@
         "total-function",
         "dealing-with-partial-functions",
         "function"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "dealing-with-partial-functions",
@@ -5656,7 +5788,8 @@
       "relatedIds": [
         "partial-function",
         "option"
-      ]
+      ],
+      "level": "practical"
     },
     {
       "id": "total-function",
@@ -5674,7 +5807,8 @@
       "relatedIds": [
         "partial-function",
         "dependent-type"
-      ]
+      ],
+      "level": "essentials"
     },
     {
       "id": "functional-programming-libraries-for-net",
@@ -5732,7 +5866,8 @@
         }
       ],
       "crossRefs": [],
-      "relatedIds": []
+      "relatedIds": [],
+      "level": "practical"
     }
   ],
   "combinators": {
@@ -5851,12 +5986,361 @@
       }
     ]
   },
+  "paths": [
+    {
+      "id": "functions-to-monads",
+      "title": "Functions to monads",
+      "intro": "From \"a function is a value\" to LINQ query syntax over `Option` and `IO`. Start here if you're new to functional programming.",
+      "steps": [
+        {
+          "termId": "function",
+          "note": "Everything else is built from functions that map an input to an output and do nothing else."
+        },
+        {
+          "termId": "pure-function",
+          "note": "Purity is the property that makes functions safe to combine, cache and test."
+        },
+        {
+          "termId": "lambda",
+          "note": "C#'s `x => ...` lets you write a function inline, wherever you need one."
+        },
+        {
+          "termId": "first-class-function",
+          "note": "Once a function is a value, you can store it, pass it and return it."
+        },
+        {
+          "termId": "higher-order-functions-hof",
+          "note": "`Select`, `Where` and `Aggregate` are functions that take functions; now you can write your own."
+        },
+        {
+          "termId": "closure",
+          "note": "A returned lambda remembers the variables around it, which is how functions get configured."
+        },
+        {
+          "termId": "partial-application",
+          "note": "Fix some arguments now and supply the rest later, which builds on closures."
+        },
+        {
+          "termId": "currying",
+          "note": "Turning a many-argument function into a chain of one-argument functions makes partial application automatic."
+        },
+        {
+          "termId": "function-composition",
+          "note": "With one-argument functions, small steps snap together into pipelines."
+        },
+        {
+          "termId": "functor",
+          "note": "`Map` composes a function with whatever is inside a box (a list, an `Option`, an `IO`) without opening it."
+        },
+        {
+          "termId": "applicative-functor",
+          "note": "`Map` handles one boxed value; applicative apply combines several independent ones."
+        },
+        {
+          "termId": "monad",
+          "note": "`Bind` handles the step functors can't, where the next computation depends on the previous result."
+        },
+        {
+          "termId": "monad-comprehension",
+          "note": "LINQ's `from ... select` is monad syntax, so chains of `Bind` read like ordinary code."
+        }
+      ]
+    },
+    {
+      "id": "errors-without-exceptions",
+      "title": "Errors without exceptions",
+      "intro": "Model failure as a value the compiler can see, instead of a `throw` it can't.",
+      "steps": [
+        {
+          "termId": "partial-function",
+          "note": "`int.Parse` and `list[0]` don't have an answer for every input, and the signature doesn't say so."
+        },
+        {
+          "termId": "total-function",
+          "note": "The goal is a function that returns something for every input it accepts."
+        },
+        {
+          "termId": "dealing-with-partial-functions",
+          "note": "The usual fixes are narrowing the input or widening the output; the rest of the path widens the output."
+        },
+        {
+          "termId": "option",
+          "note": "`Option` widens the output with \"no answer\" for failures that need no explanation."
+        },
+        {
+          "termId": "either",
+          "note": "When the caller needs to know why, `Either` carries an error value on the left."
+        },
+        {
+          "termId": "pattern-matching",
+          "note": "`Match` makes the caller handle both cases before getting at the value."
+        },
+        {
+          "termId": "functor",
+          "note": "`Map` lets you keep working on the success value and leave the failure untouched."
+        },
+        {
+          "termId": "monad",
+          "note": "`Bind` chains steps that can each fail and stops at the first failure, without nested `if`s."
+        },
+        {
+          "termId": "applicative-functor",
+          "note": "Validating a form should report every error, not just the first; applicatives combine independent checks."
+        },
+        {
+          "termId": "alternative",
+          "note": "`|` tries a fallback when the first attempt fails."
+        },
+        {
+          "termId": "fallible",
+          "note": "Language-ext's trait for \"can fail and can catch\", shared by `Option`, `Either`, `Eff` and `IO`."
+        },
+        {
+          "termId": "traversable",
+          "note": "`Traverse` turns a list of results that might have failed into one result holding a list."
+        }
+      ]
+    },
+    {
+      "id": "modelling-data-with-types",
+      "title": "Modelling data with types",
+      "intro": "Make illegal states unrepresentable, so the compiler checks your business rules.",
+      "steps": [
+        {
+          "termId": "value",
+          "note": "Data in functional code is plain values, compared by what they hold rather than by reference."
+        },
+        {
+          "termId": "immutability",
+          "note": "Values that can't change can be shared freely; C# records give you this cheaply."
+        },
+        {
+          "termId": "product-type",
+          "note": "A record holds this *and* that, and its possible values multiply."
+        },
+        {
+          "termId": "sum-type",
+          "note": "A union holds this *or* that, which is what products can't express."
+        },
+        {
+          "termId": "algebraic-data-type",
+          "note": "Sums of products describe most domain data exactly."
+        },
+        {
+          "termId": "pattern-matching",
+          "note": "`switch` takes an algebraic data type apart, and the compiler warns about cases you missed."
+        },
+        {
+          "termId": "unit-type",
+          "note": "The type with one value stands in for `void`, so every function returns something."
+        },
+        {
+          "termId": "never-type",
+          "note": "The type with no values marks code that can't return, and impossible cases."
+        },
+        {
+          "termId": "newtype",
+          "note": "Wrap an `int` as a `CustomerId` so it can't be passed where an `OrderId` belongs."
+        },
+        {
+          "termId": "smart-constructor",
+          "note": "Validate once when the value is created, and every later use can trust it."
+        },
+        {
+          "termId": "refinement-type",
+          "note": "The idea behind smart constructors, a type that is a base type plus a rule."
+        },
+        {
+          "termId": "phantom-type",
+          "note": "A type parameter that holds no data can still tag values, so metres and miles can't be added together."
+        },
+        {
+          "termId": "lens",
+          "note": "With immutable nested records, lenses read and update deep fields without long `with` chains."
+        }
+      ]
+    },
+    {
+      "id": "category-theory-for-csharp-developers",
+      "title": "Category theory for C# developers",
+      "intro": "The ideas behind the names, using code you already write.",
+      "steps": [
+        {
+          "termId": "category",
+          "note": "Types as objects and functions as arrows, with composition and identity as the only rules."
+        },
+        {
+          "termId": "morphism",
+          "note": "The arrows; in C# these are mostly functions."
+        },
+        {
+          "termId": "isomorphism",
+          "note": "Two types are \"the same\" when you can convert there and back without loss."
+        },
+        {
+          "termId": "functor",
+          "note": "A functor maps one category to another and keeps the arrows working; `Map` is that mapping."
+        },
+        {
+          "termId": "endofunctor",
+          "note": "C#'s functors all map types to types, so they are endofunctors."
+        },
+        {
+          "termId": "natural-transformation",
+          "note": "A conversion between functors, such as taking the head of a `Seq` as an `Option`, that commutes with `Map`."
+        },
+        {
+          "termId": "monoid",
+          "note": "An associative combine with an identity; you've met it as `+` with `0` and string concatenation."
+        },
+        {
+          "termId": "monad",
+          "note": "\"a monoid in the category of endofunctors\", which makes sense once you've seen the previous three steps."
+        },
+        {
+          "termId": "kleisli-category",
+          "note": "Functions that return a monad form their own category, with `Bind` as composition."
+        },
+        {
+          "termId": "product-and-coproduct",
+          "note": "Tuples and unions described by their arrows instead of their fields."
+        },
+        {
+          "termId": "duality",
+          "note": "Reverse every arrow and products become coproducts; many concepts come in such pairs."
+        },
+        {
+          "termId": "catamorphism",
+          "note": "Fold, generalised to any recursive data type."
+        },
+        {
+          "termId": "anamorphism",
+          "note": "Unfold, which is the dual of the fold you just met."
+        },
+        {
+          "termId": "adjunction",
+          "note": "A pair of functors that are almost inverses; currying is one, and composing the pair always gives a monad (here, State)."
+        },
+        {
+          "termId": "yoneda-lemma",
+          "note": "A value is determined by how it relates to everything else, which is why any number of `Map`s can fuse into one pass."
+        }
+      ]
+    },
+    {
+      "id": "lambda-calculus-foundations",
+      "title": "Lambda calculus foundations",
+      "intro": "The tiny language every functional language is built on.",
+      "steps": [
+        {
+          "termId": "lambda",
+          "note": "Start from the anonymous functions you already write in C#."
+        },
+        {
+          "termId": "lambda-calculus",
+          "note": "A language with nothing except functions, variables and application."
+        },
+        {
+          "termId": "free-and-bound-variables",
+          "note": "A variable is either a parameter of an enclosing lambda or comes from outside; closures capture the outside ones."
+        },
+        {
+          "termId": "alpha-conversion",
+          "note": "Renaming a parameter doesn't change the function, but captured names need care."
+        },
+        {
+          "termId": "beta-reduction",
+          "note": "Applying a function means substituting the argument, which is the only computation rule."
+        },
+        {
+          "termId": "eta-conversion",
+          "note": "`x => f(x)` is just `f`, the rule behind point-free style."
+        },
+        {
+          "termId": "reduction-strategy",
+          "note": "The order you reduce in decides whether a program finishes."
+        },
+        {
+          "termId": "lazy-evaluation",
+          "note": "Reducing only what's needed, the strategy behind `IEnumerable` and Haskell."
+        },
+        {
+          "termId": "church-encoding",
+          "note": "Booleans, numbers and pairs built out of nothing but functions."
+        },
+        {
+          "termId": "fixed-point-combinator",
+          "note": "Recursion without names, using the Y combinator."
+        },
+        {
+          "termId": "combinatory-logic",
+          "note": "Lambda calculus without variables at all, using only S and K."
+        },
+        {
+          "termId": "functional-combinator",
+          "note": "The same combinators as everyday C# helpers, such as `identity`, `constant` and `flip`."
+        }
+      ]
+    },
+    {
+      "id": "pure-core-effectful-shell",
+      "title": "Pure core, effectful shell",
+      "intro": "Keep business logic pure and push I/O to the edges.",
+      "steps": [
+        {
+          "termId": "side-effects",
+          "note": "Name the problem; reading the clock or writing a file makes code hard to test and reason about."
+        },
+        {
+          "termId": "pure-function",
+          "note": "The opposite, where output depends only on input."
+        },
+        {
+          "termId": "referential-transparency",
+          "note": "Pure calls can be replaced by their results, which is what makes refactoring safe."
+        },
+        {
+          "termId": "io",
+          "note": "Describe an effect as a value and run it later, so building the program stays pure."
+        },
+        {
+          "termId": "reader-monad",
+          "note": "Pass configuration and dependencies implicitly, the functional answer to dependency injection."
+        },
+        {
+          "termId": "writer-monad",
+          "note": "Collect logs alongside a result without a global logger."
+        },
+        {
+          "termId": "state-monad",
+          "note": "Thread changing state through pure steps instead of mutating a field."
+        },
+        {
+          "termId": "monad-transformer",
+          "note": "Real code needs reader, state and IO at once; transformers stack them."
+        },
+        {
+          "termId": "free-monad",
+          "note": "Write the program as data and choose the interpreter later, such as real or test."
+        },
+        {
+          "termId": "algebraic-effects",
+          "note": "The newer approach, where effects are declared operations and handlers decide what they do."
+        },
+        {
+          "termId": "property-based-testing",
+          "note": "Pure cores make it possible to test laws over thousands of generated inputs."
+        }
+      ]
+    }
+  ],
   "graph": {
     "nodes": [
       {
         "id": "arity",
         "name": "Arity",
         "category": "core-functions",
+        "level": "practical",
         "val": 5,
         "summary": "The number of arguments a function takes. From words like unary, binary, ternary, etc."
       },
@@ -5864,6 +6348,7 @@
         "id": "first-class-function",
         "name": "First-Class Function",
         "category": "core-functions",
+        "level": "essentials",
         "val": 9,
         "summary": "A language has first-class functions when functions are values like any other: they can be stored in variables and collections, passed as arguments and returned as results. In C# that value is a delegate, usually a Func<...> (or an Action<...> when nothing is returned), and a lambda is the usual way to write one."
       },
@@ -5871,6 +6356,7 @@
         "id": "higher-order-functions-hof",
         "name": "Higher-Order Functions (HOF)",
         "category": "core-functions",
+        "level": "essentials",
         "val": 15,
         "summary": "A function which takes a function as an argument and/or returns a function."
       },
@@ -5878,6 +6364,7 @@
         "id": "closure",
         "name": "Closure",
         "category": "core-functions",
+        "level": "essentials",
         "val": 8,
         "summary": "A closure is a scope which captures local variables of a function for access even after the execution has moved out of the block in which it is defined. This allows the values in the closure to be accessed by returned functions."
       },
@@ -5885,6 +6372,7 @@
         "id": "partial-application",
         "name": "Partial Application",
         "category": "composition",
+        "level": "essentials",
         "val": 6,
         "summary": "Partially applying a function means creating a new function by pre-filling some of the arguments to the original function."
       },
@@ -5892,6 +6380,7 @@
         "id": "currying",
         "name": "Currying",
         "category": "composition",
+        "level": "essentials",
         "val": 12,
         "summary": "The process of converting a function that takes multiple arguments into a function that takes them one at a time."
       },
@@ -5899,6 +6388,7 @@
         "id": "auto-currying",
         "name": "Auto Currying",
         "category": "composition",
+        "level": "everything",
         "val": 5,
         "summary": "Transforming a function that takes multiple arguments into one that if given less than its correct number of arguments returns a function that takes the rest. When the function gets the correct number of arguments it is then evaluated."
       },
@@ -5906,6 +6396,7 @@
         "id": "function-composition",
         "name": "Function Composition",
         "category": "composition",
+        "level": "essentials",
         "val": 12,
         "summary": "The act of putting two functions together to form a third function where the output of one function is the input of the other. This is one of the most important ideas of functional programming."
       },
@@ -5913,6 +6404,7 @@
         "id": "pipe",
         "name": "Pipe",
         "category": "composition",
+        "level": "essentials",
         "val": 7,
         "summary": "Piping passes a value through a series of functions, written in the order they run. F# has an operator for it, |>, so x |> f |> g means g(f(x)): the data flows left to right instead of being read inside out."
       },
@@ -5920,6 +6412,7 @@
         "id": "continuation",
         "name": "Continuation",
         "category": "composition",
+        "level": "practical",
         "val": 9,
         "summary": "At any given point in a program, the part of the code that's yet to be executed is known as a continuation."
       },
@@ -5927,6 +6420,7 @@
         "id": "continuation-passing-style",
         "name": "Continuation-Passing Style",
         "category": "composition",
+        "level": "everything",
         "val": 8,
         "summary": "A way of writing functions in which they never return a result. Instead, each takes an extra argument, its continuation: a function to call with the result, which stands for \"the rest of the program\". Code written normally is said to be in direct style."
       },
@@ -5934,6 +6428,7 @@
         "id": "io",
         "name": "IO",
         "category": "effects",
+        "level": "essentials",
         "val": 10,
         "summary": "A pure data structure that encapsulates a side effect. Instead of performing the effect immediately, IO wraps the action in a nullary function (thunk), allowing effectful operations to be transformed, chained, and composed as pure values without actually executing them until explicitly triggered."
       },
@@ -5941,6 +6436,7 @@
         "id": "recursion",
         "name": "Recursion",
         "category": "core-functions",
+        "level": "essentials",
         "val": 10,
         "summary": "A function is recursive when it is defined in terms of itself. Every recursive function needs a base case, which answers directly, and a recursive case, which reduces the problem to a smaller one of the same shape and calls itself on that."
       },
@@ -5948,6 +6444,7 @@
         "id": "tail-call",
         "name": "Tail Call",
         "category": "core-functions",
+        "level": "practical",
         "val": 7,
         "summary": "A call is in tail position when it is the very last thing a function does, so its result is returned as is. Sum from Recursion is not tail recursive, because it still has to add xs[0] after the recursive call returns. Carrying the running total in an accumulator puts the recursive call in tail position:"
       },
@@ -5955,6 +6452,7 @@
         "id": "trampoline",
         "name": "Trampoline",
         "category": "core-functions",
+        "level": "practical",
         "val": 10,
         "summary": "A mechanism that enables deep or mutually recursive functions to run without exceeding the maximum call stack limit."
       },
@@ -5962,6 +6460,7 @@
         "id": "thunk",
         "name": "Thunk",
         "category": "core-functions",
+        "level": "practical",
         "val": 9,
         "summary": "A nullary function (a function taking zero arguments) that wraps an expression to delay its evaluation until called. Thunks are the fundamental mechanism for implementing lazy evaluation, trampolines, and deferred side effects."
       },
@@ -5969,6 +6468,7 @@
         "id": "algebraic-effects",
         "name": "Algebraic Effects",
         "category": "effects",
+        "level": "everything",
         "val": 10,
         "summary": "A computational effect system that separates the invocation of an effect from its handling. Rather than coupling a function directly to its runtime environment, the function \"performs\" an effect operation (such as reading state, requesting configuration, or logging). An enclosing \"handler\" intercepts the performed effect and supplies the result, with the ability to resume or abort the computation—generalizing exceptions, async/await, and generators without requiring complex monad transformer stacks."
       },
@@ -5976,6 +6476,7 @@
         "id": "declarative-programming",
         "name": "Declarative Programming",
         "category": "core-functions",
+        "level": "practical",
         "val": 7,
         "summary": "A style of programming that describes what result you want rather than how to compute it step by step. Its opposite is imperative programming, which spells out the steps: create a variable, loop, test, mutate. SQL, regular expressions and LINQ are declarative; a for loop is imperative."
       },
@@ -5983,6 +6484,7 @@
         "id": "pure-function",
         "name": "Pure Function",
         "category": "core-functions",
+        "level": "essentials",
         "val": 17,
         "summary": "A function is pure if the return value is only determined by its input values, and does not produce side effects. The function must always return the same result when given the same input."
       },
@@ -5990,6 +6492,7 @@
         "id": "immutability",
         "name": "Immutability",
         "category": "purity-state",
+        "level": "essentials",
         "val": 9,
         "summary": "A value is immutable when it can't change after it has been created. To \"change\" it, you make a new value with the difference, and the old one stays as it was. Code that holds a reference to it can rely on that, so immutable values can be shared freely, between methods or threads, without defensive copies. Immutability is what makes referential transparency possible: a function can't have the side effect of modifying a value nobody can modify."
       },
@@ -5997,6 +6500,7 @@
         "id": "side-effects",
         "name": "Side effects",
         "category": "purity-state",
+        "level": "essentials",
         "val": 14,
         "summary": "A function or expression is said to have a side effect if apart from returning a value, it interacts with (reads from or writes to) external mutable state."
       },
@@ -6004,6 +6508,7 @@
         "id": "idempotence",
         "name": "Idempotence",
         "category": "purity-state",
+        "level": "essentials",
         "val": 6,
         "summary": "A function is idempotent if reapplying it to its result does not produce a different result."
       },
@@ -6011,6 +6516,7 @@
         "id": "point-free-style",
         "name": "Point-Free Style",
         "category": "composition",
+        "level": "practical",
         "val": 11,
         "summary": "Writing functions where the definition does not explicitly identify the arguments used. This style usually requires currying or other Higher-Order functions. A.K.A Tacit programming."
       },
@@ -6018,6 +6524,7 @@
         "id": "predicate",
         "name": "Predicate",
         "category": "core-functions",
+        "level": "practical",
         "val": 7,
         "summary": "A predicate is a function that returns true or false for a given value. A common use of a predicate is as the callback for filtering a collection."
       },
@@ -6025,6 +6532,7 @@
         "id": "contracts",
         "name": "Contracts",
         "category": "purity-state",
+        "level": "practical",
         "val": 5,
         "summary": "A contract specifies the obligations and guarantees of the behavior from a function or expression at runtime. This acts as a set of rules that are expected from the input and output of a function or expression, and errors are generally reported whenever a contract is violated."
       },
@@ -6032,6 +6540,7 @@
         "id": "category",
         "name": "Category",
         "category": "category-morphisms",
+        "level": "practical",
         "val": 14,
         "summary": "A category in category theory is a collection of objects and morphisms between them. In programming, typically types act as the objects and functions as morphisms."
       },
@@ -6039,6 +6548,7 @@
         "id": "semigroupoid",
         "name": "Semigroupoid",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 7,
         "summary": "An algebraic structure with objects and morphisms that can be associatively composed, but does not guarantee the existence of an identity morphism for each object."
       },
@@ -6046,6 +6556,7 @@
         "id": "value",
         "name": "Value",
         "category": "purity-state",
+        "level": "essentials",
         "val": 7,
         "summary": "Anything that can be assigned to a variable."
       },
@@ -6053,6 +6564,7 @@
         "id": "constant",
         "name": "Constant",
         "category": "purity-state",
+        "level": "everything",
         "val": 7,
         "summary": "A variable that cannot be reassigned once defined."
       },
@@ -6060,6 +6572,7 @@
         "id": "constant-function",
         "name": "Constant Function",
         "category": "purity-state",
+        "level": "practical",
         "val": 5,
         "summary": "A curried function that ignores its second argument. language-ext calls it constant:"
       },
@@ -6067,6 +6580,7 @@
         "id": "constant-functor",
         "name": "Constant Functor",
         "category": "algebraic-structures",
+        "level": "everything",
         "val": 5,
         "summary": "Object whose Map doesn't transform the contents. See Functor. language-ext has no Const functor type, so here is a minimal one:"
       },
@@ -6074,6 +6588,7 @@
         "id": "constant-monad",
         "name": "Constant Monad",
         "category": "algebraic-structures",
+        "level": "everything",
         "val": 4,
         "summary": "Object whose Bind doesn't transform the contents. See Monad."
       },
@@ -6081,6 +6596,7 @@
         "id": "laws",
         "name": "Laws",
         "category": "algebraic-structures",
+        "level": "practical",
         "val": 10,
         "summary": "The equations that every instance of a type class must satisfy, so that generic code written against the type class can rely on them. A functor must map the identity function to itself and preserve composition; a monad must treat Pure as an identity for Bind and bind associatively; a monoid must have an identity element and an associative Combine. The type class interface only fixes the signatures: the C# compiler checks that Map or Combine exists and has the right type, never that it obeys the laws."
       },
@@ -6088,6 +6604,7 @@
         "id": "functor",
         "name": "Functor",
         "category": "algebraic-structures",
+        "level": "essentials",
         "val": 27,
         "summary": "An object that implements a map function that takes a function which is run on the contents of that object. A functor must adhere to two rules:"
       },
@@ -6095,6 +6612,7 @@
         "id": "endofunctor",
         "name": "Endofunctor",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 10,
         "summary": "A functor that maps a category back into the same category. \"Endo\" means \"within\", as in endomorphism. In programming, the category is usually \"C# types and the functions between them\", and a functor such as Option sends every type A to another C# type Option<A> and every function A -> B to a function Option<A> -> Option<B> (that is what Map does). Both ends are still C# types and functions, so it never leaves the category: every language-ext Functor (Option, Seq, Either<L>, ...) is an endofunctor."
       },
@@ -6102,6 +6620,7 @@
         "id": "pointed-functor",
         "name": "Pointed Functor",
         "category": "algebraic-structures",
+        "level": "everything",
         "val": 8,
         "summary": "An object with an of function that puts any single value into it."
       },
@@ -6109,6 +6628,7 @@
         "id": "lift",
         "name": "Lift",
         "category": "algebraic-structures",
+        "level": "practical",
         "val": 7,
         "summary": "Lifting is when you take a value and put it into an object like a functor. If you lift a function into an Applicative Functor then you can make it work on values that are also in that functor."
       },
@@ -6116,6 +6636,7 @@
         "id": "referential-transparency",
         "name": "Referential Transparency",
         "category": "purity-state",
+        "level": "essentials",
         "val": 11,
         "summary": "An expression that can be replaced with its value without changing the behavior of the program is said to be referentially transparent."
       },
@@ -6123,6 +6644,7 @@
         "id": "equational-reasoning",
         "name": "Equational Reasoning",
         "category": "purity-state",
+        "level": "everything",
         "val": 9,
         "summary": "When an application is composed of expressions and devoid of side effects, truths about the system can be derived from the parts. You can also be confident about details of your system without having to go through every function."
       },
@@ -6130,6 +6652,7 @@
         "id": "property-based-testing",
         "name": "Property-Based Testing",
         "category": "purity-state",
+        "level": "practical",
         "val": 8,
         "summary": "Testing that a property holds for many generated inputs, instead of checking a handful of examples by hand. You state something that should be true for every input (\"reversing a list twice gives back the list\"), and a library generates hundreds of random inputs to try to prove you wrong. When one fails, the library shrinks it: it searches for smaller inputs that still fail, and reports the smallest one it finds, which is usually much easier to debug than the random input that first failed. The idea comes from Haskell's QuickCheck; in .NET, the main libraries are CsCheck and FsCheck."
       },
@@ -6137,6 +6660,7 @@
         "id": "memoization",
         "name": "Memoization",
         "category": "purity-state",
+        "level": "practical",
         "val": 8,
         "summary": "An optimization technique that caches the return value of a function based on its input parameters. Memoization is only valid and safe for pure functions possessing referential transparency, because calling the function with identical arguments must always yield identical results without producing observable side effects."
       },
@@ -6144,6 +6668,7 @@
         "id": "lambda",
         "name": "Lambda",
         "category": "core-functions",
+        "level": "essentials",
         "val": 9,
         "summary": "An anonymous function that can be treated like a value."
       },
@@ -6151,6 +6676,7 @@
         "id": "lambda-calculus",
         "name": "Lambda Calculus",
         "category": "lambda-calculus",
+        "level": "practical",
         "val": 10,
         "summary": "A branch of mathematics that uses functions to create a universal model of computation. Alonzo Church introduced it in the 1930s, and it is the theory underneath every functional language (and underneath C#'s lambdas, which are named after it). The whole language has only three kinds of term:"
       },
@@ -6158,6 +6684,7 @@
         "id": "free-and-bound-variables",
         "name": "Free and Bound Variables",
         "category": "lambda-calculus",
+        "level": "practical",
         "val": 6,
         "summary": "A variable is bound in a term if it is the parameter of an enclosing abstraction, and free otherwise. In λx. x y, x is bound by the λx and y is free: the term alone doesn't say what y is. A term with no free variables is called closed, and a closed term is also called a combinator (see Functional Combinator)."
       },
@@ -6165,6 +6692,7 @@
         "id": "alpha-conversion",
         "name": "Alpha Conversion",
         "category": "lambda-calculus",
+        "level": "everything",
         "val": 4,
         "summary": "Renaming a bound variable, everywhere it is bound, doesn't change what a function means. λx. x and λy. y are both the identity function, and are called alpha-equivalent. The one rule is that the new name must not already be free in the body, or it would be captured:"
       },
@@ -6172,6 +6700,7 @@
         "id": "beta-reduction",
         "name": "Beta Reduction",
         "category": "lambda-calculus",
+        "level": "practical",
         "val": 9,
         "summary": "The one computation rule of the lambda calculus: applying a function to an argument is done by substituting the argument for the parameter in the function's body. (λx. M) N reduces to M with every free x replaced by N, written M[x := N]. A term with nothing left to reduce is in normal form."
       },
@@ -6179,6 +6708,7 @@
         "id": "eta-conversion",
         "name": "Eta Conversion",
         "category": "lambda-calculus",
+        "level": "everything",
         "val": 4,
         "summary": "A function that only passes its argument on to another function is the same as that other function: λx. f x is equivalent to f, provided x isn't free in f. Removing the wrapper is eta reduction; adding one is eta expansion."
       },
@@ -6186,6 +6716,7 @@
         "id": "reduction-strategy",
         "name": "Reduction Strategy",
         "category": "lambda-calculus",
+        "level": "everything",
         "val": 6,
         "summary": "When a term has more than one reducible call, a reduction strategy decides which to reduce first. The two classic ones:"
       },
@@ -6193,6 +6724,7 @@
         "id": "church-encoding",
         "name": "Church Encoding",
         "category": "lambda-calculus",
+        "level": "everything",
         "val": 7,
         "summary": "A way of representing data using nothing but functions, so that the lambda calculus can compute with values it doesn't have. Each value is encoded as what you can do with it. A boolean chooses between two alternatives, and a natural number n applies a function n times:"
       },
@@ -6200,6 +6732,7 @@
         "id": "fixed-point-combinator",
         "name": "Fixed-Point Combinator",
         "category": "lambda-calculus",
+        "level": "everything",
         "val": 7,
         "summary": "A combinator that gives an anonymous function the ability to call itself, so the lambda calculus can express recursion even though it has no names. A fixed point of a function g is a value v with g v = v. A fixed-point combinator fix finds one for any g: fix g = g (fix g). Write the recursive function as a g that takes \"itself\" as an extra first argument, and fix g is the recursive function."
       },
@@ -6207,6 +6740,7 @@
         "id": "combinatory-logic",
         "name": "Combinatory Logic",
         "category": "lambda-calculus",
+        "level": "everything",
         "val": 6,
         "summary": "A variant of the lambda calculus with no variables and no λ at all: programs are built only by applying a few fixed combinators to each other. The standard set is SKI:"
       },
@@ -6214,6 +6748,7 @@
         "id": "functional-combinator",
         "name": "Functional Combinator",
         "category": "composition",
+        "level": "practical",
         "val": 9,
         "summary": "A higher-order function, usually curried, which returns a new function changed in some way. Functional combinators are often used in Point-Free Style to write especially terse programs."
       },
@@ -6221,6 +6756,7 @@
         "id": "lazy-evaluation",
         "name": "Lazy evaluation",
         "category": "composition",
+        "level": "essentials",
         "val": 10,
         "summary": "Lazy evaluation is a call-by-need evaluation mechanism that delays the evaluation of an expression until its value is needed. In functional languages, this allows for structures like infinite lists, which would not normally be available in an imperative language where the sequencing of commands is significant."
       },
@@ -6228,6 +6764,7 @@
         "id": "eager-evaluation",
         "name": "Eager Evaluation",
         "category": "composition",
+        "level": "practical",
         "val": 10,
         "summary": "Eager (or strict) evaluation computes an expression as soon as it is bound to a variable or passed to a function, whether or not its value is ever used. It is the opposite of lazy evaluation. C# is eager by default: arguments are evaluated, left to right, before the method is called."
       },
@@ -6235,6 +6772,7 @@
         "id": "generator",
         "name": "Generator",
         "category": "composition",
+        "level": "practical",
         "val": 7,
         "summary": "A function that produces a sequence of values one at a time, pausing after each until the next one is asked for. In C#, a method that uses yield return is a generator (C# calls it an iterator): the compiler turns it into an IEnumerable<T> whose code runs only as far as the next yield return each time the consumer asks for an item."
       },
@@ -6242,6 +6780,7 @@
         "id": "monoid",
         "name": "Monoid",
         "category": "algebraic-structures",
+        "level": "essentials",
         "val": 19,
         "summary": "An object with a function that \"combines\" that object with another of the same type (semigroup) which has an \"identity\" value."
       },
@@ -6249,6 +6788,7 @@
         "id": "group",
         "name": "Group",
         "category": "algebraic-structures",
+        "level": "everything",
         "val": 8,
         "summary": "A monoid in which every element has an inverse: a value that combines with it to give the identity. Integers under addition form a group, since n + (-n) == 0. Rotations of a shape do too: rotating by 90 degrees is undone by rotating by 270. Strings under concatenation are only a monoid, because nothing appended to \"abc\" gives back \"\"."
       },
@@ -6256,6 +6796,7 @@
         "id": "semiring",
         "name": "Semiring",
         "category": "algebraic-structures",
+        "level": "everything",
         "val": 7,
         "summary": "A type with two monoids on it, usually called addition and multiplication, where multiplication distributes over addition (a × (b + c) == a × b + a × c) and the additive identity (zero) annihilates (0 × a == 0). Addition must be commutative; neither operation needs an inverse."
       },
@@ -6263,6 +6804,7 @@
         "id": "monad",
         "name": "Monad",
         "category": "algebraic-structures",
+        "level": "essentials",
         "val": 30,
         "summary": "A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object."
       },
@@ -6270,6 +6812,7 @@
         "id": "monad-comprehension",
         "name": "Monad Comprehension",
         "category": "algebraic-structures",
+        "level": "essentials",
         "val": 10,
         "summary": "Syntax for writing a chain of monadic binds as if it were a sequence of plain statements. Each step binds the value inside a monad to a name, the rest of the block runs \"inside\" it, and the compiler rewrites the whole thing into nested Bind calls. Haskell calls it do-notation, Scala a for-comprehension and F# a computation expression; in C# it is LINQ query syntax."
       },
@@ -6277,6 +6820,7 @@
         "id": "comonad",
         "name": "Comonad",
         "category": "algebraic-structures",
+        "level": "everything",
         "val": 7,
         "summary": "An object that has extract and extend functions."
       },
@@ -6284,6 +6828,7 @@
         "id": "kleisli-composition",
         "name": "Kleisli Composition",
         "category": "algebraic-structures",
+        "level": "practical",
         "val": 10,
         "summary": "An operation for composing two monad-returning functions (Kleisli Arrows) where they have compatible types. In Haskell this is the >=> operator."
       },
@@ -6291,6 +6836,7 @@
         "id": "kleisli-category",
         "name": "Kleisli Category",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 8,
         "summary": "A category built from a monad M: the objects are ordinary types, but an arrow from A to B is a function A -> M<B> (a Kleisli arrow) rather than A -> B. Arrows are joined with Kleisli composition, and the identity arrow for each type is Pure (A -> M<A>). So the monad laws are exactly the category laws for this category: composing with Pure on either side changes nothing, and composition is associative."
       },
@@ -6298,6 +6844,7 @@
         "id": "free-monad",
         "name": "Free Monad",
         "category": "effects",
+        "level": "everything",
         "val": 9,
         "summary": "A Free Monad is a construction that builds a monad out of any functor without adding any domain-specific behavior. It cleanly separates the description of a program (an Abstract Syntax Tree of commands) from its execution (an interpreter that evaluates the AST)."
       },
@@ -6305,6 +6852,7 @@
         "id": "monad-transformer",
         "name": "Monad Transformer",
         "category": "effects",
+        "level": "practical",
         "val": 12,
         "summary": "While functors and applicative functors compose naturally, monads do not compose generally without knowing their specific types. A Monad Transformer is a type constructor that takes an existing monad and produces a new monad with combined capabilities (such as combining error handling, asynchronous tasks, and state)."
       },
@@ -6312,6 +6860,7 @@
         "id": "reader-monad",
         "name": "Reader Monad",
         "category": "effects",
+        "level": "practical",
         "val": 9,
         "summary": "A computation that reads from a shared, read-only environment. Instead of passing configuration through every function by hand, each step asks for what it needs, and the environment is supplied once, when the whole computation is run. It is dependency injection done with a monad."
       },
@@ -6319,6 +6868,7 @@
         "id": "writer-monad",
         "name": "Writer Monad",
         "category": "effects",
+        "level": "practical",
         "val": 7,
         "summary": "A computation that produces a value and, alongside it, accumulates output, typically a log. Each step adds to the output with tell, and the pieces are joined with a monoid, so steps never see or overwrite each other's output."
       },
@@ -6326,6 +6876,7 @@
         "id": "state-monad",
         "name": "State Monad",
         "category": "effects",
+        "level": "practical",
         "val": 10,
         "summary": "A computation that threads a piece of state from one step to the next. Each step can read the current state (get), replace it (put) or update it (modify), and the state is passed along behind the scenes, so pure code can describe a stateful algorithm without a mutable variable."
       },
@@ -6333,6 +6884,7 @@
         "id": "continuation-monad",
         "name": "Continuation Monad",
         "category": "effects",
+        "level": "everything",
         "val": 8,
         "summary": "A monad for computations written in continuation-passing style. A value of type Cont<R, A> is a function (A -> R) -> R: give it a continuation that knows what to do with an A, and it produces the final result R. Bind threads the continuations through for you, so CPS code can be written as an ordinary LINQ query."
       },
@@ -6340,6 +6892,7 @@
         "id": "fallible",
         "name": "Fallible",
         "category": "effects",
+        "level": "practical",
         "val": 10,
         "summary": "A type class for computations that can fail with an error and recover from it, so error handling can be written once for every type that supports it. It has two operations: Fail produces a failure, and Catch handles one, optionally only errors that match a predicate. Haskell calls it MonadError."
       },
@@ -6347,6 +6900,7 @@
         "id": "applicative-functor",
         "name": "Applicative Functor",
         "category": "algebraic-structures",
+        "level": "essentials",
         "val": 14,
         "summary": "An applicative functor is an object with an ap function. ap applies a function in the object to a value in another object of the same type."
       },
@@ -6354,6 +6908,7 @@
         "id": "monoidal-functor",
         "name": "Monoidal Functor",
         "category": "algebraic-structures",
+        "level": "everything",
         "val": 8,
         "summary": "A functor that preserves monoidal structure: it can make an \"empty\" value and it can pair up two values, so tuples and Unit inside the functor behave like tuples and Unit outside it. In Haskell notation:"
       },
@@ -6361,6 +6916,7 @@
         "id": "bifunctor",
         "name": "Bifunctor",
         "category": "algebraic-structures",
+        "level": "practical",
         "val": 9,
         "summary": "A structure with two independent type parameters that can map over both of them simultaneously. A Bifunctor provides bimap, which takes two functions and maps the first over the first type parameter and the second over the second type parameter."
       },
@@ -6368,6 +6924,7 @@
         "id": "variance",
         "name": "Variance",
         "category": "types-data",
+        "level": "practical",
         "val": 7,
         "summary": "How subtyping of a generic type follows subtyping of its type argument. A string is an object; variance answers whether a Thing<string> is then a Thing<object>, the other way round, or neither."
       },
@@ -6375,6 +6932,7 @@
         "id": "contravariant-functor",
         "name": "Contravariant Functor",
         "category": "algebraic-structures",
+        "level": "practical",
         "val": 8,
         "summary": "A structure similar to a functor, but whose transformation flows in the opposite direction. While a covariant functor transforms a producer F<A> into F<B> via (a -> b), a contravariant functor transforms a consumer F<A> into F<B> via (b -> a) using cmap (or contramap)."
       },
@@ -6382,6 +6940,7 @@
         "id": "profunctor",
         "name": "Profunctor",
         "category": "algebraic-structures",
+        "level": "everything",
         "val": 9,
         "summary": "A Profunctor is a bifunctor that is contravariant in its first argument and covariant in its second argument."
       },
@@ -6389,6 +6948,7 @@
         "id": "arrow",
         "name": "Arrow",
         "category": "algebraic-structures",
+        "level": "everything",
         "val": 10,
         "summary": "A generalisation of functions: something that takes an input and produces an output, and can be composed and run on parts of a tuple. Haskell's Control.Arrow defines it as a category (identity and composition) plus a few operations:"
       },
@@ -6396,6 +6956,7 @@
         "id": "alternative",
         "name": "Alternative",
         "category": "algebraic-structures",
+        "level": "practical",
         "val": 7,
         "summary": "An applicative functor that also forms a monoid, providing a binary choice operator alt (often written <|>) and an identity element for failure recovery and fallback logic."
       },
@@ -6403,6 +6964,7 @@
         "id": "morphism",
         "name": "Morphism",
         "category": "category-morphisms",
+        "level": "practical",
         "val": 8,
         "summary": "A relationship between objects within a category. In the context of functional programming all functions are morphisms."
       },
@@ -6410,6 +6972,7 @@
         "id": "homomorphism",
         "name": "Homomorphism",
         "category": "category-morphisms",
+        "level": "practical",
         "val": 6,
         "summary": "A function where there is a structural property that is the same in the input as well as the output."
       },
@@ -6417,6 +6980,7 @@
         "id": "endomorphism",
         "name": "Endomorphism",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 4,
         "summary": "A function where the input type is the same as the output. Since the types are identical, endomorphisms are also homomorphisms."
       },
@@ -6424,6 +6988,7 @@
         "id": "isomorphism",
         "name": "Isomorphism",
         "category": "category-morphisms",
+        "level": "practical",
         "val": 6,
         "summary": "A morphism made of a pair of transformations between 2 types of objects that is structural in nature and no data is lost."
       },
@@ -6431,6 +6996,7 @@
         "id": "catamorphism",
         "name": "Catamorphism",
         "category": "category-morphisms",
+        "level": "practical",
         "val": 9,
         "summary": "A function which deconstructs a structure into a single value. FoldBack (a right fold, provided for every Foldable) is an example of a catamorphism."
       },
@@ -6438,6 +7004,7 @@
         "id": "anamorphism",
         "name": "Anamorphism",
         "category": "category-morphisms",
+        "level": "practical",
         "val": 9,
         "summary": "A function that builds up a structure by repeatedly applying a function to its argument. Unfold is an example which generates a sequence from a function and a seed value. This is the opposite of a catamorphism. You can think of this as an anamorphism builds up a structure and catamorphism breaks it down."
       },
@@ -6445,6 +7012,7 @@
         "id": "hylomorphism",
         "name": "Hylomorphism",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 4,
         "summary": "The function which composes an anamorphism followed by a catamorphism."
       },
@@ -6452,6 +7020,7 @@
         "id": "paramorphism",
         "name": "Paramorphism",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 3,
         "summary": "A function just like FoldBack. However, there's a difference:"
       },
@@ -6459,6 +7028,7 @@
         "id": "apomorphism",
         "name": "Apomorphism",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 3,
         "summary": "The opposite of paramorphism, just as anamorphism is the opposite of catamorphism. With paramorphism, you retain access to the accumulator and what has been accumulated, apomorphism lets you unfold with the potential to return early."
       },
@@ -6466,6 +7036,7 @@
         "id": "natural-transformation",
         "name": "Natural Transformation",
         "category": "category-morphisms",
+        "level": "practical",
         "val": 12,
         "summary": "A structure-preserving mapping between two functors, transforming F<A> into G<A> without altering or inspecting the underlying value A."
       },
@@ -6473,6 +7044,7 @@
         "id": "functor-category",
         "name": "Functor Category",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 10,
         "summary": "A category whose objects are functors and whose arrows are natural transformations between them. For two categories C and D, the functor category has one object for each functor from C to D. An arrow from F to G is a natural transformation F<A> -> G<A> (for every A); the identity arrow leaves each F<A> alone, and composing two natural transformations gives another one."
       },
@@ -6480,6 +7052,7 @@
         "id": "initial-and-terminal-objects",
         "name": "Initial and Terminal Objects",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 10,
         "summary": "A terminal object is a type that every type has exactly one arrow (function) to. An initial object is a type that has exactly one arrow to every type. In the category of C# types and functions, the terminal object is the Unit type and the initial object is the Never type."
       },
@@ -6487,6 +7060,7 @@
         "id": "product-and-coproduct",
         "name": "Product and Coproduct",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 8,
         "summary": "The category-theory description of product types and sum types, given purely in terms of arrows."
       },
@@ -6494,6 +7068,7 @@
         "id": "duality",
         "name": "Duality",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 10,
         "summary": "Every definition in category theory has a mirror image, obtained by reversing the direction of every arrow. The mirror image is called the dual, and usually gets the prefix \"co\". Anything proved about one comes for free for the other, because the proof works with the arrows reversed too."
       },
@@ -6501,6 +7076,7 @@
         "id": "monoidal-category",
         "name": "Monoidal Category",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 12,
         "summary": "A category with a way to combine two objects into one (the tensor, written ⊗) and a unit object I, where combining is associative and I changes nothing, but only up to isomorphism rather than equality. It is a monoid one level up: instead of combining values, it combines types."
       },
@@ -6508,6 +7084,7 @@
         "id": "adjunction",
         "name": "Adjunction",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 10,
         "summary": "A pairing of two functors F and G, written F ⊣ G, such that arrows out of F<A> correspond one to one with arrows into G<B>:"
       },
@@ -6515,6 +7092,7 @@
         "id": "yoneda-lemma",
         "name": "Yoneda Lemma",
         "category": "category-morphisms",
+        "level": "everything",
         "val": 8,
         "summary": "A result that says, in programming terms, that a value of F<A> (for a functor F) carries exactly the same information as a generic function \"give me any A -> B and I'll give you an F<B>\", written forall B. (A -> B) -> F<B>. Going one way, fa becomes f => fa.Map(f); going back, you call the function with the identity x => x."
       },
@@ -6522,6 +7100,7 @@
         "id": "setoid",
         "name": "Setoid",
         "category": "algebraic-structures",
+        "level": "everything",
         "val": 5,
         "summary": "An object that has an equals function which can be used to compare other objects of the same type."
       },
@@ -6529,6 +7108,7 @@
         "id": "magma",
         "name": "Magma",
         "category": "algebraic-structures",
+        "level": "everything",
         "val": 7,
         "summary": "A set with a binary operation that is closed: combining any two values of the type gives another value of the same type. That is the whole definition, with no laws at all. It is the bottom of a hierarchy where each level adds one law:"
       },
@@ -6536,6 +7116,7 @@
         "id": "semigroup",
         "name": "Semigroup",
         "category": "algebraic-structures",
+        "level": "practical",
         "val": 8,
         "summary": "An object that has a concat function that combines it with another object of the same type."
       },
@@ -6543,6 +7124,7 @@
         "id": "foldable",
         "name": "Foldable",
         "category": "algebraic-structures",
+        "level": "essentials",
         "val": 10,
         "summary": "An object that has a reduce function that applies a function against an accumulator and each element in the array (from left to right) to reduce it to a single value."
       },
@@ -6550,6 +7132,7 @@
         "id": "traversable",
         "name": "Traversable",
         "category": "algebraic-structures",
+        "level": "practical",
         "val": 8,
         "summary": "A Foldable and Functor that can turn a collection of wrapped values inside-out via sequence or traverse, transforming F<G<A>> into G<F<A>>."
       },
@@ -6557,6 +7140,7 @@
         "id": "lens",
         "name": "Lens",
         "category": "types-data",
+        "level": "practical",
         "val": 11,
         "summary": "A lens is a structure (often an object or function) that pairs a getter and a non-mutating setter for some other data structure."
       },
@@ -6564,6 +7148,7 @@
         "id": "prism",
         "name": "Prism",
         "category": "types-data",
+        "level": "everything",
         "val": 9,
         "summary": "An optic that focuses on a sub-case or variant of a sum type. Unlike a Lens, which always assumes the target field exists on a product structure, a Prism may fail to match because the target variant might not be present."
       },
@@ -6571,6 +7156,7 @@
         "id": "iso",
         "name": "Iso",
         "category": "types-data",
+        "level": "everything",
         "val": 7,
         "summary": "An optic that defines a lossless, reversible two-way mapping between two representations of the same information (s and a). An Iso consists of a to function (s -> a) and a from function (a -> s) such that from(to(x)) == x and to(from(y)) == y."
       },
@@ -6578,6 +7164,7 @@
         "id": "traversal",
         "name": "Traversal",
         "category": "types-data",
+        "level": "everything",
         "val": 8,
         "summary": "An optic that focuses on zero, one, or multiple values (0..*) inside a data structure simultaneously."
       },
@@ -6585,6 +7172,7 @@
         "id": "zipper",
         "name": "Zipper",
         "category": "types-data",
+        "level": "everything",
         "val": 8,
         "summary": "A way to walk around an immutable data structure with a cursor. A zipper splits the structure into the item in focus and the context needed to rebuild the rest. Moving the focus one step, or changing the item at the focus, is O(1) and makes a new zipper, leaving the old one intact."
       },
@@ -6592,6 +7180,7 @@
         "id": "type-signatures",
         "name": "Type Signatures",
         "category": "types-data",
+        "level": "essentials",
         "val": 8,
         "summary": "In C# the types of arguments and return values are part of every function's signature. Even so, functional programmers often describe functions with Haskell-style type signatures in comments, because they are short and easy to read."
       },
@@ -6599,6 +7188,7 @@
         "id": "parametricity",
         "name": "Parametricity",
         "category": "types-data",
+        "level": "practical",
         "val": 11,
         "summary": "The property that a generic function behaves the same way for every type it is given, because it can't inspect values of a type it knows nothing about. Generic code of this kind is called parametric polymorphism: one piece of code that works for every type. The useful consequence is that a generic signature alone limits what a function can do, often enough to prove things about it without reading its body (Philip Wadler called these \"theorems for free\")."
       },
@@ -6606,6 +7196,7 @@
         "id": "type-class",
         "name": "Type Class",
         "category": "algebraic-structures",
+        "level": "practical",
         "val": 17,
         "summary": "An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time. This is called ad hoc polymorphism: one name with a different implementation for each type, picked at compile time (static dispatch), where an overridden method is picked at run time from the object's actual class (dynamic dispatch)."
       },
@@ -6613,6 +7204,7 @@
         "id": "higher-kinded-type",
         "name": "Higher-Kinded Type",
         "category": "types-data",
+        "level": "practical",
         "val": 11,
         "summary": "A type that is parameterised by a type constructor rather than by a plain type. int is a complete type, but Option is not: it needs an argument to become Option<int>. Kinds classify types the way types classify values:"
       },
@@ -6620,6 +7212,7 @@
         "id": "phantom-type",
         "name": "Phantom Type",
         "category": "types-data",
+        "level": "everything",
         "val": 7,
         "summary": "A type parameter that appears in a type but is never used by its data. It holds no values; it only tags the type, so the compiler can tell apart values that have the same representation but must not be mixed. In Haskell, newtype Distance unit = Distance Double never stores a unit."
       },
@@ -6627,6 +7220,7 @@
         "id": "newtype",
         "name": "Newtype",
         "category": "types-data",
+        "level": "practical",
         "val": 10,
         "summary": "A wrapper around a single value that gives it a distinct type, without changing its representation. A CustomerId and an OrderId may both be ints underneath, but as separate types the compiler stops you passing one where the other is expected. In Haskell, newtype CustomerId = CustomerId Int is erased at compile time, so the wrapper costs nothing at run time."
       },
@@ -6634,6 +7228,7 @@
         "id": "smart-constructor",
         "name": "Smart Constructor",
         "category": "types-data",
+        "level": "practical",
         "val": 10,
         "summary": "A function that is the only way to create a value of a type, and that checks the value is valid first. The real constructor is private, and the public factory returns an Option, Either, Fin or Validation, so an invalid input becomes a value the caller has to handle rather than an exception. Every value of the type that exists has passed the check, so code that receives one doesn't need to check again. This is the everyday way to \"make illegal states unrepresentable\"."
       },
@@ -6641,6 +7236,7 @@
         "id": "refinement-type",
         "name": "Refinement Type",
         "category": "types-data",
+        "level": "everything",
         "val": 9,
         "summary": "A type together with a predicate its values must satisfy, written like a set: { x : int | x > 0 } is the type of positive ints. The compiler proves that every value given that type meets the predicate, usually with an automatic theorem prover (an SMT solver), so a division by a Pos can never divide by zero, and the proof costs nothing at run time. Liquid Haskell adds refinement types to Haskell, and F* has them built in:"
       },
@@ -6648,6 +7244,7 @@
         "id": "dependent-type",
         "name": "Dependent Type",
         "category": "types-data",
+        "level": "everything",
         "val": 11,
         "summary": "A type that depends on a value. In C#, types can depend on other types (Seq<int>), but values can't appear in a type. With dependent types they can, so a type can say \"a list of exactly 3 ints\" or \"an index less than the length of this array\", and the compiler checks it."
       },
@@ -6655,6 +7252,7 @@
         "id": "existential-type",
         "name": "Existential Type",
         "category": "types-data",
+        "level": "everything",
         "val": 7,
         "summary": "A type that says \"there exists some type T\" without saying which one. A value of an existential type is a package: a value of a hidden type, together with the operations that work on it. Code that receives the package can use those operations, but can never learn what T was. It is the mirror image of a generic (universal) type: Func<T, T> with T generic means \"for every T the caller picks\", while an existential means \"for one T the producer picked and isn't telling\"."
       },
@@ -6662,6 +7260,7 @@
         "id": "rank-n-type",
         "name": "Rank-N Type",
         "category": "types-data",
+        "level": "everything",
         "val": 10,
         "summary": "A type in which a function's argument is itself generic. An ordinary generic function is rank 1: the caller picks the type arguments. In a rank-2 function, one of the arguments must work for every type, and the function being called decides which types to use it at. Rank-N allows that nesting to any depth."
       },
@@ -6669,6 +7268,7 @@
         "id": "generalized-algebraic-data-type",
         "name": "Generalized Algebraic Data Type",
         "category": "types-data",
+        "level": "everything",
         "val": 8,
         "summary": "An algebraic data type whose constructors can each fix the type parameter to something specific. In an ordinary generic sum type, such as Option<A>, every case has the same A. In a GADT (generalized algebraic data type), one case can build an Expr<int> and another an Expr<bool>, and matching on a case tells the compiler which one it has."
       },
@@ -6676,6 +7276,7 @@
         "id": "type-inference",
         "name": "Type Inference",
         "category": "types-data",
+        "level": "practical",
         "val": 7,
         "summary": "The compiler working out types that the code doesn't write down. How much it can work out varies a lot between languages."
       },
@@ -6683,6 +7284,7 @@
         "id": "structural-typing",
         "name": "Structural Typing",
         "category": "types-data",
+        "level": "practical",
         "val": 7,
         "summary": "Deciding whether types are compatible by their shape (the members they have) instead of by their name. In a structural type system, anything with an X and a Y of the right types is a point. In a nominal type system, the one C# uses, only types declared as related are compatible, however similar they look."
       },
@@ -6690,6 +7292,7 @@
         "id": "linear-type",
         "name": "Linear Type",
         "category": "types-data",
+        "level": "everything",
         "val": 6,
         "summary": "A type whose values must be used exactly once: not copied, not dropped. If a file handle has a linear type, the compiler can check that every handle is closed, and closed only once, and that nothing uses it afterwards. Affine types are the relaxed version, at most once, which is what Rust's ownership gives you. Together they are called substructural types."
       },
@@ -6697,6 +7300,7 @@
         "id": "expression-problem",
         "name": "Expression Problem",
         "category": "types-data",
+        "level": "practical",
         "val": 8,
         "summary": "The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard."
       },
@@ -6704,6 +7308,7 @@
         "id": "algebraic-data-type",
         "name": "Algebraic data type",
         "category": "types-data",
+        "level": "essentials",
         "val": 9,
         "summary": "A composite type made from putting other types together. Two common classes of algebraic types are sum and product."
       },
@@ -6711,6 +7316,7 @@
         "id": "sum-type",
         "name": "Sum type",
         "category": "types-data",
+        "level": "essentials",
         "val": 15,
         "summary": "A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types."
       },
@@ -6718,6 +7324,7 @@
         "id": "product-type",
         "name": "Product type",
         "category": "types-data",
+        "level": "essentials",
         "val": 7,
         "summary": "A product type combines types together in a way you're probably more familiar with:"
       },
@@ -6725,6 +7332,7 @@
         "id": "unit-type",
         "name": "Unit type",
         "category": "types-data",
+        "level": "essentials",
         "val": 7,
         "summary": "A type with exactly one value. Since there is only one, a Unit carries no information: it is what a function returns when it has nothing to say. It is the identity of product types: a pair (A, Unit) has exactly as many possible values as A alone."
       },
@@ -6732,6 +7340,7 @@
         "id": "never-type",
         "name": "Never type",
         "category": "types-data",
+        "level": "practical",
         "val": 10,
         "summary": "A type with no values at all. Nothing can produce one, so a function that returns Never can only throw or run forever, and code that is handed a Never can never actually run. It is the identity of sum types: Either<A, Never> has exactly as many possible values as A, because the Never case can't happen."
       },
@@ -6739,6 +7348,7 @@
         "id": "pattern-matching",
         "name": "Pattern Matching",
         "category": "types-data",
+        "level": "essentials",
         "val": 9,
         "summary": "Taking data apart by its shape: testing which case a value is, and pulling out the pieces you need, in one step. It is how functional languages consume algebraic data types, and C# has grown most of it: switch expressions with type, property, positional, relational and list patterns, combined with and, or and not, plus when guards for anything a pattern can't say."
       },
@@ -6746,6 +7356,7 @@
         "id": "option",
         "name": "Option",
         "category": "types-data",
+        "level": "essentials",
         "val": 16,
         "summary": "Option is a sum type with two cases often called Some and None."
       },
@@ -6753,6 +7364,7 @@
         "id": "either",
         "name": "Either",
         "category": "types-data",
+        "level": "essentials",
         "val": 15,
         "summary": "A sum type with two cases, Left and Right. By convention, Right represents a successful computation and Left contains an error or failure reason (\"right is right\")."
       },
@@ -6760,6 +7372,7 @@
         "id": "expression-tree",
         "name": "Expression Tree",
         "category": "types-data",
+        "level": "practical",
         "val": 7,
         "summary": "Code represented as data. When a lambda is assigned to an Expression<Func<...>> instead of a Func<...>, the C# compiler doesn't compile it to a method; it builds a tree of objects describing it (a multiplication, whose left and right are the parameter x), which your program can inspect, transform, translate or compile at run time:"
       },
@@ -6767,6 +7380,7 @@
         "id": "function",
         "name": "Function",
         "category": "core-functions",
+        "level": "essentials",
         "val": 9,
         "summary": "A function f :: A => B is an expression - often called arrow or lambda expression - with exactly one (immutable) parameter of type A and exactly one return value of type B. That value depends entirely on the argument, making functions context-independent, or referentially transparent. What is implied here is that a function must not produce any hidden side effects - a function is always pure, by definition. These properties make functions pleasant to work with: they are entirely deterministic and therefore predictable. Functions enable working with code as data, abstracting over behaviour:"
       },
@@ -6774,6 +7388,7 @@
         "id": "partial-function",
         "name": "Partial function",
         "category": "core-functions",
+        "level": "essentials",
         "val": 7,
         "summary": "A partial function is a function which is not defined for all arguments - it might return an unexpected result or may never terminate. Partial functions add cognitive overhead, they are harder to reason about and can lead to runtime errors. Some examples:"
       },
@@ -6781,6 +7396,7 @@
         "id": "dealing-with-partial-functions",
         "name": "Dealing with partial functions",
         "category": "core-functions",
+        "level": "practical",
         "val": 4,
         "summary": "Partial functions are dangerous as they need to be treated with great caution. You might get an unexpected (wrong) result or run into runtime errors. Sometimes a partial function might not return at all. Being aware of and treating all these edge cases accordingly can become very tedious. Fortunately a partial function can be converted to a regular (or total) one. We can provide default values or use guards to deal with inputs for which the (previously) partial function is undefined. Utilizing the Option type, we can yield either Some(value) or None where we would otherwise have behaved unexpectedly:"
       },
@@ -6788,6 +7404,7 @@
         "id": "total-function",
         "name": "Total Function",
         "category": "core-functions",
+        "level": "essentials",
         "val": 6,
         "summary": "A function which returns a valid result for all inputs defined in its type. This is as opposed to Partial Functions which may throw an error, return an unexpected result, or fail to terminate."
       },
@@ -6795,6 +7412,7 @@
         "id": "functional-programming-libraries-for-net",
         "name": "Functional Programming Libraries for .NET",
         "category": "types-data",
+        "level": "practical",
         "val": 4,
         "summary": "A curated catalog of functional programming libraries and toolkits for C# and .NET including language-ext, OneOf, MoreLINQ, and Pidgin."
       }

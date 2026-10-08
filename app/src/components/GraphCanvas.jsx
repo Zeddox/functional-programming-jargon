@@ -1,6 +1,10 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { soundEffects } from '../utils/audio';
 import { clusterLayout, REFERENCE_EXTENT } from '../utils/clusterLayout';
+import { VIEW_LEVELS, VIEW_LABELS } from '../utils/learning';
+
+// Colour of the active learning path's route and step badges
+const PATH_COLOR = '#f59e0b';
 
 
 // Category emblems (math/FP symbols)
@@ -26,7 +30,13 @@ export default function GraphCanvas({
   isDark,
   isPanelOpen,
   panelWidth = 560,
-  onPointerMove
+  onPointerMove,
+  pathSteps = null,
+  pathIndex = -1,
+  pathSeen = null,
+  view,
+  viewCounts = {},
+  onViewChange
 }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -45,7 +55,11 @@ export default function GraphCanvas({
     animId: null,
     clusterCenters: {},
     clusterRings: {},
-    clusterExtent: REFERENCE_EXTENT
+    clusterExtent: REFERENCE_EXTENT,
+    // Keeps re-fitting the overview while the layout settles, until the user
+    // moves the camera or selects something
+    followOverview: false,
+    overviewTarget: null
   });
 
   // Touch gesture state ref
@@ -59,6 +73,58 @@ export default function GraphCanvas({
     lastTapTime: 0
   });
 
+  // Camera target that fits every node (with room for its label) into the
+  // space left between the header, the bottom controls and an open drawer
+  const overviewTarget = () => {
+    const winW = typeof window !== 'undefined' ? window.innerWidth : 1280;
+    const winH = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const isMobile = winW < 640;
+    const PAD = 50;
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (const n of stateRef.current.nodes) {
+      x0 = Math.min(x0, n.x - PAD); x1 = Math.max(x1, n.x + PAD);
+      y0 = Math.min(y0, n.y - PAD); y1 = Math.max(y1, n.y + PAD);
+    }
+    if (!Number.isFinite(x0)) return { x: 0, y: 0, scale: 0.5 };
+
+    // Work in the canvas's own box (the camera centres on it), keeping clear
+    // of the floating header above and the controls below
+    const rect = containerRef.current?.getBoundingClientRect() ?? { top: 0, width: winW, height: winH };
+    // With nothing selected the footer also holds the empty-state card
+    const HEADER = 56, FOOTER = selectedNodeId ? 56 : isMobile ? 200 : 140;
+    const drawerW = isPanelOpen && !isMobile ? panelWidth : 0;
+    const sheetH = isPanelOpen && isMobile ? winH * 0.46 : 0;
+    const top = Math.max(0, HEADER - rect.top);
+    const visW = rect.width - drawerW;
+    const visH = rect.height - top - Math.max(FOOTER, sheetH);
+    const scale = Math.min(visW / (x1 - x0), visH / (y1 - y0)) * 0.96;
+
+    // World point that should sit in the middle of the visible area
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    const shiftX = (rect.width / 2 - visW / 2) / scale;
+    const shiftY = (rect.height / 2 - (top + visH / 2)) / scale;
+    return { x: -cx - shiftX, y: -cy - shiftY, scale };
+  };
+  stateRef.current.overviewTarget = overviewTarget;
+  // The render loop reads the active path from here, so it never sees stale props
+  stateRef.current.path = pathSteps
+    ? { steps: pathSteps, index: pathIndex, seen: new Set(pathSeen || []), ids: new Set(pathSteps) }
+    : null;
+
+  const showOverview = (snap = false) => {
+    const { camera } = stateRef.current;
+    const view = overviewTarget();
+    camera.targetX = view.x;
+    camera.targetY = view.y;
+    camera.targetScale = view.scale;
+    if (snap) {
+      camera.x = view.x;
+      camera.y = view.y;
+      camera.scale = view.scale;
+    }
+    stateRef.current.followOverview = true;
+  };
+
   // Initialize nodes and clusters
   useEffect(() => {
     if (!graphData || !graphData.nodes) return;
@@ -69,9 +135,18 @@ export default function GraphCanvas({
     stateRef.current.clusterRings = clusterRings;
     stateRef.current.clusterExtent = extent;
 
-    // Build node map and initial positions
+    // Build node map and initial positions. Nodes already on screen (when
+    // the view changes) keep where they are and drift to their new cluster.
+    const previous = stateRef.current.nodeMap;
+    const isFirstLayout = previous.size === 0;
     const nodeMap = new Map();
     const nodes = graphData.nodes.map((n, idx) => {
+      const old = previous.get(n.id);
+      if (old) {
+        const node = { ...old, ...n };
+        nodeMap.set(node.id, node);
+        return node;
+      }
       const cluster = clusterCenters[n.category] || { x: 0, y: 0 };
       const spreadAngle = (idx / graphData.nodes.length) * Math.PI * 2;
       const spreadDist = (50 + Math.random() * 140) * ((clusterRings[n.category] || 308) / 220);
@@ -100,24 +175,32 @@ export default function GraphCanvas({
     stateRef.current.links = links;
     stateRef.current.nodeMap = nodeMap;
 
-    // Center camera on initially selected node (e.g. pure-function)
-    if (selectedNodeId) {
-      const selNode = nodeMap.get(selectedNodeId);
-      if (selNode) {
-        stateRef.current.camera.x = -selNode.x;
-        stateRef.current.camera.y = -selNode.y;
-        stateRef.current.camera.targetX = -selNode.x;
-        stateRef.current.camera.targetY = -selNode.y;
-        stateRef.current.camera.scale = 0.95;
-        stateRef.current.camera.targetScale = 0.95;
-      }
+    // Start on the selected node from the URL, or on the overview; after a
+    // view change, re-fit the overview if nothing is selected
+    if (!isFirstLayout) {
+      if (!selectedNodeId) showOverview();
+      return;
+    }
+    const { camera } = stateRef.current;
+    const selNode = selectedNodeId && nodeMap.get(selectedNodeId);
+    if (selNode) {
+      camera.x = camera.targetX = -selNode.x;
+      camera.y = camera.targetY = -selNode.y;
+      camera.scale = camera.targetScale = 0.95;
+    } else {
+      showOverview(true);
     }
   }, [graphData]);
 
   // Center on selected node when selection changes or panel opens/closes
   // Calculates optimal zoom scale so the selected node AND all its connected neighbor nodes fit comfortably in the visible viewport
+  // Clearing the selection pulls back to the overview
   useEffect(() => {
-    if (!selectedNodeId) return;
+    if (!selectedNodeId) {
+      showOverview();
+      return;
+    }
+    stateRef.current.followOverview = false;
     const node = stateRef.current.nodeMap?.get(selectedNodeId);
     if (node) {
       const links = stateRef.current.links || [];
@@ -193,7 +276,7 @@ export default function GraphCanvas({
       if (!running) return;
       pulseTime += 0.025;
 
-      const { nodes, links, camera, clusterCenters, clusterRings, dragNode } = stateRef.current;
+      const { nodes, links, nodeMap, camera, clusterCenters, clusterRings, dragNode } = stateRef.current;
       const dpr = window.devicePixelRatio || 1;
       const width = canvas.width / dpr;
       const height = canvas.height / dpr;
@@ -202,6 +285,12 @@ export default function GraphCanvas({
       camera.x += (camera.targetX - camera.x) * 0.08;
       camera.y += (camera.targetY - camera.y) * 0.08;
       camera.scale += (camera.targetScale - camera.scale) * 0.08;
+      if (stateRef.current.followOverview && Math.round(pulseTime / 0.025) % 15 === 0) {
+        const view = stateRef.current.overviewTarget();
+        camera.targetX = view.x;
+        camera.targetY = view.y;
+        camera.targetScale = view.scale;
+      }
 
       // Force-directed physics calculation
       const kRepel = 4000;
@@ -432,20 +521,48 @@ export default function GraphCanvas({
         }
       };
 
+      // On a learning path, everything off the path recedes
+      const path = stateRef.current.path;
+      const offPath = (id) => path && !path.ids.has(id);
+
       // Render Links
       links.forEach(l => {
         const isHighlight = activeId && (l.source.id === activeId || l.target.id === activeId);
-        const isDimmed = activeId && !isHighlight;
+        const isDimmed = (activeId && !isHighlight) || (path && !isHighlight);
         const isSearchDimmed = searchMatchedIds && (!searchMatchedIds.has(l.source.id) || !searchMatchedIds.has(l.target.id));
         drawCurvedLink(l, isHighlight, isDimmed, isSearchDimmed);
       });
+
+      // The path's route: walked legs solid, the rest dashed, in step order
+      if (path) {
+        ctx.save();
+        ctx.lineCap = 'round';
+        for (let i = 0; i < path.steps.length - 1; i++) {
+          const a = nodeMap.get(path.steps[i]);
+          const b = nodeMap.get(path.steps[i + 1]);
+          if (!a || !b) continue;
+          const walked = i < path.index;
+          ctx.setLineDash(walked ? [] : [6, 7]);
+          ctx.strokeStyle = walked ? PATH_COLOR : `${PATH_COLOR}80`;
+          ctx.lineWidth = walked ? 3.2 : 2;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
 
       // Render Nodes
       nodes.forEach(n => {
         const isSelected = n.id === selectedNodeId;
         const isHovered = n.id === hoveredNodeId;
         const isConnected = connectedIds.has(n.id);
-        const isDimmed = activeId && !isConnected;
+        // On a path, path nodes stay lit and the rest dim unless they're linked
+        // to the node being looked at
+        const isDimmed = path
+          ? offPath(n.id) && !isConnected
+          : activeId && !isConnected;
         const isSearchMatched = !searchMatchedIds || searchMatchedIds.has(n.id);
 
         const cat = categories[n.category] || {};
@@ -564,8 +681,30 @@ export default function GraphCanvas({
           ? (isSelected ? '#121212' : '#f0f0ee')
           : (isSelected ? '#eaeae8' : (isHovered ? '#000000' : '#1a1a19'));
         ctx.fillText(text, n.x, labelY + 1);
-
         ctx.restore();
+
+        // Step number badge on the active path's nodes
+        const step = path ? path.steps.indexOf(n.id) : -1;
+        if (step >= 0) {
+          const bx = n.x + n.radius * 0.78;
+          const by = n.y - n.radius * 0.78;
+          const isCurrent = step === path.index;
+          const isSeen = path.seen.has(n.id);
+          ctx.globalAlpha = 1;
+          ctx.beginPath();
+          ctx.arc(bx, by, isCurrent ? 11 : 9.5, 0, Math.PI * 2);
+          ctx.fillStyle = isCurrent || isSeen ? PATH_COLOR : (isDark ? '#1a1a19' : '#ffffff');
+          ctx.fill();
+          ctx.strokeStyle = PATH_COLOR;
+          ctx.lineWidth = 1.6;
+          ctx.stroke();
+          ctx.fillStyle = isCurrent || isSeen ? '#1a1a19' : PATH_COLOR;
+          ctx.font = `700 ${isCurrent ? 11 : 10}px "JetBrains Mono", monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(String(step + 1), bx, by + 0.5);
+        }
+
         ctx.restore();
       });
 
@@ -613,7 +752,8 @@ export default function GraphCanvas({
 
   // Mouse / Touch Interaction Handlers
   const handleMouseDown = (e) => {
-    if (e.button !== 0) return;
+    // Clicks on the floating controls aren't canvas clicks
+    if (e.button !== 0 || e.target !== canvasRef.current) return;
     const pos = clientToWorld(e.clientX, e.clientY);
     const hitNode = getNodeAt(pos.x, pos.y);
 
@@ -658,6 +798,7 @@ export default function GraphCanvas({
       const dy = (e.clientY - panStart.y) / camera.scale;
       camera.x = panStart.camX + dx;
       camera.y = panStart.camY + dy;
+      if (Math.abs(dx) + Math.abs(dy) > 2) stateRef.current.followOverview = false;
       camera.targetX = camera.x;
       camera.targetY = camera.y;
       return;
@@ -685,9 +826,12 @@ export default function GraphCanvas({
   };
 
   const handleMouseUp = (e) => {
-    const { dragNode, isPanning } = stateRef.current;
+    const { dragNode, isPanning, panStart } = stateRef.current;
     
-    if (dragNode) {
+    if (isPanning && selectedNodeId &&
+        Math.hypot(e.clientX - panStart.x, e.clientY - panStart.y) < 4) {
+      onSelectNode(null);
+    } else if (dragNode) {
       onSelectNode(dragNode.id);
       soundEffects.select(soundEnabled);
       stateRef.current.dragNode = null;
@@ -705,6 +849,7 @@ export default function GraphCanvas({
 
   // Touch Handlers for Mobile
   const handleTouchStart = (e) => {
+    if (e.target !== canvasRef.current) return;
     if (e.touches.length === 1) {
       const t = e.touches[0];
       const pos = clientToWorld(t.clientX, t.clientY);
@@ -756,9 +901,10 @@ export default function GraphCanvas({
       const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
       if (touchRef.current.startDist > 0) {
         const factor = dist / touchRef.current.startDist;
-        const newScale = Math.max(0.3, Math.min(3.5, touchRef.current.startScale * factor));
+        const newScale = Math.max(0.15, Math.min(3.5, touchRef.current.startScale * factor));
         stateRef.current.camera.scale = newScale;
         stateRef.current.camera.targetScale = newScale;
+        stateRef.current.followOverview = false;
       }
       return;
     }
@@ -786,11 +932,13 @@ export default function GraphCanvas({
         stateRef.current.camera.y = stateRef.current.panStart.camY + dy;
         stateRef.current.camera.targetX = stateRef.current.camera.x;
         stateRef.current.camera.targetY = stateRef.current.camera.y;
+        stateRef.current.followOverview = false;
       }
     }
   };
 
   const handleTouchEnd = (e) => {
+    if (e.target !== canvasRef.current) return;
     if (touchRef.current.isPinching) {
       if (e.touches.length < 2) {
         touchRef.current.isPinching = false;
@@ -805,6 +953,8 @@ export default function GraphCanvas({
       if (hit) {
         onSelectNode(hit.id);
         soundEffects.select(soundEnabled);
+      } else if (selectedNodeId) {
+        onSelectNode(null);
       }
     }
 
@@ -816,30 +966,13 @@ export default function GraphCanvas({
     e.preventDefault();
     const zoomFactor = e.deltaY < 0 ? 1.12 : 0.88;
     const { camera } = stateRef.current;
-    const newScale = Math.max(0.3, Math.min(3.5, camera.targetScale * zoomFactor));
+    const newScale = Math.max(0.15, Math.min(3.5, camera.targetScale * zoomFactor));
     camera.targetScale = newScale;
+    stateRef.current.followOverview = false;
   };
 
   const handleResetCamera = () => {
-    const { camera } = stateRef.current;
-    const winW = typeof window !== 'undefined' ? window.innerWidth : 1280;
-    const winH = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const isMobile = winW < 640;
-    // Fits the whole constellation of clusters (the base zooms were tuned for
-    // REFERENCE_EXTENT and shrink as the layout grows)
-    const fit = REFERENCE_EXTENT / stateRef.current.clusterExtent;
-    const targetScale = (isMobile ? 0.54 : 0.68) * fit;
-    let offsetX = 0;
-    if (isPanelOpen && !isMobile) {
-      offsetX = (panelWidth / 2) / targetScale;
-    }
-    let offsetY = 0;
-    if (isPanelOpen && isMobile) {
-      offsetY = (winH * 0.46 / 2) / targetScale;
-    }
-    camera.targetX = -offsetX;
-    camera.targetY = -offsetY;
-    camera.targetScale = targetScale;
+    showOverview();
     soundEffects.toggle(soundEnabled);
   };
 
@@ -904,13 +1037,43 @@ export default function GraphCanvas({
           </svg>
           <span>[ Reset ]</span>
         </button>
-        <div className={`text-[11px] px-2.5 py-1 border backdrop-blur-md ${
+        {/* How much of the jargon to show */}
+        {onViewChange && (
+          <div
+            role="radiogroup"
+            aria-label="Graph view"
+            className={`flex border backdrop-blur-md text-[11px] ${
+              isDark ? 'bg-[#1a1a19]/90 border-[rgba(240,240,238,0.18)]' : 'bg-[#eaeae8]/90 border-[rgba(26,26,25,0.18)]'
+            }`}
+          >
+            {VIEW_LEVELS.map(level => {
+              const isActive = level === view;
+              return (
+                <button
+                  key={level}
+                  role="radio"
+                  aria-checked={isActive}
+                  onClick={() => !isActive && onViewChange(level)}
+                  title={`${VIEW_LABELS[level]}: ${viewCounts[level] ?? ''} concepts`}
+                  className={`px-2 py-1 transition ${
+                    isActive
+                      ? (isDark ? 'bg-[#f0f0ee] text-[#121212]' : 'bg-[#1a1a19] text-[#eaeae8]')
+                      : (isDark ? 'text-[#f0f0ee]/70 hover:bg-[#242422]' : 'text-[#1a1a19]/70 hover:bg-[#dcdcd9]')
+                  }`}
+                >
+                  {VIEW_LABELS[level]}
+                  <span className="hidden md:inline opacity-60"> {viewCounts[level]}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        <div className={`hidden 2xl:block text-[11px] px-2.5 py-1 border backdrop-blur-md ${
           isDark
             ? 'text-[#f0f0ee]/60 bg-[#1a1a19]/70 border-[rgba(240,240,238,0.12)]'
             : 'text-[#1a1a19]/60 bg-[#eaeae8]/80 border-[rgba(26,26,25,0.12)]'
         }`}>
-          <span className="hidden sm:inline">drag: pan · scroll: zoom</span>
-          <span className="sm:hidden">drag: pan · pinch: zoom</span>
+          drag: pan · scroll: zoom
         </div>
       </div>
     </div>

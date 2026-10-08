@@ -4,14 +4,20 @@ import GraphCanvas from './components/GraphCanvas';
 import SearchHUD from './components/SearchHUD';
 import NodeDetailPanel from './components/NodeDetailPanel';
 import CombinatorsModal from './components/CombinatorsModal';
+import PathsModal from './components/PathsModal';
 import { soundEffects } from './utils/audio';
+import {
+  VIEW_LEVELS, levelRank, viewFor, loadView, saveView,
+  loadProgress, saveProgress, stepIndexOf, pausedPath
+} from './utils/learning';
 import {
   Search,
   Volume2,
   VolumeX,
   Sun,
   Moon,
-  Shuffle
+  Shuffle,
+  Route
 } from 'lucide-react';
 import { GithubIcon } from './components/Icons';
 
@@ -25,9 +31,33 @@ const clampPanelWidth = (width, winW) =>
   Math.max(MIN_PANEL_WIDTH, Math.min(width, winW - MIN_CANVAS_WIDTH));
 
 export default function App() {
-  const { meta, categories, terms, graph, combinators } = jargonsData;
+  const { meta, categories, terms, graph, combinators, paths = [] } = jargonsData;
+
+  // Graph view: how much of the jargon to show. A link or search result for a
+  // term outside the view widens the view to include it.
+  const [view, setViewState] = useState(() => {
+    const saved = loadView();
+    const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : '';
+    const term = terms.find(t => t.id === hash);
+    return term ? viewFor(term.level, saved) : saved;
+  });
+  const setView = setViewState;
+  // Remember whichever view is showing, including one widened by a link
+  useEffect(() => saveView(view), [view]);
+
+  // Learning-path progress (see utils/learning.js for the stored shape)
+  const [progress, setProgressState] = useState(() => loadProgress(paths));
+  const updateProgress = (fn) => setProgressState(prev => {
+    const next = fn(prev);
+    saveProgress(next);
+    return next;
+  });
+  const [isPathsOpen, setIsPathsOpen] = useState(false);
+  const activePath = paths.find(p => p.id === progress.active) || null;
+  const activeStepIndex = activePath ? stepIndexOf(activePath, progress.paths[activePath.id]?.current) : -1;
+
   
-  // Highlighted node on the graph (or from initial URL hash)
+  // Highlighted node on the graph (from the initial URL hash); null shows the overview
   const [selectedNodeId, setSelectedNodeId] = useState(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash.replace(/^#/, '');
@@ -35,7 +65,7 @@ export default function App() {
         return hash;
       }
     }
-    return 'partial-function';
+    return null;
   });
 
   // Sidebar detail panel: open if valid hash in URL on initial load, otherwise closed
@@ -46,6 +76,33 @@ export default function App() {
     }
     return false;
   });
+
+  // Terms on the graph: everything up to the view's level, plus the steps of
+  // the active path wherever they sit, plus the term being read
+  const viewIds = useMemo(() => {
+    const rank = levelRank(view);
+    const ids = new Set(terms.filter(t => levelRank(t.level) <= rank).map(t => t.id));
+    activePath?.steps.forEach(step => ids.add(step.termId));
+    return ids;
+  }, [terms, view, activePath]);
+  // Only depends on the selection when it's outside the view, so ordinary
+  // clicks don't re-lay out the graph
+  const extraId = selectedNodeId && !viewIds.has(selectedNodeId) ? selectedNodeId : null;
+  const visibleIds = useMemo(
+    () => (extraId ? new Set([...viewIds, extraId]) : viewIds),
+    [viewIds, extraId]
+  );
+
+  // Memoised so the canvas only re-lays out when the visible set changes
+  const visibleGraph = useMemo(() => ({
+    nodes: graph.nodes.filter(n => visibleIds.has(n.id)),
+    links: graph.links.filter(l => visibleIds.has(l.source) && visibleIds.has(l.target))
+  }), [graph, visibleIds]);
+
+  const viewCounts = useMemo(() => Object.fromEntries(VIEW_LEVELS.map(v =>
+    [v, terms.filter(t => levelRank(t.level) <= levelRank(v)).length])), [terms]);
+
+  const pathSteps = useMemo(() => activePath?.steps.map(s => s.termId) ?? null, [activePath]);
 
   // Command palette search modal
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -126,11 +183,13 @@ export default function App() {
       if (hash === 'combinators') {
         setIsCombinatorsOpen(true);
       } else if (hash && allTermsMap[hash]) {
+        revealTerm(hash);
         setSelectedNodeId(hash);
         setIsPanelOpen(true);
         setSearchQuery('');
       } else if (!hash) {
         setIsPanelOpen(false);
+        setSelectedNodeId(null);
       }
     };
 
@@ -139,28 +198,116 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHash);
   }, [allTermsMap]);
 
+  // Widen the view if a term is outside it (and not on the active path)
+  function revealTerm(termId) {
+    const term = allTermsMap[termId];
+    if (!term || (activePath && stepIndexOf(activePath, termId) >= 0)) return;
+    setViewState(current => viewFor(term.level, current));
+  }
+
+  // Move a path's bookmark to one of its steps
+  const markStep = (pathId, termId, extra = {}) => updateProgress(prev => {
+    const entry = prev.paths[pathId] || { seen: [], done: false };
+    return {
+      ...prev,
+      ...extra,
+      paths: {
+        ...prev.paths,
+        [pathId]: {
+          ...entry,
+          current: termId,
+          seen: entry.seen.includes(termId) ? entry.seen : [...entry.seen, termId],
+          at: Date.now()
+        }
+      }
+    };
+  });
+
+  const showTerm = (termId) => {
+    setSelectedNodeId(termId);
+    setSearchQuery('');
+    setIsPanelOpen(true);
+    window.history.replaceState(null, '', `#${termId}`);
+  };
+
+  // Begin (or continue) a path at a step: its first step by default
+  const handleStartPath = (pathId, termId = null, { restart = false } = {}) => {
+    const path = paths.find(p => p.id === pathId);
+    if (!path) return;
+    const target = termId || path.steps[0].termId;
+    updateProgress(prev => ({
+      ...prev,
+      active: pathId,
+      paths: {
+        ...prev.paths,
+        [pathId]: {
+          current: target,
+          seen: [...new Set([...(restart ? [] : prev.paths[pathId]?.seen || []), target])],
+          done: false,
+          at: Date.now()
+        }
+      }
+    }));
+    setIsPathsOpen(false);
+    showTerm(target);
+  };
+
+  const handleResumePath = (pathId) => {
+    const entry = progress.paths[pathId];
+    handleStartPath(pathId, entry?.current);
+  };
+
+  const handleGoToStep = (index) => {
+    if (!activePath) return;
+    const step = activePath.steps[Math.max(0, Math.min(index, activePath.steps.length - 1))];
+    markStep(activePath.id, step.termId);
+    showTerm(step.termId);
+  };
+
+  // Pausing keeps the bookmark; the empty-state card offers to resume
+  const handlePausePath = () => updateProgress(prev => ({ ...prev, active: null }));
+
+  const handleFinishPath = () => {
+    if (!activePath) return;
+    const id = activePath.id;
+    updateProgress(prev => ({
+      ...prev,
+      active: null,
+      paths: { ...prev.paths, [id]: { ...prev.paths[id], done: true, at: Date.now() } }
+    }));
+  };
+
   // Update hash and reset search filter when a node is selected
   const handleSelectNode = (nodeId) => {
+    if (nodeId) {
+      revealTerm(nodeId);
+      // Picking another step of the active path moves the bookmark there
+      if (activePath && stepIndexOf(activePath, nodeId) >= 0) markStep(activePath.id, nodeId);
+    }
     setSelectedNodeId(nodeId);
     setSearchQuery('');
     if (nodeId) {
       setIsPanelOpen(true);
       window.history.replaceState(null, '', `#${nodeId}`);
     } else {
+      if (activePath) handlePausePath();
       setIsPanelOpen(false);
       window.history.replaceState(null, '', window.location.pathname);
     }
   };
 
-  // Close drawer
+  // Close drawer and clear the selection (on a path, closing pauses it)
   const handleClosePanel = () => {
+    if (activePath) handlePausePath();
     setIsPanelOpen(false);
+    setSelectedNodeId(null);
     window.history.replaceState(null, '', window.location.pathname);
   };
 
-  // Pick random term
+  // Pick a random term from the current view
   const handleRandomTerm = () => {
-    const randomTerm = terms[Math.floor(Math.random() * terms.length)];
+    const pool = terms.filter(t => visibleIds.has(t.id));
+    const randomTerm = pool[Math.floor(Math.random() * pool.length)];
     if (randomTerm) {
       handleSelectNode(randomTerm.id);
       soundEffects.select(soundEnabled);
@@ -196,6 +343,8 @@ export default function App() {
       if (e.key === 'Escape') {
         if (isCombinatorsOpen) {
           handleCloseCombinators();
+        } else if (isPathsOpen) {
+          setIsPathsOpen(false);
         } else if (isSearchOpen) {
           setIsSearchOpen(false);
           setSearchQuery('');
@@ -206,9 +355,10 @@ export default function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSearchOpen, isPanelOpen, isCombinatorsOpen]);
+  }, [isSearchOpen, isPanelOpen, isCombinatorsOpen, isPathsOpen, progress.active]);
 
   const activeTerm = (selectedNodeId && isPanelOpen) ? allTermsMap[selectedNodeId] : null;
+  const resumable = pausedPath(progress, paths);
 
   return (
     <div className={`relative w-screen h-screen overflow-hidden flex flex-col font-mono transition-colors duration-200 ${
@@ -273,6 +423,26 @@ export default function App() {
           >
             <Search className="w-3.5 h-3.5" />
             <span className="hidden sm:inline text-[10px] opacity-50 font-mono">/</span>
+          </button>
+
+          {/* Learning paths */}
+          <button
+            onClick={() => {
+              setIsPathsOpen(true);
+              soundEffects.toggle(soundEnabled);
+            }}
+            title="Learning paths"
+            aria-label="Learning paths"
+            className={`flex items-center gap-1.5 px-2 py-1 border backdrop-blur-md transition ${
+              activePath
+                ? (isDark ? 'bg-amber-400/15 text-amber-300 border-amber-400/40' : 'bg-amber-500/15 text-amber-800 border-amber-600/40')
+                : isDark
+                  ? 'bg-[#1a1a19]/90 hover:bg-[#222220] text-[#f0f0ee]/80 hover:text-[#f0f0ee] border-[rgba(240,240,238,0.15)]'
+                  : 'bg-[#eaeae8]/95 hover:bg-[#dededb] text-[#1a1a19]/80 hover:text-[#1a1a19] border-[rgba(26,26,25,0.15)]'
+            }`}
+          >
+            <Route className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline text-[11px]">Paths</span>
           </button>
 
           {/* Random / Surprise Me */}
@@ -358,7 +528,16 @@ export default function App() {
       {/* Main Experience: Interactive Knowledge Graph */}
       <main className="relative flex-1 w-full h-full overflow-hidden">
         <GraphCanvas
-          graphData={graph}
+          graphData={visibleGraph}
+          pathSteps={pathSteps}
+          pathIndex={activeStepIndex}
+          pathSeen={activePath ? progress.paths[activePath.id]?.seen : null}
+          view={view}
+          viewCounts={viewCounts}
+          onViewChange={(next) => {
+            setView(next);
+            soundEffects.toggle(soundEnabled);
+          }}
           categories={categories}
           selectedNodeId={selectedNodeId}
           onSelectNode={handleSelectNode}
@@ -369,6 +548,67 @@ export default function App() {
           isPanelOpen={isPanelOpen}
           panelWidth={panelWidth}
         />
+        {/* Empty state: shown on the overview when nothing is selected */}
+        {!selectedNodeId && !isSearchOpen && (
+          <div
+            data-testid="empty-state"
+            className={`absolute z-20 bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 w-[min(22rem,calc(100vw-2rem))] px-4 py-3 border backdrop-blur-md text-center ${
+              isDark
+                ? 'bg-[#1a1a19]/85 text-[#f0f0ee] border-[rgba(240,240,238,0.15)]'
+                : 'bg-[#eaeae8]/90 text-[#1a1a19] border-[rgba(26,26,25,0.15)]'
+            }`}
+          >
+            <p className="text-[11px] leading-relaxed opacity-75">
+              {visibleIds.size} of {meta.totalTerms} concepts shown.
+              Pick a node to read about it, or:
+            </p>
+            {resumable && (
+              <button
+                onClick={() => handleResumePath(resumable.id)}
+                className={`mt-2 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 border text-[11px] transition ${
+                  isDark
+                    ? 'bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border-amber-400/40'
+                    : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 border-amber-600/40'
+                }`}
+              >
+                <Route className="w-3 h-3" />
+                Resume {resumable.title} · step {stepIndexOf(resumable, progress.paths[resumable.id].current) + 1}/{resumable.steps.length}
+              </button>
+            )}
+            <div className="mt-2 flex items-center justify-center gap-2 text-[11px]">
+              <button
+                onClick={() => { setIsSearchOpen(true); soundEffects.toggle(soundEnabled); }}
+                className={`flex items-center gap-1.5 px-2.5 py-1 border transition ${
+                  isDark
+                    ? 'hover:bg-[#242422] border-[rgba(240,240,238,0.18)]'
+                    : 'hover:bg-[#dcdcd9] border-[rgba(26,26,25,0.18)]'
+                }`}
+              >
+                <Search className="w-3 h-3" /> Search
+              </button>
+              <button
+                onClick={() => { setIsPathsOpen(true); soundEffects.toggle(soundEnabled); }}
+                className={`flex items-center gap-1.5 px-2.5 py-1 border transition ${
+                  isDark
+                    ? 'hover:bg-[#242422] border-[rgba(240,240,238,0.18)]'
+                    : 'hover:bg-[#dcdcd9] border-[rgba(26,26,25,0.18)]'
+                }`}
+              >
+                <Route className="w-3 h-3" /> Paths
+              </button>
+              <button
+                onClick={handleRandomTerm}
+                className={`flex items-center gap-1.5 px-2.5 py-1 border transition ${
+                  isDark
+                    ? 'hover:bg-[#242422] border-[rgba(240,240,238,0.18)]'
+                    : 'hover:bg-[#dcdcd9] border-[rgba(26,26,25,0.18)]'
+                }`}
+              >
+                <Shuffle className="w-3 h-3" /> Random
+              </button>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Slideover Detail Drawer */}
@@ -380,6 +620,15 @@ export default function App() {
           onSelectTerm={handleSelectNode}
           onClose={handleClosePanel}
           onOpenCombinators={() => handleOpenCombinators()}
+          paths={paths}
+          progress={progress}
+          activePath={activePath}
+          activeStepIndex={activeStepIndex}
+          onStartPath={handleStartPath}
+          onResumePath={handleResumePath}
+          onGoToStep={handleGoToStep}
+          onPausePath={handlePausePath}
+          onFinishPath={handleFinishPath}
           soundEnabled={soundEnabled}
           useCategoryColors={useCategoryColors}
           isDark={isDark}
@@ -397,6 +646,19 @@ export default function App() {
         combinators={combinators}
         onClose={handleCloseCombinators}
         onSelectTerm={handleSelectNode}
+        soundEnabled={soundEnabled}
+        isDark={isDark}
+      />
+
+      {/* Learning path picker */}
+      <PathsModal
+        isOpen={isPathsOpen}
+        paths={paths}
+        progress={progress}
+        allTermsMap={allTermsMap}
+        onStartPath={handleStartPath}
+        onResumePath={handleResumePath}
+        onClose={() => setIsPathsOpen(false)}
         soundEnabled={soundEnabled}
         isDark={isDark}
       />

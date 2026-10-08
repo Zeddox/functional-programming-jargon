@@ -1,8 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { X, ExternalLink, Link2, BookOpen, GitFork, Check, ChevronUp, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import {
+  X, ExternalLink, Link2, BookOpen, GitFork, Check, ChevronUp, ChevronDown,
+  Route, ChevronLeft, ChevronRight, Pause, Play, RotateCcw, List, Flag
+} from 'lucide-react';
 import { soundEffects } from '../utils/audio';
 import { splitMarkdownParts, internalLinkTarget } from '../utils/markdown';
+import { stepIndexOf } from '../utils/learning';
 import CodeBlock from './CodeBlock';
+import InlineText from './InlineText';
 
 export default function NodeDetailPanel({
   term,
@@ -11,6 +16,15 @@ export default function NodeDetailPanel({
   onSelectTerm,
   onClose,
   onOpenCombinators,
+  paths = [],
+  progress = { active: null, paths: {} },
+  activePath = null,
+  activeStepIndex = -1,
+  onStartPath,
+  onResumePath,
+  onGoToStep,
+  onPausePath,
+  onFinishPath,
   soundEnabled,
   useCategoryColors,
   isDark,
@@ -21,15 +35,41 @@ export default function NodeDetailPanel({
 }) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showSteps, setShowSteps] = useState(false);
+  const bodyRef = useRef(null);
 
-  // Reset to peek mode whenever term changes
+  // Reset to peek mode and the top of the content whenever term changes
   useEffect(() => {
     setIsExpanded(false);
+    setShowSteps(false);
+    if (bodyRef.current) bodyRef.current.scrollTop = 0;
   }, [term?.id]);
 
   if (!term) return null;
 
   const cat = categories[term.category] || {};
+
+  // Learning paths: is this term the active path's current step, a detour
+  // from it, or a possible starting point for a path?
+  const isPathStep = Boolean(activePath) && stepIndexOf(activePath, term.id) === activeStepIndex && activeStepIndex >= 0;
+  const step = isPathStep ? activePath.steps[activeStepIndex] : null;
+  const nextStep = isPathStep ? activePath.steps[activeStepIndex + 1] : null;
+  const isLastStep = isPathStep && !nextStep;
+  const pathsWithTerm = paths.filter(p => p.id !== activePath?.id && stepIndexOf(p, term.id) >= 0);
+  const pathAct = (fn) => () => {
+    fn();
+    soundEffects.select(soundEnabled);
+  };
+  const pathButton = `flex items-center justify-center gap-1.5 px-2.5 py-1.5 border text-[11px] transition disabled:opacity-35 disabled:pointer-events-none ${
+    isDark
+      ? 'hover:bg-[#242422] border-[rgba(240,240,238,0.18)]'
+      : 'hover:bg-[#dcdcd9] border-[rgba(26,26,25,0.18)]'
+  }`;
+  const pathPrimary = `flex items-center justify-center gap-1.5 px-2.5 py-1.5 border text-[11px] transition ${
+    isDark
+      ? 'bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border-amber-400/40'
+      : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 border-amber-600/40'
+  }`;
   const accentColor = useCategoryColors ? (cat.color || '#64748b') : (isDark ? '#e2e8f0' : '#1e293b');
 
   // Copy share permalink
@@ -218,7 +258,97 @@ export default function NodeDetailPanel({
       </div>
 
       {/* Scrollable Content Body */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-5">
+      <div ref={bodyRef} className="flex-1 overflow-y-auto p-5 space-y-5">
+        {/* Learning path: where this step sits and why it comes next */}
+        {isPathStep && (
+          <section
+            data-testid="path-step"
+            className={`border p-4 space-y-3 ${
+              isDark ? 'border-amber-400/35 bg-amber-400/[0.06]' : 'border-amber-600/35 bg-amber-500/[0.07]'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-widest">
+              <span className={`flex items-center gap-1.5 ${isDark ? 'text-amber-300' : 'text-amber-800'}`}>
+                <Route className="w-3 h-3" /> {activePath.title}
+              </span>
+              <span className="opacity-70 shrink-0">Step {activeStepIndex + 1} of {activePath.steps.length}</span>
+            </div>
+
+            <div className="flex gap-0.5" aria-hidden="true">
+              {activePath.steps.map((s, i) => (
+                <span
+                  key={s.termId}
+                  className={`h-1 flex-1 ${
+                    i === activeStepIndex ? 'bg-amber-500'
+                      : progress.paths[activePath.id]?.seen.includes(s.termId) ? 'bg-amber-500/50'
+                      : isDark ? 'bg-[#f0f0ee]/12' : 'bg-[#1a1a19]/12'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {activeStepIndex === 0 && (
+              <p className="text-[11px] leading-relaxed opacity-75"><InlineText text={activePath.intro} isDark={isDark} /></p>
+            )}
+
+            <div>
+              <h4 className="text-[10px] uppercase tracking-widest opacity-60 mb-1">
+                {activeStepIndex === 0 ? 'Where to start' : 'Why this comes next'}
+              </h4>
+              <p className="text-[12.5px] leading-relaxed"><InlineText text={step.note} isDark={isDark} /></p>
+            </div>
+
+            {/* Later: exercises and animated explainers for this step go here */}
+
+            {/* Every step, to jump back or ahead */}
+            <div>
+              <button
+                onClick={() => setShowSteps(v => !v)}
+                aria-expanded={showSteps}
+                className="text-[10px] uppercase tracking-widest opacity-60 hover:opacity-100 flex items-center gap-1.5"
+              >
+                <List className="w-3 h-3" /> {showSteps ? 'Hide steps' : 'All steps'}
+              </button>
+              {showSteps && (
+                <ol className="mt-2 space-y-0.5 text-[11px]">
+                  {activePath.steps.map((s, i) => {
+                    const seen = progress.paths[activePath.id]?.seen.includes(s.termId);
+                    return (
+                      <li key={s.termId}>
+                        <button
+                          onClick={pathAct(() => onGoToStep(i))}
+                          className={`w-full text-left px-2 py-1 flex items-center gap-2 transition ${
+                            i === activeStepIndex
+                              ? (isDark ? 'bg-amber-400/15' : 'bg-amber-500/15')
+                              : (isDark ? 'hover:bg-[#242422]' : 'hover:bg-[#dcdcd9]')
+                          }`}
+                        >
+                          <span className={`w-5 text-right tabular-nums ${seen ? 'text-amber-500' : 'opacity-50'}`}>{i + 1}</span>
+                          <span className={i === activeStepIndex ? 'font-semibold' : ''}>{allTermsMap[s.termId]?.title}</span>
+                          {seen && i !== activeStepIndex && <Check className="w-3 h-3 text-amber-500 ml-auto" />}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Looking at something off the active path */}
+        {activePath && !isPathStep && (
+          <div className={`flex items-center justify-between gap-3 px-3 py-2 border text-[11px] ${
+            isDark ? 'border-amber-400/30' : 'border-amber-600/30'
+          }`}>
+            <span className="opacity-75 min-w-0 truncate">
+              On <strong>{activePath.title}</strong>, step {activeStepIndex + 1} of {activePath.steps.length}
+            </span>
+            <button className={pathPrimary} onClick={pathAct(() => onGoToStep(activeStepIndex))}>
+              <ChevronLeft className="w-3 h-3" /> Back to path
+            </button>
+          </div>
+        )}
         {/* Definition Summary Box */}
         <div className={`p-4 border ${
           isDark
@@ -233,6 +363,52 @@ export default function NodeDetailPanel({
             {term.summary}
           </p>
         </div>
+
+        {/* Paths that pass through this term */}
+        {!isPathStep && pathsWithTerm.length > 0 && (
+          <section data-testid="term-paths" className="space-y-2">
+            <h4 className="text-[10px] uppercase tracking-widest opacity-60 flex items-center gap-1.5">
+              <Route className="w-3 h-3" /> On {pathsWithTerm.length === 1 ? 'a learning path' : 'learning paths'}
+            </h4>
+            {pathsWithTerm.map(path => {
+              const at = stepIndexOf(path, term.id);
+              const entry = progress.paths[path.id];
+              const resumeAt = entry && !entry.done ? stepIndexOf(path, entry.current) : -1;
+              return (
+                <div key={path.id} className={`border p-3 space-y-2 ${
+                  isDark ? 'border-[rgba(240,240,238,0.12)]' : 'border-[rgba(26,26,25,0.12)]'
+                }`}>
+                  <div className="flex items-baseline justify-between gap-3 text-[11px]">
+                    <span className="font-semibold">{path.title}</span>
+                    <span className="opacity-60 shrink-0">step {at + 1} of {path.steps.length}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {resumeAt >= 0 && (
+                      <button className={pathPrimary} onClick={pathAct(() => onResumePath(path.id))}>
+                        <Play className="w-3 h-3" /> Resume at step {resumeAt + 1}
+                      </button>
+                    )}
+                    {at > 0 && resumeAt !== at && (
+                      <button
+                        className={resumeAt >= 0 ? pathButton : pathPrimary}
+                        onClick={pathAct(() => onStartPath(path.id, term.id))}
+                      >
+                        <Play className="w-3 h-3" /> Start here
+                      </button>
+                    )}
+                    <button
+                      className={at === 0 && !entry ? pathPrimary : pathButton}
+                      onClick={pathAct(() => onStartPath(path.id, null, { restart: Boolean(entry) }))}
+                    >
+                      {entry ? <RotateCcw className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                      {entry ? 'Restart from step 1' : at === 0 ? 'Start path' : 'From step 1'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </section>
+        )}
 
         {/* Interleaved Explanation & Code Examples */}
         <div className="space-y-3 pt-1" onClick={handleContentClick}>
@@ -269,6 +445,24 @@ export default function NodeDetailPanel({
             })}
           </div>
         </div>
+
+        {/* Path mode: preview of the next step */}
+        {nextStep && (
+          <button
+            onClick={pathAct(() => onGoToStep(activeStepIndex + 1))}
+            className={`w-full text-left border p-4 space-y-1.5 transition ${
+              isDark
+                ? 'border-amber-400/30 hover:bg-amber-400/[0.06]'
+                : 'border-amber-600/30 hover:bg-amber-500/[0.07]'
+            }`}
+          >
+            <span className="text-[10px] uppercase tracking-widest opacity-60 flex items-center gap-1.5">
+              Up next · step {activeStepIndex + 2}
+            </span>
+            <span className="block text-[13px] font-semibold">{allTermsMap[nextStep.termId]?.title}</span>
+            <span className="block text-[11px] leading-relaxed opacity-75"><InlineText text={nextStep.note} isDark={isDark} /></span>
+          </button>
+        )}
 
         {/* Connected Concepts in Knowledge Graph */}
         {term.relatedIds && term.relatedIds.length > 0 && (
@@ -357,8 +551,47 @@ export default function NodeDetailPanel({
         )}
       </div>
 
+      {/* Footer: path controls on a path step */}
+      {isPathStep && (
+        <div
+          data-testid="path-controls"
+          className={`px-3 py-2.5 border-t flex items-center gap-2 ${
+            isDark ? 'border-amber-400/25 bg-[#1a1a19]/80' : 'border-amber-600/25 bg-[#dededb]/80'
+          }`}
+        >
+          <button
+            className={pathButton}
+            disabled={activeStepIndex === 0}
+            onClick={pathAct(() => onGoToStep(activeStepIndex - 1))}
+            aria-label="Previous step"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" /> Back
+          </button>
+          <button className={pathButton} onClick={pathAct(onPausePath)} title="Pause; resume any time from Paths">
+            <Pause className="w-3 h-3" /> Pause
+          </button>
+          <button
+            className={pathButton}
+            onClick={pathAct(() => onStartPath(activePath.id, null, { restart: true }))}
+            title="Restart from step 1"
+            aria-label="Restart path"
+          >
+            <RotateCcw className="w-3 h-3" />
+          </button>
+          {isLastStep ? (
+            <button className={`${pathPrimary} ml-auto`} onClick={pathAct(onFinishPath)}>
+              <Flag className="w-3 h-3" /> Finish path
+            </button>
+          ) : (
+            <button className={`${pathPrimary} ml-auto`} onClick={pathAct(() => onGoToStep(activeStepIndex + 1))}>
+              Next <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Footer / Quick Actions */}
-      <div className={`p-3.5 border-t flex items-center justify-between text-[11px] ${
+      <div className={`${isPathStep ? 'hidden' : ''} p-3.5 border-t flex items-center justify-between text-[11px] ${
         isDark ? 'border-[rgba(240,240,238,0.1)] bg-[#1a1a19]/40 opacity-70' : 'border-[rgba(26,26,25,0.1)] bg-[#dededb]/40 opacity-70'
       }`}>
         <a
