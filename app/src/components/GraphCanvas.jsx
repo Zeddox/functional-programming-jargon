@@ -21,6 +21,7 @@ export default function GraphCanvas({
   soundEnabled,
   isDark,
   isPanelOpen,
+  panelWidth = 560,
   onPointerMove
 }) {
   const canvasRef = useRef(null);
@@ -143,7 +144,7 @@ export default function GraphCanvas({
       const winW = typeof window !== 'undefined' ? window.innerWidth : 1280;
       const winH = typeof window !== 'undefined' ? window.innerHeight : 800;
       const isMobile = winW < 640;
-      const sidebarWidth = (isPanelOpen && !isMobile) ? (winW >= 1024 ? 560 : 500) : 0;
+      const sidebarWidth = (isPanelOpen && !isMobile) ? panelWidth : 0;
       const sheetHeight = (isPanelOpen && isMobile) ? winH * 0.46 : 0;
       const visibleWidth = winW - sidebarWidth;
       const visibleHeight = winH - sheetHeight;
@@ -173,7 +174,7 @@ export default function GraphCanvas({
       stateRef.current.camera.targetY = -node.y - offsetY;
       stateRef.current.camera.targetScale = targetScale;
     }
-  }, [selectedNodeId, isPanelOpen]);
+  }, [selectedNodeId, isPanelOpen, panelWidth]);
 
   // Simulation & rendering loop
   useEffect(() => {
@@ -825,8 +826,7 @@ export default function GraphCanvas({
     const targetScale = isMobile ? 0.75 : 0.95;
     let offsetX = 0;
     if (isPanelOpen && !isMobile) {
-      const sidebarWidth = winW >= 1024 ? 560 : 500;
-      offsetX = (sidebarWidth / 2) / targetScale;
+      offsetX = (panelWidth / 2) / targetScale;
     }
     let offsetY = 0;
     if (isPanelOpen && isMobile) {

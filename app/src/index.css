@@ -116,126 +116,79 @@
   user-select: text;
 }
 
-/* Prism Syntax Highlighting - Dark Theme */
-.dark pre code .token.comment,
-.dark pre code .token.prolog,
-.dark pre code .token.doctype,
-.dark pre code .token.cdata {
-  color: #64748b;
+/* Prism Syntax Highlighting - Atom One Dark (used for code in both themes) */
+.code-one-dark {
+  background: #282c34;
+  color: #abb2bf;
+}
+
+.code-one-dark .token.comment,
+.code-one-dark .token.prolog,
+.code-one-dark .token.doctype,
+.code-one-dark .token.cdata {
+  color: #5c6370;
   font-style: italic;
 }
 
-.dark pre code .token.punctuation {
-  color: #94a3b8;
+.code-one-dark .token.punctuation,
+.code-one-dark .token.parameter {
+  color: #abb2bf;
 }
 
-.dark pre code .token.property,
-.dark pre code .token.tag,
-.dark pre code .token.boolean,
-.dark pre code .token.number,
-.dark pre code .token.constant,
-.dark pre code .token.symbol {
-  color: #fb923c;
+.code-one-dark .token.keyword,
+.code-one-dark .token.atrule {
+  color: #c678dd;
 }
 
-.dark pre code .token.selector,
-.dark pre code .token.attr-name,
-.dark pre code .token.string,
-.dark pre code .token.char,
-.dark pre code .token.builtin {
-  color: #34d399;
+.code-one-dark .token.string,
+.code-one-dark .token.char,
+.code-one-dark .token.attr-value,
+.code-one-dark .token.regex,
+.code-one-dark .token.selector,
+.code-one-dark .token.inserted {
+  color: #98c379;
 }
 
-.dark pre code .token.operator,
-.dark pre code .token.entity,
-.dark pre code .token.url,
-.dark pre code .language-css .token.string,
-.dark pre code .style .token.string {
-  color: #f472b6;
+.code-one-dark .token.number,
+.code-one-dark .token.boolean,
+.code-one-dark .token.constant,
+.code-one-dark .token.attr-name {
+  color: #d19a66;
 }
 
-.dark pre code .token.atrule,
-.dark pre code .token.attr-value,
-.dark pre code .token.keyword {
-  color: #f43f5e;
-  font-weight: 600;
+.code-one-dark .token.class-name,
+.code-one-dark .token.builtin,
+.code-one-dark .token.namespace {
+  color: #e5c07b;
 }
 
-.dark pre code .token.function,
-.dark pre code .token.function-variable,
-.dark pre code .token.class-name {
-  color: #60a5fa;
-  font-weight: 600;
+.code-one-dark .token.namespace {
+  opacity: 1;
 }
 
-.dark pre code .token.regex,
-.dark pre code .token.important,
-.dark pre code .token.variable {
-  color: #c084fc;
+.code-one-dark .token.function,
+.code-one-dark .token.function-variable {
+  color: #61afef;
 }
 
-.dark pre code .token.parameter {
-  color: #f1f5f9;
+.code-one-dark .token.operator,
+.code-one-dark .token.entity,
+.code-one-dark .token.url {
+  color: #56b6c2;
 }
 
-/* Prism Syntax Highlighting - Light Theme */
-.light pre code .token.comment,
-.light pre code .token.prolog,
-.light pre code .token.doctype,
-.light pre code .token.cdata {
-  color: #64748b;
-  font-style: italic;
+.code-one-dark .token.property,
+.code-one-dark .token.tag,
+.code-one-dark .token.symbol,
+.code-one-dark .token.variable,
+.code-one-dark .token.important,
+.code-one-dark .token.deleted {
+  color: #e06c75;
 }
 
-.light pre code .token.punctuation {
-  color: #475569;
-}
-
-.light pre code .token.property,
-.light pre code .token.tag,
-.light pre code .token.boolean,
-.light pre code .token.number,
-.light pre code .token.constant,
-.light pre code .token.symbol {
-  color: #d97706;
-}
-
-.light pre code .token.selector,
-.light pre code .token.attr-name,
-.light pre code .token.string,
-.light pre code .token.char,
-.light pre code .token.builtin {
-  color: #059669;
-}
-
-.light pre code .token.operator,
-.light pre code .token.entity,
-.light pre code .token.url {
-  color: #e11d48;
-}
-
-.light pre code .token.atrule,
-.light pre code .token.attr-value,
-.light pre code .token.keyword {
-  color: #be185d;
-  font-weight: 600;
-}
-
-.light pre code .token.function,
-.light pre code .token.function-variable,
-.light pre code .token.class-name {
-  color: #2563eb;
-  font-weight: 600;
-}
-
-.light pre code .token.regex,
-.light pre code .token.important,
-.light pre code .token.variable {
-  color: #7c3aed;
-}
-
-.light pre code .token.parameter {
-  color: #0f172a;
+.code-one-dark .token.important,
+.code-one-dark .token.bold {
+  font-weight: bold;
 }
 
 /* Monospace Architectural Prose Styling for Markdown */

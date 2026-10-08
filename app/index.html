@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5" />
@@ -7,7 +7,15 @@
     <meta name="description" content="Interactive knowledge graph exploring 69 functional programming concepts, category theory morphisms, and algebraic structures with C# (language-ext) examples." />
     <meta name="keywords" content="functional programming, fp jargon, monad, functor, currying, fantasy land, category theory, javascript, hemanth" />
     <meta name="author" content="Hemanth HM" />
-    <meta name="theme-color" content="#eaeae8" />
+    <meta name="theme-color" content="#121212" />
+    <script>
+      // Dark is the default; apply a saved light preference before first paint
+      try {
+        if (localStorage.getItem('fp_theme_explicit') === 'light') {
+          document.documentElement.className = 'light';
+        }
+      } catch (e) {}
+    </script>
     <link rel="canonical" href="https://hemanth.github.io/functional-programming-jargon/" />
     
     <!-- LLM & AI Agent Discoverability -->

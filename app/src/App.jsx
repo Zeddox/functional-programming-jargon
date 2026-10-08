@@ -14,6 +14,15 @@ import {
 } from 'lucide-react';
 import { GithubIcon } from './components/Icons';
 
+// Desktop drawer sizing
+const MIN_PANEL_WIDTH = 360;
+const MIN_CANVAS_WIDTH = 520; // room for the header's logo and toolbar beside the drawer
+
+const defaultPanelWidth = (winW) => (winW >= 1024 ? 560 : 500);
+
+const clampPanelWidth = (width, winW) =>
+  Math.max(MIN_PANEL_WIDTH, Math.min(width, winW - MIN_CANVAS_WIDTH));
+
 export default function App() {
   const { meta, categories, terms, graph } = jargonsData;
   
@@ -45,15 +54,51 @@ export default function App() {
   const [useCategoryColors] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
-  // Initialize theme: check explicit preference or default to light mode
+  // Initialize theme: check explicit preference or default to dark mode
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const explicit = localStorage.getItem('fp_theme_explicit');
       if (explicit) return explicit === 'dark';
-      return false; // Default to light mode
     }
-    return false;
+    return true; // Default to dark mode
   });
+
+  // Track viewport width: the drawer is a bottom sheet below the sm breakpoint
+  const [windowWidth, setWindowWidth] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth : 1280
+  );
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  const isMobile = windowWidth < 640;
+
+  // Desktop drawer width: user-resizable and remembered across visits
+  const [preferredPanelWidth, setPreferredPanelWidth] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = Number(localStorage.getItem('fp_panel_width'));
+      if (saved) return saved;
+    }
+    return null; // null = responsive default
+  });
+  const [isResizingPanel, setIsResizingPanel] = useState(false);
+  const panelWidth = clampPanelWidth(
+    preferredPanelWidth ?? defaultPanelWidth(windowWidth),
+    windowWidth
+  );
+
+  const handlePanelResize = (width) => {
+    const next = width === null ? null : clampPanelWidth(width, window.innerWidth);
+    setPreferredPanelWidth(next);
+    if (next === null) localStorage.removeItem('fp_panel_width');
+    else localStorage.setItem('fp_panel_width', String(Math.round(next)));
+  };
+
+  // Width the drawer actually covers on the right edge of the screen
+  const panelInset = isPanelOpen && !isMobile ? panelWidth : 0;
+  // On narrow screens even the smallest drawer leaves no room for the logo
+  const isHeaderCramped = panelInset > 0 && windowWidth - panelInset < MIN_CANVAS_WIDTH;
 
   // Map of terms by id for instant lookup
   const allTermsMap = useMemo(() => {
@@ -152,9 +197,15 @@ export default function App() {
       }`} />
 
       {/* Floating Transparent Header (No solid bar, fully transparent background & borderless) */}
-      <header className="relative z-30 px-4 sm:px-6 py-3 bg-transparent border-none flex items-center justify-between gap-4 pointer-events-auto">
+      {/* The right padding tracks the open drawer so the toolbar slides over with it */}
+      <header
+        className={`relative z-30 px-4 sm:px-6 py-3 bg-transparent border-none flex items-center justify-between gap-4 pointer-events-auto ${
+          isResizingPanel ? '' : 'transition-[padding] duration-300 ease-[var(--ease-out-expo)]'
+        }`}
+        style={panelInset ? { paddingRight: panelInset + 24 } : undefined}
+      >
         {/* Logo / Brand */}
-        <div className="flex items-center gap-3">
+        <div className={`items-center gap-3 ${isHeaderCramped ? 'hidden' : 'flex'}`}>
           <div className={`w-7 h-7 border flex items-center justify-center font-mono font-bold text-sm shadow-sm ${
             isDark
               ? 'bg-[#1a1a19] border-[rgba(240,240,238,0.2)] text-[#f0f0ee]'
@@ -182,7 +233,7 @@ export default function App() {
         </div>
 
         {/* Right Toolbar Controls */}
-        <div className="flex items-center gap-1.5 text-xs">
+        <div className="ml-auto flex items-center gap-1.5 text-xs">
           {/* Tiny Search Button */}
           <button
             onClick={() => {
@@ -293,6 +344,7 @@ export default function App() {
           soundEnabled={soundEnabled}
           isDark={isDark}
           isPanelOpen={isPanelOpen}
+          panelWidth={panelWidth}
         />
       </main>
 
@@ -307,6 +359,10 @@ export default function App() {
           soundEnabled={soundEnabled}
           useCategoryColors={useCategoryColors}
           isDark={isDark}
+          width={panelWidth}
+          onResize={handlePanelResize}
+          isResizing={isResizingPanel}
+          onResizingChange={setIsResizingPanel}
         />
       )}
 

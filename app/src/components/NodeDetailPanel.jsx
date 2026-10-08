@@ -28,7 +28,11 @@ export default function NodeDetailPanel({
   onClose,
   soundEnabled,
   useCategoryColors,
-  isDark
+  isDark,
+  width,
+  onResize,
+  isResizing,
+  onResizingChange
 }) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -108,16 +112,69 @@ export default function NodeDetailPanel({
     }
   };
 
+  // Drag the left edge to resize the desktop drawer
+  const handleResizeStart = (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const handle = e.currentTarget;
+    handle.setPointerCapture(e.pointerId);
+    onResizingChange(true);
+
+    const handleMove = (ev) => onResize(window.innerWidth - ev.clientX);
+    const handleEnd = () => {
+      handle.removeEventListener('pointermove', handleMove);
+      handle.removeEventListener('pointerup', handleEnd);
+      handle.removeEventListener('pointercancel', handleEnd);
+      onResizingChange(false);
+    };
+    handle.addEventListener('pointermove', handleMove);
+    handle.addEventListener('pointerup', handleEnd);
+    handle.addEventListener('pointercancel', handleEnd);
+  };
+
+  const handleResizeKey = (e) => {
+    const step = e.shiftKey ? 64 : 16;
+    if (e.key === 'ArrowLeft') onResize(width + step);
+    else if (e.key === 'ArrowRight') onResize(width - step);
+    else return;
+    e.preventDefault();
+  };
+
   return (
     <aside
-      className={`fixed inset-x-0 bottom-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:top-0 w-full sm:w-[500px] lg:w-[560px] ${
+      style={{ '--panel-w': `${width}px` }}
+      className={`fixed inset-x-0 bottom-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:top-0 w-full sm:w-[var(--panel-w)] ${
         isExpanded ? 'h-[85vh]' : 'h-[46vh]'
-      } sm:h-full rounded-t-2xl sm:rounded-none backdrop-blur-md border-t sm:border-t-0 sm:border-l z-50 flex flex-col font-mono shadow-2xl transition-all duration-300 ease-[var(--ease-out-expo)] ${
+      } sm:h-full rounded-t-2xl sm:rounded-none backdrop-blur-md border-t sm:border-t-0 sm:border-l z-50 flex flex-col font-mono shadow-2xl ${
+        isResizing ? 'select-none' : 'transition-all duration-300 ease-[var(--ease-out-expo)]'
+      } ${
         isDark
           ? 'bg-[#121212]/95 border-[rgba(240,240,238,0.15)] text-[#f0f0ee]'
           : 'bg-[#eaeae8]/98 border-[rgba(26,26,25,0.15)] text-[#1a1a19]'
       }`}
     >
+      {/* Desktop Resize Handle (drag, arrow keys, or double-click to reset) */}
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize panel"
+        aria-valuenow={Math.round(width)}
+        tabIndex={0}
+        title="Drag to resize · double-click to reset"
+        onPointerDown={handleResizeStart}
+        onKeyDown={handleResizeKey}
+        onDoubleClick={() => onResize(null)}
+        className="group hidden sm:block absolute inset-y-0 -left-1.5 w-3 z-10 cursor-col-resize touch-none focus:outline-none"
+      >
+        <div className={`absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 transition-colors ${
+          isResizing
+            ? (isDark ? 'bg-[#f0f0ee]/50' : 'bg-[#1a1a19]/50')
+            : (isDark
+              ? 'bg-transparent group-hover:bg-[#f0f0ee]/30 group-focus-visible:bg-[#f0f0ee]/50'
+              : 'bg-transparent group-hover:bg-[#1a1a19]/30 group-focus-visible:bg-[#1a1a19]/50')
+        }`} />
+      </div>
+
       {/* Mobile Swipe / Tap Grab Handle */}
       <div
         className="sm:hidden flex flex-col items-center justify-center pt-2.5 pb-1 cursor-pointer select-none"
