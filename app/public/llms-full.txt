@@ -1,6 +1,6 @@
 # FP Jargon - Full Reference
 
-> Complete catalog of 87 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
+> Complete catalog of 135 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
 > Source: https://github.com/hemanth/functional-programming-jargon
 > Live app: https://hemanth.github.io/functional-programming-jargon/
 
@@ -27,12 +27,54 @@ Func<int> zero = () => 0;
 
 ---
 
+## First-Class Function
+
+- Category: Core Functions
+- ID: #first-class-function
+- Aliases: first-class functions, functions as values, delegate, func, method group, function value
+- Related concepts: #higher-order-functions-hof, #closure, #value, #function-composition, #currying
+
+### Definition
+A language has first-class functions when functions are values like any other: they can be stored in variables and collections, passed as arguments and returned as results. In C# that value is a delegate, usually a Func<...> (or an Action<...> when nothing is returned), and a lambda is the usual way to write one.
+
+### Code Examples
+
+```csharp
+// Stored in a variable
+Func<int, int> square = x => x * x;
+
+// Stored in a collection
+var ops = new Dictionary<string, Func<int, int, int>>
+{
+    ["+"] = (a, b) => a + b,
+    ["*"] = (a, b) => a * b,
+};
+
+// Passed in, and returned
+Func<int, int> Twice(Func<int, int> f) => x => f(f(x));
+
+var twelve = ops["*"](3, 4);    // => 12
+var eightyOne = Twice(square)(3); // => 81
+```
+
+```csharp
+int Increment(int x) => x + 1;
+
+var inc = Increment;          // a method group converted to Func<int, int>
+Func<double, double> abs = Math.Abs; // Math.Abs is overloaded, so the type is needed
+
+var three = inc(2);    // => 3
+var two = abs(-2.0);   // => 2
+```
+
+---
+
 ## Higher-Order Functions (HOF)
 
 - Category: Core Functions
 - ID: #higher-order-functions-hof
 - Aliases: hof, higher order function
-- Related concepts: #partial-application, #point-free-style, #functional-combinator, #closure, #predicate, #function-composition, #continuation, #trampoline
+- Related concepts: #partial-application, #point-free-style, #functional-combinator, #closure, #predicate, #function-composition, #continuation, #trampoline, #first-class-function, #declarative-programming, #pipe
 
 ### Definition
 A function which takes a function as an argument and/or returns a function.
@@ -58,7 +100,7 @@ Filter(Is<int>(), new object?[] { 0, "1", 2, null }); // => [0, 2]
 
 - Category: Core Functions
 - ID: #closure
-- Related concepts: #lambda, #higher-order-functions-hof
+- Related concepts: #lambda, #higher-order-functions-hof, #free-and-bound-variables, #first-class-function
 
 ### Definition
 A closure is a scope which captures local variables of a function for access even after the execution has moved out of the block in which it is defined. This allows the values in the closure to be accessed by returned functions.
@@ -113,7 +155,7 @@ add1More(4); // => 9
 - Category: Composition & Flow
 - ID: #currying
 - Aliases: curried
-- Related concepts: #partial-application, #arity, #auto-currying, #point-free-style, #constant-function
+- Related concepts: #partial-application, #arity, #auto-currying, #point-free-style, #lambda-calculus, #adjunction, #first-class-function, #constant-function
 
 ### Definition
 The process of converting a function that takes multiple arguments into a function that takes them one at a time.
@@ -161,7 +203,7 @@ uncurry(curriedAdd)(1, 2);  // => 3
 
 - Category: Composition & Flow
 - ID: #function-composition
-- Related concepts: #point-free-style, #category, #higher-order-functions-hof, #lens, #semigroupoid
+- Related concepts: #point-free-style, #category, #higher-order-functions-hof, #lens, #semigroupoid, #first-class-function, #pipe, #arrow
 
 ### Definition
 The act of putting two functions together to form a third function where the output of one function is the input of the other. This is one of the most important ideas of functional programming.
@@ -185,11 +227,53 @@ floorThenToString(121.212121); // => "121"
 
 ---
 
+## Pipe
+
+- Category: Composition & Flow
+- ID: #pipe
+- Aliases: pipe operator, |>, forward application, forward composition, method chaining, pipeline, fluent
+- Related concepts: #function-composition, #point-free-style, #higher-order-functions-hof
+
+### Definition
+Piping passes a value through a series of functions, written in the order they run. F# has an operator for it, |>, so x |> f |> g means g(f(x)): the data flows left to right instead of being read inside out.
+
+### Code Examples
+
+```text
+// F#
+// trim, length and isEven are the functions defined below
+"  code " |> trim |> length |> isEven   // true
+```
+
+```csharp
+Func<string, string> trim = s => s.Trim();
+Func<string, int> length = s => s.Length;
+Func<int, bool> isEven = n => n % 2 == 0;
+
+// Pipe a value through the functions, left to right
+var piped = Pure("  code ") >> trim >> length >> isEven >> lower; // => true
+
+// Compose the functions first, then call the result
+var trimmedLengthIsEven = trim >> length >> isEven;
+trimmedLengthIsEven(" hello "); // => false
+```
+
+```csharp
+var result = "  code ".Pipe(s => s.Trim()).Pipe(s => s.Length); // => 4
+
+static class PipeExtensions
+{
+    public static B Pipe<A, B>(this A value, Func<A, B> f) => f(value);
+}
+```
+
+---
+
 ## Continuation
 
 - Category: Composition & Flow
 - ID: #continuation
-- Related concepts: #higher-order-functions-hof, #trampoline, #algebraic-effects
+- Related concepts: #higher-order-functions-hof, #trampoline, #algebraic-effects, #continuation-passing-style, #continuation-monad
 
 ### Definition
 At any given point in a program, the part of the code that's yet to be executed is known as a continuation.
@@ -231,6 +315,35 @@ async Task ReadAndContinue(string path)
 
 ---
 
+## Continuation-Passing Style
+
+- Category: Composition & Flow
+- ID: #continuation-passing-style
+- Aliases: cps, continuation passing, callback, direct style
+- Related concepts: #tail-call, #continuation, #continuation-monad, #trampoline
+
+### Definition
+A way of writing functions in which they never return a result. Instead, each takes an extra argument, its continuation: a function to call with the result, which stands for "the rest of the program". Code written normally is said to be in direct style.
+
+### Code Examples
+
+```csharp
+// Direct style
+int Factorial(int n) => n == 0 ? 1 : n * Factorial(n - 1);
+
+// Continuation-passing style: the result goes to k
+R FactorialK<R>(int n, Func<int, R> k) =>
+    n == 0
+        ? k(1)
+        : FactorialK(n - 1, r => k(n * r)); // "when you have (n - 1)!, multiply by n, then carry on with k"
+
+Factorial(5);                          // => 120
+FactorialK(5, r => r);                 // => 120
+FactorialK(5, r => $"5! is {r}");      // => "5! is 120"
+```
+
+---
+
 ## IO
 
 - Category: Effects
@@ -257,12 +370,79 @@ formatted.Run(); // => "tick 2"
 
 ---
 
+## Recursion
+
+- Category: Core Functions
+- ID: #recursion
+- Aliases: recursive function, base case, structural recursion, self-reference
+- Related concepts: #fixed-point-combinator, #tail-call, #trampoline, #catamorphism, #anamorphism, #foldable
+
+### Definition
+A function is recursive when it is defined in terms of itself. Every recursive function needs a base case, which answers directly, and a recursive case, which reduces the problem to a smaller one of the same shape and calls itself on that.
+
+### Code Examples
+
+```csharp
+int Sum(Seq<int> xs) =>
+    xs.IsEmpty
+        ? 0                     // base case
+        : xs[0] + Sum(xs.Tail); // recursive case on a smaller sequence
+
+Sum(Seq(1, 2, 3, 4)); // => 10
+```
+
+```csharp
+int Depth(Tree t) => t switch
+{
+    Leaf => 0,
+    Node n => 1 + Math.Max(Depth(n.Left), Depth(n.Right)),
+    _ => throw new InvalidOperationException()
+};
+
+var tree = new Node(new Node(new Leaf(), new Leaf()), new Leaf());
+Depth(tree); // => 2
+
+abstract record Tree;
+record Leaf : Tree;
+record Node(Tree Left, Tree Right) : Tree;
+```
+
+---
+
+## Tail Call
+
+- Category: Core Functions
+- ID: #tail-call
+- Aliases: tail call optimisation, tco, tail recursion, tail position, stack overflow
+- Related concepts: #recursion, #trampoline, #continuation-passing-style
+
+### Definition
+A call is in tail position when it is the very last thing a function does, so its result is returned as is. Sum from Recursion is not tail recursive, because it still has to add xs[0] after the recursive call returns. Carrying the running total in an accumulator puts the recursive call in tail position:
+
+### Code Examples
+
+```csharp
+int Sum(Seq<int> xs, int acc) =>
+    xs.IsEmpty
+        ? acc
+        : Sum(xs.Tail, acc + xs[0]); // nothing left to do after this call
+
+Sum(Seq(1, 2, 3, 4), 0); // => 10
+```
+
+```text
+// F#: compiled to a loop, so a million iterations is fine
+let rec sum n acc = if n = 0 then acc else sum (n - 1) (acc + n)
+```
+
+---
+
 ## Trampoline
 
 - Category: Core Functions
 - ID: #trampoline
 - Aliases: thunk loop, tail recursion optimization
-- Related concepts: #higher-order-functions-hof, #continuation, #thunk
+- Related concepts: #higher-order-functions-hof, #continuation, #thunk, #recursion, #tail-call, #continuation-passing-style
 
 ### Definition
 A mechanism that enables deep or mutually recursive functions to run without exceeding the maximum call stack limit.
@@ -287,7 +467,7 @@ SumBelow(1_000_000, 0).Run(); // => 500000500000
 - Category: Core Functions
 - ID: #thunk
 - Aliases: deferred computation, nullary function, lazy thunk
-- Related concepts: #lazy-evaluation, #trampoline, #io
+- Related concepts: #lazy-evaluation, #trampoline, #io, #reduction-strategy, #eager-evaluation
 
 ### Definition
 A nullary function (a function taking zero arguments) that wraps an expression to delay its evaluation until called. Thunks are the fundamental mechanism for implementing lazy evaluation, trampolines, and deferred side effects.
@@ -355,12 +535,45 @@ var log = handler.Logged;
 
 ---
 
+## Declarative Programming
+
+- Category: Core Functions
+- ID: #declarative-programming
+- Aliases: declarative, imperative, what not how, query syntax
+- Related concepts: #higher-order-functions-hof, #pure-function, #monad-comprehension
+
+### Definition
+A style of programming that describes what result you want rather than how to compute it step by step. Its opposite is imperative programming, which spells out the steps: create a variable, loop, test, mutate. SQL, regular expressions and LINQ are declarative; a for loop is imperative.
+
+### Code Examples
+
+```csharp
+var numbers = Seq(1, 2, 3, 4, 5, 6);
+
+// Imperative: how to build the result, one mutation at a time
+var squares = new List<int>();
+foreach (var n in numbers)
+{
+    if (n % 2 == 0)
+        squares.Add(n * n);
+}
+var imperative = squares; // => [4, 16, 36]
+
+// Declarative: what the result is
+numbers.Filter(n => n % 2 == 0).Map(n => n * n); // => [4, 16, 36]
+
+// The same with LINQ query syntax
+var evensSquared = from n in numbers where n % 2 == 0 select n * n; // => [4, 16, 36]
+```
+
+---
+
 ## Pure Function
 
 - Category: Core Functions
 - ID: #pure-function
 - Aliases: deterministic function, purity
-- Related concepts: #side-effects, #referential-transparency, #idempotence, #equational-reasoning, #function, #lazy-evaluation, #lens, #memoization, #either
+- Related concepts: #side-effects, #referential-transparency, #idempotence, #equational-reasoning, #function, #lazy-evaluation, #lens, #memoization, #beta-reduction, #declarative-programming, #immutability, #property-based-testing, #either
 
 ### Definition
 A function is pure if the return value is only determined by its input values, and does not produce side effects. The function must always return the same result when given the same input.
@@ -394,11 +607,58 @@ var result = greeting; // => "Hi, Brianne"
 
 ---
 
+## Immutability
+
+- Category: Purity & Reasoning
+- ID: #immutability
+- Aliases: immutable, immutable data, persistent data structure, records, with expression, init-only, shallow immutability
+- Related concepts: #referential-transparency, #side-effects, #pure-function, #linear-type, #zipper
+
+### Definition
+A value is immutable when it can't change after it has been created. To "change" it, you make a new value with the difference, and the old one stays as it was. Code that holds a reference to it can rely on that, so immutable values can be shared freely, between methods or threads, without defensive copies. Immutability is what makes referential transparency possible: a function can't have the side effect of modifying a value nobody can modify.
+
+### Code Examples
+
+```csharp
+var ada = new Person("Ada", 36);
+var older = ada with { Age = 37 };
+
+// ada.Age = 37;  // compile error: Age is init-only
+var before = ada;  // => Person { Name = Ada, Age = 36 }
+var after = older; // => Person { Name = Ada, Age = 37 }
+
+record Person(string Name, int Age);
+```
+
+```csharp
+var core = new Team("Core", new List<string> { "Ada" });
+var platform = core with { Name = "Platform" };
+
+core.Members.Add("Grace");
+var members = platform.Members; // => ["Ada", "Grace"]
+
+record Team(string Name, List<string> Members);
+```
+
+```csharp
+var xs = Seq(1, 2, 3);
+var ys = xs.Add(4);
+var unchanged = xs; // => [1, 2, 3]
+var extended = ys;  // => [1, 2, 3, 4]
+
+var stock = Map(("apples", 3), ("pears", 5));
+var sold = stock.SetItem("apples", 2);
+var stillThree = stock.Find("apples"); // => Some(3)
+var nowTwo = sold.Find("apples");      // => Some(2)
+```
+
+---
+
 ## Side effects
 
 - Category: Purity & Reasoning
 - ID: #side-effects
-- Related concepts: #pure-function, #fallible, #state-monad, #io, #algebraic-effects, #memoization, #function
+- Related concepts: #pure-function, #fallible, #state-monad, #io, #algebraic-effects, #eager-evaluation, #immutability, #linear-type, #memoization, #function
 
 ### Definition
 A function or expression is said to have a side effect if apart from returning a value, it interacts with (reads from or writes to) external mutable state.
@@ -443,7 +703,7 @@ Sort(Sort(Sort(Seq(2, 1)))); // => [1, 2]
 - Category: Composition & Flow
 - ID: #point-free-style
 - Aliases: tacit programming, tacit, point-free, pointfree
-- Related concepts: #currying, #function-composition, #higher-order-functions-hof, #functional-combinator
+- Related concepts: #currying, #function-composition, #higher-order-functions-hof, #functional-combinator, #eta-conversion, #combinatory-logic, #pipe
 
 ### Definition
 Writing functions where the definition does not explicitly identify the arguments used. This style usually requires currying or other Higher-Order functions. A.K.A Tacit programming.
@@ -473,7 +733,7 @@ incrementAll2(Seq(1, 2, 3)); // => [2, 3, 4]
 
 - Category: Core Functions
 - ID: #predicate
-- Related concepts: #higher-order-functions-hof, #contravariant-functor
+- Related concepts: #higher-order-functions-hof, #contravariant-functor, #refinement-type
 
 ### Definition
 A predicate is a function that returns true or false for a given value. A common use of a predicate is as the callback for filtering a collection.
@@ -520,7 +780,7 @@ AddOne(-1); // => Fail(Contract violated: expected a non-negative int)
 
 - Category: Category & Morphisms
 - ID: #category
-- Related concepts: #morphism, #function-composition, #natural-transformation, #semigroupoid
+- Related concepts: #morphism, #function-composition, #natural-transformation, #semigroupoid, #kleisli-category, #functor-category, #initial-and-terminal-objects, #arrow, #endofunctor, #monoidal-category
 
 ### Definition
 A category in category theory is a collection of objects and morphisms between them. In programming, typically types act as the objects and functions as morphisms.
@@ -566,7 +826,7 @@ loudGreeting("hello"); // => "HELLO!"
 
 - Category: Purity & Reasoning
 - ID: #value
-- Related concepts: #constant, #io
+- Related concepts: #constant, #first-class-function, #io
 
 ### Definition
 Anything that can be assigned to a variable.
@@ -683,27 +943,76 @@ record Constant<C, A>(C Value)
 
 ---
 
+## Laws
+
+- Category: Algebraic Structures
+- ID: #laws
+- Aliases: type class laws, functor laws, monad laws, monoid laws, lawful instance
+- Related concepts: #property-based-testing, #type-class, #functor, #monad, #equational-reasoning, #monoid
+
+### Definition
+The equations that every instance of a type class must satisfy, so that generic code written against the type class can rely on them. A functor must map the identity function to itself and preserve composition; a monad must treat Pure as an identity for Bind and bind associatively; a monoid must have an identity element and an associative Combine. The type class interface only fixes the signatures: the C# compiler checks that Map or Combine exists and has the right type, never that it obeys the laws.
+
+### Code Examples
+
+```csharp
+Func<int, Option<int>> half = x => x % 2 == 0 ? Some(x / 2) : None;
+Func<int, Option<int>> dec  = x => x > 0 ? Some(x - 1) : None;
+Func<int, int> inc = x => x + 1;
+Func<int, int> dbl = x => x * 2;
+var m = Some(8);
+
+// Functor: identity and composition
+var fId   = m.Map(x => x) == m;                         // => true
+var fComp = m.Map(x => dbl(inc(x))) == m.Map(inc).Map(dbl); // => true
+
+// Monad: left identity, right identity and associativity
+var leftId  = Some(8).Bind(half) == half(8);            // => true
+var rightId = m.Bind(x => Some(x)) == m;                // => true
+var assoc   = m.Bind(half).Bind(dec) == m.Bind(x => half(x).Bind(dec)); // => true
+
+// Monoid: Seq with concatenation and the empty Seq
+var xs = Seq(1, 2);
+var mId    = xs + Seq<int>() == xs && Seq<int>() + xs == xs; // => true
+var mAssoc = (xs + Seq(3)) + Seq(4) == xs + (Seq(3) + Seq(4)); // => true
+```
+
+```csharp
+var lawful = new BadMax(-5).Combine(BadMax.Empty) == new BadMax(-5); // => false
+
+// So folding a list of negative numbers invents a maximum that isn't in the list
+Monoid.combine(Seq(new BadMax(-5), new BadMax(-3))); // => BadMax { Value = 0 }
+
+record BadMax(int Value) : Monoid<BadMax>
+{
+    public static BadMax Empty => new(0); // should be int.MinValue
+    public BadMax Combine(BadMax rhs) => Value >= rhs.Value ? this : rhs;
+}
+```
+
+---
+
 ## Functor
 
 - Category: Algebraic Structures
 - ID: #functor
 - Aliases: map, mappable
-- Related concepts: #pointed-functor, #applicative-functor, #lift, #parametricity, #type-class, #higher-kinded-type, #traversable, #bifunctor, #contravariant-functor, #natural-transformation, #free-monad, #constant-functor, #option, #monad, #monad-transformer, #sum-type
+- Related concepts: #pointed-functor, #applicative-functor, #lift, #parametricity, #type-class, #higher-kinded-type, #traversable, #bifunctor, #contravariant-functor, #natural-transformation, #free-monad, #variance, #endofunctor, #functor-category, #adjunction, #yoneda-lemma, #laws, #monoidal-functor, #constant-functor, #option, #monad, #monad-transformer, #sum-type
 
 ### Definition
 An object that implements a map function that takes a function which is run on the contents of that object. A functor must adhere to two rules:
 
 ### Code Examples
 
-```csharp
+```text
 fa.Map(x => x)
 ```
 
-```csharp
+```text
 fa.Map(x => g(f(x)))
 ```
 
-```csharp
+```text
 fa.Map(f).Map(g)
 ```
 
@@ -725,6 +1034,43 @@ K<F, string> Describe<F>(K<F, int> fa) where F : Functor<F> =>
 
 Describe(Some(1));          // => Some(got 1)
 Describe(Seq(1, 2));        // => [got 1, got 2]
+```
+
+---
+
+## Endofunctor
+
+- Category: Category & Morphisms
+- ID: #endofunctor
+- Aliases: endo functor, monoid in the category of endofunctors, join, flatten
+- Related concepts: #functor, #monad, #monoid, #endomorphism, #category, #functor-category
+
+### Definition
+A functor that maps a category back into the same category. "Endo" means "within", as in endomorphism. In programming, the category is usually "C# types and the functions between them", and a functor such as Option sends every type A to another C# type Option<A> and every function A -> B to a function Option<A> -> Option<B> (that is what Map does). Both ends are still C# types and functions, so it never leaves the category: every language-ext Functor (Option, Seq, Either<L>, ...) is an endofunctor.
+
+### Code Examples
+
+```csharp
+// One generic function, any endofunctor on C# types
+K<F, string> Label<F>(K<F, int> fa) where F : Functor<F> =>
+    fa.Map(n => $"#{n}");
+
+Label(Some(7));                  // => Some(#7)
+Label(Seq(1, 2));                // => [#1, #2]
+Label(Right<string, int>(3));    // => Right(#3)
+```
+
+```csharp
+var three = Some(Some(Some(3)));
+
+// Associativity: outer pair first, or inner pair first
+var outerFirst = three.Flatten().Flatten();              // => Some(3)
+var innerFirst = three.Map(o => o.Flatten()).Flatten();  // => Some(3)
+
+// Identity: an extra Pure layer, outside or inside, flattens away
+var x = Some(5);
+var pureOutside = Some(x).Flatten();                     // => Some(5)
+var pureInside  = x.Map(a => Some(a)).Flatten();         // => Some(5)
 ```
 
 ---
@@ -791,7 +1137,7 @@ pure<Seq, int>(1); // => [1]
 - Category: Purity & Reasoning
 - ID: #referential-transparency
 - Aliases: referential transparent, substitution model
-- Related concepts: #pure-function, #equational-reasoning, #constant, #memoization, #function
+- Related concepts: #pure-function, #equational-reasoning, #constant, #memoization, #beta-reduction, #immutability, #function
 
 ### Definition
 An expression that can be replaced with its value without changing the behavior of the program is said to be referentially transparent.
@@ -811,7 +1157,7 @@ Greet(); // => "Hello World!"
 - Category: Purity & Reasoning
 - ID: #equational-reasoning
 - Aliases: algebraic reasoning
-- Related concepts: #pure-function, #referential-transparency
+- Related concepts: #pure-function, #referential-transparency, #beta-reduction, #property-based-testing, #laws
 
 ### Definition
 When an application is composed of expressions and devoid of side effects, truths about the system can be derived from the parts. You can also be confident about details of your system without having to go through every function.
@@ -828,6 +1174,50 @@ var grainToDogs = compose(grainIntoChicken, chickenIntoDogs);
 var grainToCats = compose(grainToDogs, dogsIntoCats);
 
 grainToCats("grain"); // => "cats(dogs(chicken(grain)))"
+```
+
+---
+
+## Property-Based Testing
+
+- Category: Purity & Reasoning
+- ID: #property-based-testing
+- Aliases: property testing, property-based tests, quickcheck, cscheck, fscheck, generative testing, shrinking, counterexample, pbt
+- Related concepts: #laws, #pure-function, #equational-reasoning, #monoid
+
+### Definition
+Testing that a property holds for many generated inputs, instead of checking a handful of examples by hand. You state something that should be true for every input ("reversing a list twice gives back the list"), and a library generates hundreds of random inputs to try to prove you wrong. When one fails, the library shrinks it: it searches for smaller inputs that still fail, and reports the smallest one it finds, which is usually much easier to debug than the random input that first failed. The idea comes from Haskell's QuickCheck; in .NET, the main libraries are CsCheck and FsCheck.
+
+### Code Examples
+
+```csharp
+using CsCheck;
+
+string Outcome(Action test)
+{
+    try { test(); return "passed"; }
+    catch (CsCheckException e) { return "failed on " + e.Message.Split('\n').Last().Trim(); }
+}
+
+// Reversing twice is the identity
+var reverse = Outcome(() => Gen.Int.Array
+    .Sample(xs => xs.Reverse().Reverse().SequenceEqual(xs))); // => "passed"
+
+// The Monoid laws for string concatenation: associative, with "" as identity
+var associative = Outcome(() => Gen.Select(Gen.String, Gen.String, Gen.String)
+    .Sample((a, b, c) => a + (b + c) == (a + b) + c)); // => "passed"
+var identity = Outcome(() => Gen.String
+    .Sample(s => "" + s == s && s + "" == s)); // => "passed"
+```
+
+```csharp
+// Bug: only removes adjacent duplicates
+int[] Dedupe(int[] xs) => xs.Where((x, i) => i == 0 || xs[i - 1] != x).ToArray();
+
+var noDuplicates = Outcome(() => Gen.Int[0, 1].Array
+    .Sample(xs => Dedupe(xs).Distinct().Count() == Dedupe(xs).Length, iter: 100_000));
+// noDuplicates typically shrinks to "failed on [0, 1, 0]", but shrinking is randomised, so check just the outcome:
+var failed = noDuplicates.StartsWith("failed on"); // => true
 ```
 
 ---
@@ -876,7 +1266,7 @@ var computed = calls; // => 5
 - Category: Core Functions
 - ID: #lambda
 - Aliases: anonymous function, arrow function
-- Related concepts: #function, #closure, #lambda-calculus
+- Related concepts: #function, #closure, #lambda-calculus, #expression-tree, #type-inference
 
 ### Definition
 An anonymous function that can be treated like a value.
@@ -905,12 +1295,360 @@ add1(2); // => 3
 
 ## Lambda Calculus
 
-- Category: Types & Data Modeling
+- Category: Lambda Calculus
 - ID: #lambda-calculus
-- Related concepts: #lambda
+- Aliases: λ-calculus, untyped lambda calculus, alonzo church, abstraction, application
+- Related concepts: #lambda, #currying, #beta-reduction, #church-encoding, #combinatory-logic, #fixed-point-combinator
 
 ### Definition
-A branch of mathematics that uses functions to create a universal model of computation.
+A branch of mathematics that uses functions to create a universal model of computation. Alonzo Church introduced it in the 1930s, and it is the theory underneath every functional language (and underneath C#'s lambdas, which are named after it). The whole language has only three kinds of term:
+
+### Code Examples
+
+```text
+x          a variable
+λx. M      an abstraction: a function with parameter x and body M
+M N        an application: call the function M with the argument N
+```
+
+```csharp
+// λx. x
+Func<int, int> identity = x => x;
+
+// λx. λy. x  (two arguments, curried)
+Func<int, Func<int, int>> first = x => y => x;
+
+// (λx. λy. x) 1 2
+var result = first(1)(2); // => 1
+```
+
+---
+
+## Free and Bound Variables
+
+- Category: Lambda Calculus
+- ID: #free-and-bound-variables
+- Aliases: free variable, bound variable, closed term, open term, variable capture
+- Related concepts: #closure, #functional-combinator, #alpha-conversion, #beta-reduction
+
+### Definition
+A variable is bound in a term if it is the parameter of an enclosing abstraction, and free otherwise. In λx. x y, x is bound by the λx and y is free: the term alone doesn't say what y is. A term with no free variables is called closed, and a closed term is also called a combinator (see Functional Combinator).
+
+### Code Examples
+
+```text
+λx. x y          x is bound, y is free
+λx. λy. x y      closed: both are bound
+(λx. x) x        the first x is bound, the last one is free (a different x)
+```
+
+```csharp
+var y = 10;
+
+// x is bound (a parameter); y is free (captured from the enclosing scope)
+Func<int, int> addY = x => x + y;
+
+var result = addY(1); // => 11
+```
+
+---
+
+## Alpha Conversion
+
+- Category: Lambda Calculus
+- ID: #alpha-conversion
+- Aliases: α-conversion, alpha equivalence, alpha renaming, capture-avoiding substitution, renaming
+- Related concepts: #free-and-bound-variables, #beta-reduction
+
+### Definition
+Renaming a bound variable, everywhere it is bound, doesn't change what a function means. λx. x and λy. y are both the identity function, and are called alpha-equivalent. The one rule is that the new name must not already be free in the body, or it would be captured:
+
+### Code Examples
+
+```text
+λx. x y    ≡    λz. z y      fine
+λx. x y    ≢    λy. y y      wrong: the free y has been captured
+```
+
+```text
+(λx. λy. x) y
+= (λx. λz. x) y      alpha: rename the bound y to z
+→ λz. y              beta: a constant function returning the free y
+```
+
+```csharp
+Func<int, int> f = x => x * 2;
+Func<int, int> g = n => n * 2;
+
+var same = f(21) == g(21); // => true
+```
+
+---
+
+## Beta Reduction
+
+- Category: Lambda Calculus
+- ID: #beta-reduction
+- Aliases: β-reduction, substitution, redex, normal form, omega
+- Related concepts: #lambda-calculus, #alpha-conversion, #equational-reasoning, #referential-transparency, #pure-function, #reduction-strategy, #free-and-bound-variables
+
+### Definition
+The one computation rule of the lambda calculus: applying a function to an argument is done by substituting the argument for the parameter in the function's body. (λx. M) N reduces to M with every free x replaced by N, written M[x := N]. A term with nothing left to reduce is in normal form.
+
+### Code Examples
+
+```text
+(λx. λy. x) a b
+→ (λy. a) b          substitute a for x
+→ a                  substitute b for y (y doesn't appear)
+```
+
+```text
+(λx. x x) (λx. x x)
+→ (λx. x x) (λx. x x)
+→ ...
+```
+
+```csharp
+Func<int, int> square = x => x * x;
+
+var called = square(3 + 1);           // => 16
+var substituted = (3 + 1) * (3 + 1);  // => 16
+```
+
+---
+
+## Eta Conversion
+
+- Category: Lambda Calculus
+- ID: #eta-conversion
+- Aliases: η-conversion, eta reduction, eta expansion, method group, extensionality
+- Related concepts: #point-free-style, #fixed-point-combinator
+
+### Definition
+A function that only passes its argument on to another function is the same as that other function: λx. f x is equivalent to f, provided x isn't free in f. Removing the wrapper is eta reduction; adding one is eta expansion.
+
+### Code Examples
+
+```text
+λx. f x    ≡    f
+```
+
+```csharp
+int Increment(int x) => x + 1;
+
+var etaExpanded = Seq(1, 2, 3).Map(x => Increment(x)); // => [2, 3, 4]
+var etaReduced = Seq(1, 2, 3).Map(Increment);          // => [2, 3, 4]
+```
+
+---
+
+## Reduction Strategy
+
+- Category: Lambda Calculus
+- ID: #reduction-strategy
+- Aliases: evaluation strategy, normal order, applicative order, call-by-name, call-by-value, call-by-need, church-rosser
+- Related concepts: #beta-reduction, #lazy-evaluation, #eager-evaluation, #thunk
+
+### Definition
+When a term has more than one reducible call, a reduction strategy decides which to reduce first. The two classic ones:
+
+### Code Examples
+
+```text
+K a Ω
+normal order:       (λy. a) Ω  →  a
+applicative order:  K a Ω  →  K a Ω  →  ...    (Ω never finishes)
+```
+
+```csharp
+var log = new List<string>();
+
+int Arg(string name) { log.Add(name); return 0; }
+
+int ByValue(int x, int y) => x;
+int ByName(Func<int> x, Func<int> y) => x() + x();
+int ByNeed(Lazy<int> x, Lazy<int> y) => x.Value + x.Value;
+
+ByValue(Arg("a"), Arg("b"));
+var byValue = log.ToList(); // => ["a", "b"]
+
+log.Clear();
+ByName(() => Arg("a"), () => Arg("b"));
+var byName = log.ToList(); // => ["a", "a"]
+
+log.Clear();
+ByNeed(new Lazy<int>(() => Arg("a")), new Lazy<int>(() => Arg("b")));
+var byNeed = log.ToList(); // => ["a"]
+```
+
+---
+
+## Church Encoding
+
+- Category: Lambda Calculus
+- ID: #church-encoding
+- Aliases: church numerals, church booleans, church pairs, scott encoding, encoding data as functions
+- Related concepts: #lambda-calculus, #catamorphism, #rank-n-type, #sum-type, #combinatory-logic
+
+### Definition
+A way of representing data using nothing but functions, so that the lambda calculus can compute with values it doesn't have. Each value is encoded as what you can do with it. A boolean chooses between two alternatives, and a natural number n applies a function n times:
+
+### Code Examples
+
+```text
+true  = λt. λf. t
+false = λt. λf. f
+not   = λb. λt. λf. b f t
+and   = λp. λq. p q p
+
+0     = λf. λx. x
+1     = λf. λx. f x
+2     = λf. λx. f (f x)
+succ  = λn. λf. λx. f (n f x)
+add   = λm. λn. λf. λx. m f (n f x)
+mul   = λm. λn. λf. m (n f)
+
+pair  = λa. λb. λs. s a b
+first = λp. p true
+second = λp. p false
+```
+
+```csharp
+// Booleans: pick one of two values
+Func<A, Func<A, A>> True<A>() => t => f => t;
+Func<A, Func<A, A>> False<A>() => t => f => f;
+Func<A, Func<A, A>> Not<A>(Func<A, Func<A, A>> b) => t => f => b(f)(t);
+Func<A, Func<A, A>> And<A>(Func<A, Func<A, A>> p, Func<A, Func<A, A>> q) =>
+    t => f => p(q(t)(f))(f);
+
+bool ToBool(Func<bool, Func<bool, bool>> b) => b(true)(false);
+
+var notTrue = ToBool(Not(True<bool>()));                     // => false
+var trueAndTrue = ToBool(And(True<bool>(), Not(False<bool>()))); // => true
+
+// A Church boolean is its own if/else
+var answer = Not(True<string>())("yes")("no"); // => "no"
+```
+
+```csharp
+// Numerals: apply f n times
+Func<Func<A, A>, Func<A, A>> Zero<A>() => f => x => x;
+Func<Func<A, A>, Func<A, A>> Succ<A>(Func<Func<A, A>, Func<A, A>> n) =>
+    f => x => f(n(f)(x));
+Func<Func<A, A>, Func<A, A>> Add<A>(Func<Func<A, A>, Func<A, A>> m, Func<Func<A, A>, Func<A, A>> n) =>
+    f => x => m(f)(n(f)(x));
+Func<Func<A, A>, Func<A, A>> Mul<A>(Func<Func<A, A>, Func<A, A>> m, Func<Func<A, A>, Func<A, A>> n) =>
+    f => m(n(f));
+
+int ToInt(Func<Func<int, int>, Func<int, int>> n) => n(x => x + 1)(0);
+
+var two = Succ(Succ(Zero<int>()));
+var three = Succ(two);
+
+var sum = ToInt(Add(two, three));     // => 5
+var product = ToInt(Mul(two, three)); // => 6
+
+// The same numeral works on any type: "append a star", twice
+var stars = Succ(Succ(Zero<string>()))(s => s + "*")(""); // => "**"
+```
+
+```csharp
+// Pairs: hand both parts to a selector, which is a Church boolean
+Func<Func<A, Func<A, A>>, A> Pair<A>(A a, A b) => s => s(a)(b);
+A First<A>(Func<Func<A, Func<A, A>>, A> p) => p(t => f => t);
+A Second<A>(Func<Func<A, Func<A, A>>, A> p) => p(t => f => f);
+
+var point = Pair(3, 4);
+var x = First(point);  // => 3
+var y = Second(point); // => 4
+```
+
+---
+
+## Fixed-Point Combinator
+
+- Category: Lambda Calculus
+- ID: #fixed-point-combinator
+- Aliases: y combinator, z combinator, fix, fixpoint, anonymous recursion, sage bird
+- Related concepts: #eta-conversion, #recursion, #eager-evaluation, #functional-combinator, #lambda-calculus
+
+### Definition
+A combinator that gives an anonymous function the ability to call itself, so the lambda calculus can express recursion even though it has no names. A fixed point of a function g is a value v with g v = v. A fixed-point combinator fix finds one for any g: fix g = g (fix g). Write the recursive function as a g that takes "itself" as an extra first argument, and fix g is the recursive function.
+
+### Code Examples
+
+```text
+Y = λf. (λx. f (x x)) (λx. f (x x))
+
+Y g
+→ (λx. g (x x)) (λx. g (x x))
+→ g ((λx. g (x x)) (λx. g (x x)))
+= g (Y g)
+```
+
+```text
+Z = λf. (λx. f (λv. x x v)) (λx. f (λv. x x v))
+```
+
+```csharp
+Func<A, B> Z<A, B>(Func<Func<A, B>, Func<A, B>> f)
+{
+    SelfApplicable<A, B> x = self => v => f(self(self))(v);
+    return x(x);
+}
+
+// Neither lambda refers to its own name: "next" is supplied by Z
+var factorial = Z<int, int>(next => n => n <= 1 ? 1 : n * next(n - 1));
+var fibonacci = Z<int, int>(next => n => n < 2 ? n : next(n - 1) + next(n - 2));
+
+var f5 = factorial(5);   // => 120
+var fib10 = fibonacci(10); // => 55
+
+delegate Func<A, B> SelfApplicable<A, B>(SelfApplicable<A, B> self);
+```
+
+---
+
+## Combinatory Logic
+
+- Category: Lambda Calculus
+- ID: #combinatory-logic
+- Aliases: ski, ski calculus, s k i combinators, iota, bracket abstraction
+- Related concepts: #functional-combinator, #point-free-style, #lambda-calculus, #church-encoding
+
+### Definition
+A variant of the lambda calculus with no variables and no λ at all: programs are built only by applying a few fixed combinators to each other. The standard set is SKI:
+
+### Code Examples
+
+```text
+I x      = x                  identity
+K x y    = x                  constant
+S x y z  = x z (y z)          substitution
+```
+
+```text
+S K K x
+→ K x (K x)
+→ x
+```
+
+```csharp
+var S = Combinators<int, Func<int, int>, int>.S;
+var K1 = Combinators<int, Func<int, int>>.K;
+var K2 = Combinators<int, int>.K;
+
+Func<int, int> I = S(K1)(K2);
+
+var result = I(42); // => 42
+```
+
+```text
+I = ι ι
+K = ι (ι (ι ι))
+S = ι (ι (ι (ι ι)))
+```
 
 ---
 
@@ -918,7 +1656,7 @@ A branch of mathematics that uses functions to create a universal model of compu
 
 - Category: Composition & Flow
 - ID: #functional-combinator
-- Related concepts: #point-free-style, #higher-order-functions-hof
+- Related concepts: #point-free-style, #higher-order-functions-hof, #free-and-bound-variables, #fixed-point-combinator, #combinatory-logic
 
 ### Definition
 A higher-order function, usually curried, which returns a new function changed in some way. Functional combinators are often used in Point-Free Style to write especially terse programs.
@@ -951,7 +1689,7 @@ flip(divide)(10)(30); // => 3
 - Category: Composition & Flow
 - ID: #lazy-evaluation
 - Aliases: call-by-need, deferred execution, generators
-- Related concepts: #pure-function, #io, #thunk
+- Related concepts: #pure-function, #io, #thunk, #reduction-strategy, #eager-evaluation, #generator
 
 ### Definition
 Lazy evaluation is a call-by-need evaluation mechanism that delays the evaluation of an expression until its value is needed. In functional languages, this allows for structures like infinite lists, which would not normally be available in an imperative language where the sequencing of commands is significant.
@@ -983,12 +1721,86 @@ toSeq(Naturals()).Map(n => n * n).Take(4); // => [0, 1, 4, 9]
 
 ---
 
+## Eager Evaluation
+
+- Category: Composition & Flow
+- ID: #eager-evaluation
+- Aliases: strict evaluation, eager, call by value, deferred execution, tolist
+- Related concepts: #reduction-strategy, #fixed-point-combinator, #lazy-evaluation, #side-effects, #thunk, #generator
+
+### Definition
+Eager (or strict) evaluation computes an expression as soon as it is bound to a variable or passed to a function, whether or not its value is ever used. It is the opposite of lazy evaluation. C# is eager by default: arguments are evaluated, left to right, before the method is called.
+
+### Code Examples
+
+```csharp
+var log = new List<string>();
+int Trace(string name, int value) { log.Add(name); return value; }
+int First(int a, int b) => a;
+
+First(Trace("a", 1), Trace("b", 2)); // => 1
+var traced = log; // => ["a", "b"]
+```
+
+```csharp
+var calls = 0;
+var query = Enumerable.Range(1, 3).Select(x => { calls++; return x * 10; });
+
+var afterQuery = calls;  // => 0
+
+var list = query.ToList(); // => [10, 20, 30]
+var afterToList = calls; // => 3
+
+// The list is already computed; the query runs again every time
+var listSum = list.Sum();   // => 60
+var querySum = query.Sum(); // => 60
+var afterSums = calls;   // => 6
+```
+
+---
+
+## Generator
+
+- Category: Composition & Flow
+- ID: #generator
+- Aliases: yield return, iterator, ienumerable, infinite sequence, lazy sequence, coroutine
+- Related concepts: #lazy-evaluation, #anamorphism, #eager-evaluation
+
+### Definition
+A function that produces a sequence of values one at a time, pausing after each until the next one is asked for. In C#, a method that uses yield return is a generator (C# calls it an iterator): the compiler turns it into an IEnumerable<T> whose code runs only as far as the next yield return each time the consumer asks for an item.
+
+### Code Examples
+
+```csharp
+var produced = 0;
+
+IEnumerable<long> Fibonacci()
+{
+    long a = 0, b = 1;
+    while (true)
+    {
+        produced++;
+        yield return a;
+        (a, b) = (b, a + b);
+    }
+}
+
+var first10 = Fibonacci().Take(10).ToList(); // => [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+var count = produced; // => 10
+```
+
+```csharp
+var evens = toSeq(Fibonacci()).Filter(n => n % 2 == 0).Take(5); // => [0, 2, 8, 34, 144]
+```
+
+---
+
 ## Monoid
 
 - Category: Algebraic Structures
 - ID: #monoid
 - Aliases: empty, identity, semigroup with identity
-- Related concepts: #semigroup, #foldable, #type-class, #writer-monad, #alternative, #homomorphism
+- Related concepts: #semigroup, #foldable, #type-class, #writer-monad, #alternative, #property-based-testing, #endofunctor, #monoidal-category, #magma, #group, #semiring, #monoidal-functor, #laws, #homomorphism, #newtype
 
 ### Definition
 An object with a function that "combines" that object with another of the same type (semigroup) which has an "identity" value.
@@ -1038,12 +1850,115 @@ var commutes = 0 - 4 == 4 - 0; // => false
 
 ---
 
+## Group
+
+- Category: Algebraic Structures
+- ID: #group
+- Aliases: inverse, abelian group, commutative group, monoid with inverses
+- Related concepts: #magma, #monoid, #type-class, #semiring
+
+### Definition
+A monoid in which every element has an inverse: a value that combines with it to give the identity. Integers under addition form a group, since n + (-n) == 0. Rotations of a shape do too: rotating by 90 degrees is undone by rotating by 270. Strings under concatenation are only a monoid, because nothing appended to "abc" gives back "".
+
+### Code Examples
+
+```csharp
+// Undo works for any group: combine with the inverse of the step
+A Undo<A>(A total, A step) where A : Group<A> => total.Combine(step.Invert());
+
+var turned = new Rotation(90).Combine(new Rotation(300)); // => Rotation { Degrees = 30 }
+var back   = Undo(turned, new Rotation(300));              // => Rotation { Degrees = 90 }
+
+var cancels = new Rotation(90).Combine(new Rotation(90).Invert()) == Rotation.Empty; // => true
+
+interface Group<A> : Monoid<A> where A : Group<A>
+{
+    A Invert();
+}
+
+// Rotations by whole degrees, combined by adding modulo 360
+record Rotation(int Degrees) : Group<Rotation>
+{
+    public static Rotation Empty => new(0);
+    public Rotation Combine(Rotation rhs) => new((Degrees + rhs.Degrees) % 360);
+    public Rotation Invert() => new((360 - Degrees) % 360);
+}
+```
+
+---
+
+## Semiring
+
+- Category: Algebraic Structures
+- ID: #semiring
+- Aliases: rig, tropical semiring, min-plus, max-plus, shortest path
+- Related concepts: #group, #monoid, #type-class
+
+### Definition
+A type with two monoids on it, usually called addition and multiplication, where multiplication distributes over addition (a × (b + c) == a × b + a × c) and the additive identity (zero) annihilates (0 × a == 0). Addition must be commutative; neither operation needs an inverse.
+
+### Code Examples
+
+```csharp
+A Total<A>(Seq<Seq<A>> routes) where A : Semiring<A> =>
+    routes.Fold(A.Zero, (acc, route) =>
+        A.Add(acc, route.Fold(A.One, (r, leg) => A.Mul(r, leg))));
+
+// Two routes from X to Z: X -> Y -> Z, or straight X -> Z
+
+// Is any route open? Each leg is open or closed (or / and)
+Total(Seq(Seq(new Open(true), new Open(true)), Seq(new Open(false))));
+// => Open { Value = True }
+
+// Shortest distance: legs are lengths in km (min / plus)
+Total(Seq(Seq(new Distance(2), new Distance(3)), Seq(new Distance(7))));
+// => Distance { Km = 5 }
+
+// Number of ways to travel: legs are counts of trains (plus / times)
+Total(Seq(Seq(new Ways(2), new Ways(3)), Seq(new Ways(1))));
+// => Ways { Count = 7 }
+
+interface Semiring<A> where A : Semiring<A>
+{
+    static abstract A Zero { get; }
+    static abstract A One { get; }
+    static abstract A Add(A x, A y);
+    static abstract A Mul(A x, A y);
+}
+
+record Open(bool Value) : Semiring<Open>
+{
+    public static Open Zero => new(false);
+    public static Open One => new(true);
+    public static Open Add(Open x, Open y) => new(x.Value || y.Value);
+    public static Open Mul(Open x, Open y) => new(x.Value && y.Value);
+}
+
+record Distance(double Km) : Semiring<Distance>
+{
+    public static Distance Zero => new(double.PositiveInfinity);
+    public static Distance One => new(0);
+    public static Distance Add(Distance x, Distance y) => new(Math.Min(x.Km, y.Km));
+    public static Distance Mul(Distance x, Distance y) => new(x.Km + y.Km);
+}
+
+record Ways(int Count) : Semiring<Ways>
+{
+    public static Ways Zero => new(0);
+    public static Ways One => new(1);
+    public static Ways Add(Ways x, Ways y) => new(x.Count + y.Count);
+    public static Ways Mul(Ways x, Ways y) => new(x.Count * y.Count);
+}
+```
+
+---
+
 ## Monad
 
 - Category: Algebraic Structures
 - ID: #monad
 - Aliases: flatmap, bind, chain, return
-- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #fallible, #higher-kinded-type, #monad-comprehension, #reader-monad, #writer-monad, #state-monad, #either, #io, #free-monad, #monad-transformer, #constant-monad, #pointed-functor, #functor, #sum-type, #never-type
+- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #fallible, #higher-kinded-type, #monad-comprehension, #reader-monad, #writer-monad, #state-monad, #either, #io, #free-monad, #monad-transformer, #continuation-monad, #endofunctor, #kleisli-category, #laws, #constant-monad, #pointed-functor, #functor, #arrow, #duality, #adjunction, #sum-type, #never-type
 
 ### Definition
 A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object.
@@ -1083,7 +1998,7 @@ AddM(Seq(1, 2), Seq(10, 20));  // => [11, 21, 12, 22]
 - Category: Algebraic Structures
 - ID: #monad-comprehension
 - Aliases: do notation, do-notation, for comprehension, linq, query syntax, query expression, selectmany
-- Related concepts: #never-type, #monad, #kleisli-composition
+- Related concepts: #never-type, #monad, #kleisli-composition, #declarative-programming, #continuation-monad, #structural-typing
 
 ### Definition
 Syntax for writing a chain of monadic binds as if it were a sequence of plain statements. Each step binds the value inside a monad to a name, the rest of the block runs "inside" it, and the compiler rewrites the whole thing into nested Bind calls. Haskell calls it do-notation, Scala a for-comprehension and F# a computation expression; in C# it is LINQ query syntax.
@@ -1124,7 +2039,7 @@ var area = from w in ParseInt("3")
 
 - Category: Algebraic Structures
 - ID: #comonad
-- Related concepts: #monad
+- Related concepts: #monad, #duality, #adjunction
 
 ### Definition
 An object that has extract and extend functions.
@@ -1156,7 +2071,7 @@ new CoIdentity<int>(1).Extend(co => co.Extract() + 1);
 
 - Category: Algebraic Structures
 - ID: #kleisli-composition
-- Related concepts: #monad, #monad-comprehension, #monad-transformer, #option
+- Related concepts: #monad, #monad-comprehension, #monad-transformer, #kleisli-category, #arrow, #option
 
 ### Definition
 An operation for composing two monad-returning functions (Kleisli Arrows) where they have compatible types. In Haskell this is the >=> operator.
@@ -1191,11 +2106,47 @@ parseAndValidate("999");  // => Some(999)
 
 ---
 
+## Kleisli Category
+
+- Category: Category & Morphisms
+- ID: #kleisli-category
+- Aliases: kleisli arrow, monadic arrows, a -> m b, fish operator
+- Related concepts: #kleisli-composition, #monad, #category, #option
+
+### Definition
+A category built from a monad M: the objects are ordinary types, but an arrow from A to B is a function A -> M<B> (a Kleisli arrow) rather than A -> B. Arrows are joined with Kleisli composition, and the identity arrow for each type is Pure (A -> M<A>). So the monad laws are exactly the category laws for this category: composing with Pure on either side changes nothing, and composition is associative.
+
+### Code Examples
+
+```csharp
+Func<A, Option<C>> Then<A, B, C>(Func<A, Option<B>> f, Func<B, Option<C>> g) =>
+    a => f(a).Bind(g);
+
+Option<A> Id<A>(A a) => Some(a);
+
+Func<string, Option<int>> parse = s => parseInt(s);
+Func<int, Option<int>> positive = n => n > 0 ? Some(n) : None;
+Func<int, Option<int>> halve = n => n % 2 == 0 ? Some(n / 2) : None;
+
+var inputs = Seq("8", "-8", "x", "3");
+
+// Identity: Id on either side changes nothing
+var plain   = inputs.Map(parse);                       // => [Some(8), Some(-8), None, Some(3)]
+var idLeft  = inputs.Map(Then<string, string, int>(Id, parse)); // => [Some(8), Some(-8), None, Some(3)]
+var idRight = inputs.Map(Then<string, int, int>(parse, Id));    // => [Some(8), Some(-8), None, Some(3)]
+
+// Associativity: the grouping doesn't matter
+var grouped1 = inputs.Map(Then(Then(parse, positive), halve)); // => [Some(4), None, None, None]
+var grouped2 = inputs.Map(Then(parse, Then(positive, halve))); // => [Some(4), None, None, None]
+```
+
+---
+
 ## Free Monad
 
 - Category: Effects
 - ID: #free-monad
-- Related concepts: #monad, #functor, #io, #algebraic-effects
+- Related concepts: #monad, #functor, #io, #algebraic-effects, #expression-tree
 
 ### Definition
 A Free Monad is a construction that builds a monad out of any functor without adding any domain-specific behavior. It cleanly separates the description of a program (an Abstract Syntax Tree of commands) from its execution (an interpreter that evaluates the AST).
@@ -1364,7 +2315,7 @@ var log   = result.Output; // => [doubled 5, added one to 10]
 - Category: Effects
 - ID: #state-monad
 - Aliases: state, get, put, modify, stateful
-- Related concepts: #monad, #reader-monad, #writer-monad, #side-effects, #monad-transformer
+- Related concepts: #monad, #reader-monad, #writer-monad, #side-effects, #monad-transformer, #adjunction
 
 ### Definition
 A computation that threads a piece of state from one step to the next. Each step can read the current state (get), replace it (put) or update it (modify), and the state is passed along behind the scenes, so pure code can describe a stateful algorithm without a mutable variable.
@@ -1386,6 +2337,68 @@ var labels = from a in NextId()
 var run  = labels.Run(100);
 var text = run.Value; // => "#100 #101 #102"
 var next = run.State; // => 103
+```
+
+---
+
+## Continuation Monad
+
+- Category: Effects
+- ID: #continuation-monad
+- Aliases: cont, cont monad, callcc, call/cc, mother of all monads
+- Related concepts: #continuation-passing-style, #monad, #continuation, #monad-comprehension
+
+### Definition
+A monad for computations written in continuation-passing style. A value of type Cont<R, A> is a function (A -> R) -> R: give it a continuation that knows what to do with an A, and it produces the final result R. Bind threads the continuations through for you, so CPS code can be written as an ordinary LINQ query.
+
+### Code Examples
+
+```csharp
+Cont<R, int> Square<R>(int x) => new(k => k(x * x));
+Cont<R, int> AddThree<R>(int x) => new(k => k(x + 3));
+
+// Looks like direct style, runs in CPS
+Cont<R, int> Calc<R>() =>
+    from a in Square<R>(4)
+    from b in AddThree<R>(a)
+    select b;
+
+// The caller decides what happens with the result
+Calc<string>().Run(b => $"result {b}"); // => "result 19"
+Calc<int>().Run(b => b * 2);            // => 38
+```
+
+```csharp
+Cont<R, string> Classify<R>(int n) =>
+    Cont.CallCC<R, string, Unit>(exit =>
+        from _ in n < 0 ? exit("negative") : Cont.Pure<R, Unit>(unit)
+        from s in Cont.Pure<R, string>(n % 2 == 0 ? "even" : "odd")
+        select s);
+
+Classify<string>(4).Run(s => s);  // => "even"
+Classify<string>(-3).Run(s => s); // => "negative"
+```
+
+```csharp
+public record Cont<R, A>(Func<Func<A, R>, R> Run)
+{
+    public Cont<R, B> Map<B>(Func<A, B> f) => new(k => Run(a => k(f(a))));
+    public Cont<R, B> Bind<B>(Func<A, Cont<R, B>> f) => new(k => Run(a => f(a).Run(k)));
+
+    // Select and SelectMany let LINQ query syntax work with Cont
+    public Cont<R, B> Select<B>(Func<A, B> f) => Map(f);
+    public Cont<R, C> SelectMany<B, C>(Func<A, Cont<R, B>> bind, Func<A, B, C> project) =>
+        Bind(a => bind(a).Map(b => project(a, b)));
+}
+
+public static class Cont
+{
+    public static Cont<R, A> Pure<R, A>(A value) => new(k => k(value));
+
+    // exit(a) ignores its own continuation and jumps to k, the continuation of CallCC
+    public static Cont<R, A> CallCC<R, A, B>(Func<Func<A, Cont<R, B>>, Cont<R, A>> f) =>
+        new(k => f(a => new Cont<R, B>(_ => k(a))).Run(k));
+}
 ```
 
 ---
@@ -1433,7 +2446,7 @@ ParseAgeE<Fin>("old"); // => Fail('old' is not an age)
 - Category: Algebraic Structures
 - ID: #applicative-functor
 - Aliases: applicative, ap
-- Related concepts: #functor, #pointed-functor, #monad, #lift, #traversable, #alternative, #monad-transformer
+- Related concepts: #functor, #pointed-functor, #monad, #lift, #traversable, #alternative, #monoidal-functor, #arrow, #monad-transformer, #monoidal-category
 
 ### Definition
 An applicative functor is an object with an ap function. ap applies a function in the object to a value in another object of the same type.
@@ -1468,12 +2481,48 @@ partiallyAppliedAdds.Apply(arg2); // => [5, 6, 7, 8]
 
 ---
 
+## Monoidal Functor
+
+- Category: Algebraic Structures
+- ID: #monoidal-functor
+- Aliases: lax monoidal functor, zip, product of functors
+- Related concepts: #monoidal-category, #applicative-functor, #functor, #monoid
+
+### Definition
+A functor that preserves monoidal structure: it can make an "empty" value and it can pair up two values, so tuples and Unit inside the functor behave like tuples and Unit outside it. In Haskell notation:
+
+### Code Examples
+
+```text
+unit :: f ()
+(**) :: f a -> f b -> f (a, b)
+```
+
+```csharp
+var unitOpt = pure<Option, Unit>(unit); // => Some(())
+
+Some(1).Zip(Some("a"));           // => Some((1, a))
+Some(1).Zip(Option<string>.None); // => None
+```
+
+```csharp
+K<F, B> ApplyViaZip<F, A, B>(K<F, Func<A, B>> ff, K<F, A> fa)
+    where F : Applicative<F> =>
+    ff.Zip(fa).Map(p => p.First(p.Second));
+
+Func<int, int> addTen = x => x + 10;
+ApplyViaZip(Some(addTen), Some(5));  // => Some(15)
+ApplyViaZip(Some(addTen), Option<int>.None); // => None
+```
+
+---
+
 ## Bifunctor
 
 - Category: Algebraic Structures
 - ID: #bifunctor
 - Aliases: bimap, pair map
-- Related concepts: #either, #functor, #product-type, #profunctor
+- Related concepts: #either, #functor, #product-type, #profunctor, #monoidal-category
 
 ### Definition
 A structure with two independent type parameters that can map over both of them simultaneously. A Bifunctor provides bimap, which takes two functions and maps the first over the first type parameter and the second over the second type parameter.
@@ -1497,12 +2546,56 @@ found.MapSecond(n => n + 1);      // => Right(11)
 
 ---
 
+## Variance
+
+- Category: Types & Data Modeling
+- ID: #variance
+- Aliases: covariance, contravariance, invariance, in and out, array covariance, generic variance
+- Related concepts: #functor, #contravariant-functor, #profunctor
+
+### Definition
+How subtyping of a generic type follows subtyping of its type argument. A string is an object; variance answers whether a Thing<string> is then a Thing<object>, the other way round, or neither.
+
+### Code Examples
+
+```csharp
+IEnumerable<string> names = ["Ada", "Grace"];
+IEnumerable<object> things = names;          // covariant
+var count = things.Count();                  // => 2
+
+Action<object> log = o => Console.WriteLine(o);
+Action<string> logName = log;                // contravariant
+
+Func<object, string> describe = o => $"<{o}>";
+Func<string, object> narrower = describe;    // in on the input, out on the output
+var result = narrower("Ada");                // => "<Ada>"
+
+// List<object> list = new List<string>();   // compile error: List<T> is invariant
+```
+
+```csharp
+interface IProducer<out T> { T Produce(); }
+interface IConsumer<in T> { void Consume(T item); }
+```
+
+```csharp
+object[] items = new string[1];
+string Store(object[] array)
+{
+    try { array[0] = 42; return "stored"; }
+    catch (ArrayTypeMismatchException e) { return e.GetType().Name; }
+}
+Store(items); // => "ArrayTypeMismatchException"
+```
+
+---
+
 ## Contravariant Functor
 
 - Category: Algebraic Structures
 - ID: #contravariant-functor
 - Aliases: contravariant, cmap, contramap
-- Related concepts: #functor, #predicate, #profunctor
+- Related concepts: #functor, #predicate, #profunctor, #variance
 
 ### Definition
 A structure similar to a functor, but whose transformation flows in the opposite direction. While a covariant functor transforms a producer F<A> into F<B> via (a -> b), a contravariant functor transforms a consumer F<A> into F<B> via (b -> a) using cmap (or contramap).
@@ -1541,7 +2634,7 @@ hasLongBio.Test(new User("Hi"));          // => false
 
 - Category: Algebraic Structures
 - ID: #profunctor
-- Related concepts: #bifunctor, #contravariant-functor, #lens
+- Related concepts: #bifunctor, #contravariant-functor, #lens, #variance, #arrow
 
 ### Definition
 A Profunctor is a bifunctor that is contravariant in its first argument and covariant in its second argument.
@@ -1566,6 +2659,54 @@ var isTrimmedLengthEven = Promap(
 // "code" has 4 characters, "hello" has 5:
 isTrimmedLengthEven("   code   "); // => true
 isTrimmedLengthEven(" hello ");    // => false
+```
+
+---
+
+## Arrow
+
+- Category: Algebraic Structures
+- ID: #arrow
+- Aliases: arrows, control.arrow, fanout, split, first
+- Related concepts: #category, #kleisli-composition, #profunctor, #function-composition, #applicative-functor, #monad
+
+### Definition
+A generalisation of functions: something that takes an input and produces an output, and can be composed and run on parts of a tuple. Haskell's Control.Arrow defines it as a category (identity and composition) plus a few operations:
+
+### Code Examples
+
+```text
+arr   :: (b -> c) -> a b c                       -- lift a plain function
+(>>>) :: a b c -> a c d -> a b d                 -- compose left to right
+first :: a b c -> a (b, d) (c, d)                -- run on the first of a pair
+(***) :: a b c -> a b' c' -> a (b, b') (c, c')   -- run two side by side
+(&&&) :: a b c -> a b c' -> a b (c, c')          -- feed one input to both
+```
+
+```csharp
+Func<string, int> length = s => s.Length;
+Func<string, string> shout = s => s.ToUpper();
+Func<int, bool> isEven = n => n % 2 == 0;
+
+length.Compose(isEven)("hello");             // => false
+length.First<string, int, bool>()(("hi", true)); // => (2, True)
+length.Split(isEven)(("hello", 4));          // => (5, True)
+length.Fanout(shout)("hello");               // => (5, HELLO)
+
+static class FuncArrow
+{
+    // first: apply f to the first element, pass the second through
+    public static Func<(A, C), (B, C)> First<A, B, C>(this Func<A, B> f) =>
+        p => (f(p.Item1), p.Item2);
+
+    // *** : apply f and g to the two halves of a pair
+    public static Func<(A, C), (B, D)> Split<A, B, C, D>(this Func<A, B> f, Func<C, D> g) =>
+        p => (f(p.Item1), g(p.Item2));
+
+    // &&& : apply f and g to the same input
+    public static Func<A, (B, C)> Fanout<A, B, C>(this Func<A, B> f, Func<A, C> g) =>
+        a => (f(a), g(a));
+}
 ```
 
 ---
@@ -1637,7 +2778,7 @@ var preservesEmpty = Concat([]) == "";  // => true
 
 - Category: Category & Morphisms
 - ID: #endomorphism
-- Related concepts: #homomorphism
+- Related concepts: #homomorphism, #endofunctor
 
 ### Definition
 A function where the input type is the same as the output. Since the types are identical, endomorphisms are also homomorphisms.
@@ -1658,7 +2799,7 @@ Func<int, int> decrement = x => x - 1;
 
 - Category: Category & Morphisms
 - ID: #isomorphism
-- Related concepts: #homomorphism, #iso, #morphism
+- Related concepts: #homomorphism, #iso, #monoidal-category, #morphism
 
 ### Definition
 A morphism made of a pair of transformations between 2 types of objects that is structural in nature and no data is lost.
@@ -1686,7 +2827,7 @@ record Coords(int X, int Y);
 - Category: Category & Morphisms
 - ID: #catamorphism
 - Aliases: fold, reduce, reduceright
-- Related concepts: #anamorphism, #foldable, #hylomorphism, #paramorphism
+- Related concepts: #anamorphism, #foldable, #hylomorphism, #paramorphism, #church-encoding, #recursion, #duality
 
 ### Definition
 A function which deconstructs a structure into a single value. FoldBack (a right fold, provided for every Foldable) is an example of a catamorphism.
@@ -1706,8 +2847,8 @@ Sum(Seq(1, 2, 3, 4, 5)); // => 15
 
 - Category: Category & Morphisms
 - ID: #anamorphism
-- Aliases: unfold, generate
-- Related concepts: #catamorphism, #hylomorphism, #apomorphism
+- Aliases: unfold, generate, unfoldr, list.unfold, seed, dual of fold, corecursion
+- Related concepts: #catamorphism, #hylomorphism, #apomorphism, #recursion, #generator, #foldable, #duality
 
 ### Definition
 A function that builds up a structure by repeatedly applying a function to its argument. Unfold is an example which generates a sequence from a function and a seed value. This is the opposite of a catamorphism. You can think of this as an anamorphism builds up a structure and catamorphism breaks it down.
@@ -1727,6 +2868,20 @@ Seq<int> CountDown(int n) =>
     Unfold(k => k <= 0 ? None : Some((k, k - 1)), n);
 
 CountDown(5); // => [5, 4, 3, 2, 1]
+```
+
+```csharp
+// Unfold a number into its digits, least significant first...
+var digits = toSeq(LanguageExt.List.unfold(1234, n => n == 0 ? None : Some((n % 10, n / 10))));
+// => [4, 3, 2, 1]
+
+// ...and fold them back into the number
+digits.FoldBack(0, (acc, d) => acc * 10 + d); // => 1234
+```
+
+```csharp
+var fibonacci = toSeq(LanguageExt.List.unfold((0, 1), s => Some((s.Item1, (s.Item2, s.Item1 + s.Item2)))));
+fibonacci.Take(8); // => [0, 1, 1, 2, 3, 5, 8, 13]
 ```
 
 ---
@@ -1801,7 +2956,7 @@ The opposite of paramorphism, just as anamorphism is the opposite of catamorphis
 - Category: Category & Morphisms
 - ID: #natural-transformation
 - Aliases: nat, functor transformation
-- Related concepts: #parametricity, #type-class, #functor, #morphism, #category
+- Related concepts: #parametricity, #type-class, #functor, #morphism, #category, #rank-n-type, #functor-category, #yoneda-lemma
 
 ### Definition
 A structure-preserving mapping between two functors, transforming F<A> into G<A> without altering or inspecting the underlying value A.
@@ -1825,6 +2980,238 @@ K<Seq, A> OptionToSeq<A>(K<Option, A> fa) =>
 
 OptionToSeq(Some(1).Map(twice)); // => [2]
 OptionToSeq(Some(1)).Map(twice); // => [2]
+```
+
+---
+
+## Functor Category
+
+- Category: Category & Morphisms
+- ID: #functor-category
+- Aliases: category of functors, endofunctor category
+- Related concepts: #natural-transformation, #functor, #category, #yoneda-lemma, #endofunctor, #adjunction
+
+### Definition
+A category whose objects are functors and whose arrows are natural transformations between them. For two categories C and D, the functor category has one object for each functor from C to D. An arrow from F to G is a natural transformation F<A> -> G<A> (for every A); the identity arrow leaves each F<A> alone, and composing two natural transformations gives another one.
+
+### Code Examples
+
+```csharp
+// Two arrows in the functor category: Seq => Option, then Option => Seq
+Option<A> First<A>(Seq<A> xs) => xs.Head;
+Seq<A> ToSeq<A>(Option<A> o) => o.Match(Some: a => Seq(a), None: () => Seq<A>());
+
+// Their composite is an arrow Seq => Seq, and it is still natural
+Seq<A> FirstOnly<A>(Seq<A> xs) => ToSeq(First(xs));
+
+FirstOnly(Seq(1, 2, 3).Map(x => x * 10)); // => [10]
+FirstOnly(Seq(1, 2, 3)).Map(x => x * 10); // => [10]
+```
+
+---
+
+## Initial and Terminal Objects
+
+- Category: Category & Morphisms
+- ID: #initial-and-terminal-objects
+- Aliases: initial object, terminal object, final object, absurd, empty type
+- Related concepts: #unit-type, #never-type, #duality, #category, #product-type, #sum-type
+
+### Definition
+A terminal object is a type that every type has exactly one arrow (function) to. An initial object is a type that has exactly one arrow to every type. In the category of C# types and functions, the terminal object is the Unit type and the initial object is the Never type.
+
+### Code Examples
+
+```csharp
+// The only possible A -> Unit: forget the input
+Unit Discard<A>(A _) => unit;
+
+var fromInt    = Discard(42);   // => ()
+var fromString = Discard("hi"); // => ()
+```
+
+```csharp
+// The only possible Never -> A
+A FromNever<A>(Never n) => n.Absurd<A>();
+
+var toInt  = FromNever<int>;    // => <function>
+var toText = FromNever<string>; // => <function>
+
+public sealed class Never
+{
+    private Never() { }
+
+    public A Absurd<A>() => throw new System.Diagnostics.UnreachableException();
+}
+```
+
+---
+
+## Product and Coproduct
+
+- Category: Category & Morphisms
+- ID: #product-and-coproduct
+- Aliases: coproduct, categorical product, categorical sum, projection, injection, universal property
+- Related concepts: #product-type, #sum-type, #either, #duality
+
+### Definition
+The category-theory description of product types and sum types, given purely in terms of arrows.
+
+### Code Examples
+
+```csharp
+// The unique arrow into a product
+Func<C, (A, B)> Both<C, A, B>(Func<C, A> f, Func<C, B> g) => c => (f(c), g(c));
+
+var stats = Both((string s) => s.Length, (string s) => s.ToUpper());
+
+var pair = stats("abc");  // => (3, ABC)
+var len  = pair.Item1;    // => 3
+var up   = pair.Item2;    // => "ABC"
+```
+
+```csharp
+// The unique arrow out of a coproduct
+Func<Either<A, B>, C> Cases<A, B, C>(Func<A, C> f, Func<B, C> g) =>
+    e => e.Match(Left: f, Right: g);
+
+var describe = Cases((int n) => $"number {n}", (string s) => $"text {s}");
+
+describe(Left<int, string>(3));     // => "number 3"
+describe(Right<int, string>("hi")); // => "text hi"
+```
+
+---
+
+## Duality
+
+- Category: Category & Morphisms
+- ID: #duality
+- Aliases: dual, co-, opposite category, reversing arrows
+- Related concepts: #initial-and-terminal-objects, #product-and-coproduct, #comonad, #catamorphism, #anamorphism, #monad
+
+### Definition
+Every definition in category theory has a mirror image, obtained by reversing the direction of every arrow. The mirror image is called the dual, and usually gets the prefix "co". Anything proved about one comes for free for the other, because the proof works with the arrows reversed too.
+
+### Code Examples
+
+```text
+product:    C -> A,  C -> B   gives the unique   C -> (A, B)
+coproduct:  A -> C,  B -> C   gives the unique   Either<A, B> -> C
+```
+
+---
+
+## Monoidal Category
+
+- Category: Category & Morphisms
+- ID: #monoidal-category
+- Aliases: tensor product, tensor, unit object, associator, unitor
+- Related concepts: #monoid, #isomorphism, #monoidal-functor, #unit-type, #bifunctor, #category, #never-type, #applicative-functor
+
+### Definition
+A category with a way to combine two objects into one (the tensor, written ⊗) and a unit object I, where combining is associative and I changes nothing, but only up to isomorphism rather than equality. It is a monoid one level up: instead of combining values, it combines types.
+
+### Code Examples
+
+```csharp
+// Associative up to isomorphism: ((A, B), C) ≅ (A, (B, C))
+(A, (B, C)) Reassoc<A, B, C>(((A, B), C) t) => (t.Item1.Item1, (t.Item1.Item2, t.Item2));
+((A, B), C) Unassoc<A, B, C>((A, (B, C)) t) => ((t.Item1, t.Item2.Item1), t.Item2.Item2);
+
+var left  = ((1, "two"), true);
+var right = Reassoc(left);              // => (1, (two, True))
+var back  = Unassoc(right) == left;     // => true
+
+// Unital up to isomorphism: (A, Unit) ≅ A
+(A, Unit) AddUnit<A>(A a) => (a, unit);
+A DropUnit<A>((A, Unit) t) => t.Item1;
+
+var withUnit = AddUnit(5);              // => (5, ())
+var without  = DropUnit(withUnit);      // => 5
+```
+
+---
+
+## Adjunction
+
+- Category: Category & Morphisms
+- ID: #adjunction
+- Aliases: adjoint functors, left adjoint, right adjoint, curry uncurry, hom-set isomorphism
+- Related concepts: #currying, #state-monad, #functor, #comonad, #functor-category, #monad
+
+### Definition
+A pairing of two functors F and G, written F ⊣ G, such that arrows out of F<A> correspond one to one with arrows into G<B>:
+
+### Code Examples
+
+```text
+Hom(F A, B)  ≅  Hom(A, G B)
+```
+
+```csharp
+Func<A, Func<B, C>> Curry<A, B, C>(Func<(A, B), C> f) => a => b => f((a, b));
+Func<(A, B), C> Uncurry<A, B, C>(Func<A, Func<B, C>> g) => p => g(p.Item1)(p.Item2);
+
+Func<(int, string), string> repeat = p => string.Concat(Enumerable.Repeat(p.Item2, p.Item1));
+
+var curried = Curry(repeat)(3)("ab");          // => "ababab"
+var original = repeat((3, "ab"));              // => "ababab"
+var roundTrip = Uncurry(Curry(repeat))((2, "xy")); // => "xyxy"
+```
+
+---
+
+## Yoneda Lemma
+
+- Category: Category & Morphisms
+- ID: #yoneda-lemma
+- Aliases: yoneda, coyoneda, map fusion, functor fusion
+- Related concepts: #functor, #rank-n-type, #natural-transformation, #functor-category
+
+### Definition
+A result that says, in programming terms, that a value of F<A> (for a functor F) carries exactly the same information as a generic function "give me any A -> B and I'll give you an F<B>", written forall B. (A -> B) -> F<B>. Going one way, fa becomes f => fa.Map(f); going back, you call the function with the identity x => x.
+
+### Code Examples
+
+```csharp
+var yo = Yoneda.Lift(Some(20));
+
+// Back again by passing the identity function
+var lowered = yo.Lower();                         // => Some(20)
+var none    = Yoneda.Lift(Option<int>.None).Lower(); // => None
+
+// Maps are stored up and composed, then applied in one go at Lower
+var mapped = yo.Map(x => x + 1).Map(x => x * 2).Map(x => $"#{x}").Lower();
+// => Some(#42)
+
+// Same answer as mapping the Option directly
+var direct = Some(20).Map(x => x + 1).Map(x => x * 2).Map(x => $"#{x}");
+// => Some(#42)
+
+interface IYoneda<A>
+{
+    Option<B> Run<B>(Func<A, B> f);
+}
+
+// Option<A> into Yoneda form: wait for a function, then Map with it
+sealed class Lifted<A>(Option<A> value) : IYoneda<A>
+{
+    public Option<B> Run<B>(Func<A, B> f) => value.Map(f);
+}
+
+// Map doesn't touch the Option: it composes f in front of whatever comes later
+sealed class Mapped<X, A>(IYoneda<X> inner, Func<X, A> g) : IYoneda<A>
+{
+    public Option<B> Run<B>(Func<A, B> f) => inner.Run((X x) => f(g(x)));
+}
+
+static class Yoneda
+{
+    public static IYoneda<A> Lift<A>(Option<A> value) => new Lifted<A>(value);
+    public static IYoneda<B> Map<A, B>(this IYoneda<A> y, Func<A, B> g) => new Mapped<A, B>(y, g);
+    public static Option<A> Lower<A>(this IYoneda<A> y) => y.Run((A x) => x);
+}
 ```
 
 ---
@@ -1862,11 +3249,42 @@ struct EqIgnoreCase : Eq<string>
 
 ---
 
+## Magma
+
+- Category: Algebraic Structures
+- ID: #magma
+- Aliases: binary operation, closed operation, groupoid (algebra), algebraic hierarchy
+- Related concepts: #semigroup, #monoid, #group
+
+### Definition
+A set with a binary operation that is closed: combining any two values of the type gives another value of the same type. That is the whole definition, with no laws at all. It is the bottom of a hierarchy where each level adds one law:
+
+### Code Examples
+
+```text
+Magma       closed binary operation       a • b is again in the set
+Semigroup   + associativity               (a • b) • c == a • (b • c)
+Monoid      + identity element            e • a == a == a • e
+Group       + inverse for every element   a • a⁻¹ == e
+```
+
+```csharp
+var subLeft  = (10 - 5) - 2; // => 3
+var subRight = 10 - (5 - 2); // => 7
+
+double Avg(double a, double b) => (a + b) / 2;
+
+var avgLeft  = Avg(Avg(2, 4), 8); // => 5.5
+var avgRight = Avg(2, Avg(4, 8)); // => 4
+```
+
+---
+
 ## Semigroup
 
 - Category: Algebraic Structures
 - ID: #semigroup
-- Related concepts: #monoid, #setoid, #semigroupoid
+- Related concepts: #monoid, #setoid, #semigroupoid, #magma
 
 ### Definition
 An object that has a concat function that combines it with another object of the same type.
@@ -1890,7 +3308,7 @@ Twice(Seq(1, 2)); // => [1, 2, 1, 2]
 
 - Category: Algebraic Structures
 - ID: #foldable
-- Related concepts: #catamorphism, #monoid, #traversable, #higher-kinded-type
+- Related concepts: #catamorphism, #monoid, #traversable, #anamorphism, #recursion, #higher-kinded-type
 
 ### Definition
 An object that has a reduce function that applies a function against an accumulator and each element in the array (from left to right) to reduce it to a single value.
@@ -1934,7 +3352,7 @@ Seq("1", "x", "3").Traverse(s => parseInt(s)).As(); // => None
 - Category: Types & Data Modeling
 - ID: #lens
 - Aliases: getter, setter, optics
-- Related concepts: #function-composition, #pure-function, #prism, #iso, #profunctor, #traversal
+- Related concepts: #function-composition, #pure-function, #prism, #iso, #profunctor, #traversal, #zipper
 
 ### Definition
 A lens is a structure (often an object or function) that pairs a getter and a non-mutating setter for some other data structure.
@@ -2046,7 +3464,7 @@ record Iso<S, A>(Func<S, A> To, Func<A, S> From);
 
 - Category: Types & Data Modeling
 - ID: #traversal
-- Related concepts: #lens, #prism, #traversable
+- Related concepts: #lens, #prism, #traversable, #zipper
 
 ### Definition
 An optic that focuses on zero, one, or multiple values (0..*) inside a data structure simultaneously.
@@ -2071,11 +3489,60 @@ record Traversal<S, A>(
 
 ---
 
+## Zipper
+
+- Category: Types & Data Modeling
+- ID: #zipper
+- Aliases: list zipper, tree zipper, cursor, focus, huet zipper
+- Related concepts: #lens, #immutability, #algebraic-data-type, #traversal
+
+### Definition
+A way to walk around an immutable data structure with a cursor. A zipper splits the structure into the item in focus and the context needed to rebuild the rest. Moving the focus one step, or changing the item at the focus, is O(1) and makes a new zipper, leaving the old one intact.
+
+### Code Examples
+
+```text
+list      [1, 2, 3, 4, 5]   focus on 3
+zipper    left = [2, 1]   focus = 3   right = [4, 5]
+```
+
+```csharp
+var start = ListZipper<int>.From(Seq(1, 2, 3, 4));
+
+var edited =
+    from z0 in start
+    from z1 in z0.Right()
+    from z2 in z1.Right()
+    select z2.Modify(x => x * 10);
+
+var focus = edited.Map(z => z.Focus);  // => Some(30)
+var list = edited.Map(z => z.ToSeq()); // => Some([1, 2, 30, 4])
+var tooFar = start.Bind(z => z.Left()); // => None
+
+record ListZipper<A>(Seq<A> Before, A Focus, Seq<A> After)
+{
+    public static Option<ListZipper<A>> From(Seq<A> xs) =>
+        xs.Head.Map(h => new ListZipper<A>([], h, xs.Tail));
+
+    public Option<ListZipper<A>> Left() =>
+        Before.Head.Map(h => new ListZipper<A>(Before.Tail, h, Focus.Cons(After)));
+
+    public Option<ListZipper<A>> Right() =>
+        After.Head.Map(h => new ListZipper<A>(Focus.Cons(Before), h, After.Tail));
+
+    public ListZipper<A> Modify(Func<A, A> f) => this with { Focus = f(Focus) };
+
+    public Seq<A> ToSeq() => toSeq(Before.Reverse()) + Focus.Cons(After);
+}
+```
+
+---
+
 ## Type Signatures
 
 - Category: Types & Data Modeling
 - ID: #type-signatures
-- Related concepts: #parametricity, #dependent-type, #contracts
+- Related concepts: #parametricity, #dependent-type, #contracts, #type-inference
 
 ### Definition
 In C# the types of arguments and return values are part of every function's signature. Even so, functional programmers often describe functions with Haskell-style type signatures in comments, because they are short and easy to read.
@@ -2114,7 +3581,7 @@ Map<int, int>(x => x + 1)(Seq(1, 2)); // => [2, 3]
 - Category: Types & Data Modeling
 - ID: #parametricity
 - Aliases: free theorems, theorems for free, parametric, generic, generics, free theorem, parametric polymorphism
-- Related concepts: #type-signatures, #type-class, #functor, #natural-transformation
+- Related concepts: #type-signatures, #type-class, #functor, #natural-transformation, #existential-type, #rank-n-type, #type-inference
 
 ### Definition
 The property that a generic function behaves the same way for every type it is given, because it can't inspect values of a type it knows nothing about. Generic code of this kind is called parametric polymorphism: one piece of code that works for every type. The useful consequence is that a generic signature alone limits what a function can do, often enough to prove things about it without reading its body (Philip Wadler called these "theorems for free").
@@ -2147,7 +3614,7 @@ Sneaky(41);   // => 42
 - Category: Algebraic Structures
 - ID: #type-class
 - Aliases: trait, traits, typeclass, instance, multi-parameter type class, static abstract, ad hoc polymorphism, overloading, static dispatch, polymorphism
-- Related concepts: #parametricity, #fallible, #higher-kinded-type, #monoid, #functor, #natural-transformation, #expression-problem
+- Related concepts: #parametricity, #fallible, #higher-kinded-type, #monoid, #functor, #natural-transformation, #expression-problem, #newtype, #existential-type, #structural-typing, #laws, #group, #semiring
 
 ### Definition
 An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time. This is called ad hoc polymorphism: one name with a different implementation for each type, picked at compile time (static dispatch), where an overridden method is picked at run time from the object's actual class (dynamic dispatch).
@@ -2176,20 +3643,20 @@ record Max(int Value) : Monoid<Max>
 - Category: Types & Data Modeling
 - ID: #higher-kinded-type
 - Aliases: hkt, higher kinds, kind, type constructor, k<f, a>, brand
-- Related concepts: #dependent-type, #type-class, #functor, #monad, #foldable, #expression-problem
+- Related concepts: #dependent-type, #type-class, #functor, #monad, #rank-n-type, #foldable, #expression-problem
 
 ### Definition
 A type that is parameterised by a type constructor rather than by a plain type. int is a complete type, but Option is not: it needs an argument to become Option<int>. Kinds classify types the way types classify values:
 
 ### Code Examples
 
-```csharp
+```text
 int, string, Option<int>   :: *             a complete type
 Option, Seq, Task          :: * -> *        needs one type argument
 Either, Dictionary         :: * -> * -> *   needs two
 ```
 
-```csharp
+```text
 // Not valid C#
 F<B> Map<F, A, B>(F<A> fa, Func<A, B> f);
 ```
@@ -2218,19 +3685,198 @@ Double(Seq(1, 2, 3)); // => [2, 4, 6]
 
 ---
 
+## Phantom Type
+
+- Category: Types & Data Modeling
+- ID: #phantom-type
+- Aliases: phantom type parameter, type tag, marker type, units of measure, typestate
+- Related concepts: #newtype, #smart-constructor, #refinement-type
+
+### Definition
+A type parameter that appears in a type but is never used by its data. It holds no values; it only tags the type, so the compiler can tell apart values that have the same representation but must not be mixed. In Haskell, newtype Distance unit = Distance Double never stores a unit.
+
+### Code Examples
+
+```csharp
+var run = new Distance<Metres>(5000);
+var walk = new Distance<Metres>(1200);
+var total = Add(run, walk); // => Distance { Value = 6200 }
+
+var mast = new Distance<Feet>(100);
+// Add(run, mast);          // compile error: Metres and Feet don't match
+var inMetres = Add(run, ToMetres(mast)).Value; // => 5030.48
+
+// Both arguments must carry the same unit
+Distance<U> Add<U>(Distance<U> a, Distance<U> b) => new(a.Value + b.Value);
+Distance<Metres> ToMetres(Distance<Feet> d) => new(d.Value * 0.3048);
+
+record Distance<TUnit>(double Value);
+abstract class Metres;
+abstract class Feet;
+```
+
+```csharp
+var email = new Email<Unverified>("ada@example.com");
+var verified = Verify(email, "1234").Map(Welcome); // => Some(Welcome, ada@example.com)
+// Welcome(email);  // compile error: not verified yet
+
+Option<Email<Verified>> Verify(Email<Unverified> e, string code) =>
+    code == "1234" ? Some(new Email<Verified>(e.Address)) : None;
+string Welcome(Email<Verified> e) => $"Welcome, {e.Address}";
+
+record Email<TState>(string Address);
+abstract class Unverified;
+abstract class Verified;
+```
+
+---
+
+## Newtype
+
+- Category: Types & Data Modeling
+- ID: #newtype
+- Aliases: wrapper type, strongly typed id, value object, domaintype, identifier, record struct
+- Related concepts: #phantom-type, #smart-constructor, #type-class, #structural-typing, #refinement-type, #monoid
+
+### Definition
+A wrapper around a single value that gives it a distinct type, without changing its representation. A CustomerId and an OrderId may both be ints underneath, but as separate types the compiler stops you passing one where the other is expected. In Haskell, newtype CustomerId = CustomerId Int is erased at compile time, so the wrapper costs nothing at run time.
+
+### Code Examples
+
+```csharp
+var customer = new CustomerId(7);
+var order = new OrderId(7);
+
+string Lookup(CustomerId id) => $"customer {id.Value}";
+Lookup(customer);  // => "customer 7"
+// Lookup(order);  // compile error: an OrderId is not a CustomerId
+// Lookup(7);      // compile error: neither is a bare int
+
+var same = customer == new CustomerId(7); // => true
+
+readonly record struct CustomerId(int Value);
+readonly record struct OrderId(int Value);
+```
+
+```csharp
+using LanguageExt.Traits.Domain;
+
+var ticket = TicketId.From(42); // => Succ(TicketId { Value = 42 })
+var bad = TicketId.From(-1);    // => Fail(ticket ids are positive)
+
+readonly record struct TicketId(int Value) : Identifier<TicketId>, DomainType<TicketId, int>
+{
+    public static Fin<TicketId> From(int repr) =>
+        repr > 0 ? new TicketId(repr) : Error.New("ticket ids are positive");
+    public int To() => Value;
+}
+```
+
+---
+
+## Smart Constructor
+
+- Category: Types & Data Modeling
+- ID: #smart-constructor
+- Aliases: parse don't validate, validating constructor, factory, illegal states unrepresentable, private constructor
+- Related concepts: #phantom-type, #newtype, #dependent-type, #refinement-type, #option, #either
+
+### Definition
+A function that is the only way to create a value of a type, and that checks the value is valid first. The real constructor is private, and the public factory returns an Option, Either, Fin or Validation, so an invalid input becomes a value the caller has to handle rather than an exception. Every value of the type that exists has passed the check, so code that receives one doesn't need to check again. This is the everyday way to "make illegal states unrepresentable".
+
+### Code Examples
+
+```csharp
+var ok = Age.From(36).Map(a => a.Value);  // => Succ(36)
+var bad = Age.From(-3).Map(a => a.Value); // => Fail(-3 is not a valid age)
+// new Age(36);                           // compile error: the constructor is private
+
+sealed record Age
+{
+    public int Value { get; }
+    private Age(int value) => Value = value;
+
+    public static Fin<Age> From(int value) =>
+        value is >= 0 and <= 150 ? new Age(value) : Error.New($"{value} is not a valid age");
+}
+```
+
+```csharp
+var person = from name in Name.From("Ada")
+             from age in Age.From(36)
+             select $"{name.Value}, {age.Value}"; // => Succ(Ada, 36)
+
+sealed record Name
+{
+    public string Value { get; }
+    private Name(string value) => Value = value;
+
+    public static Fin<Name> From(string value) =>
+        string.IsNullOrWhiteSpace(value) ? Error.New("name is empty") : new Name(value.Trim());
+}
+```
+
+---
+
+## Refinement Type
+
+- Category: Types & Data Modeling
+- ID: #refinement-type
+- Aliases: liquid haskell, f star, subset type, refined type, predicate type
+- Related concepts: #phantom-type, #smart-constructor, #dependent-type, #predicate, #newtype
+
+### Definition
+A type together with a predicate its values must satisfy, written like a set: { x : int | x > 0 } is the type of positive ints. The compiler proves that every value given that type meets the predicate, usually with an automatic theorem prover (an SMT solver), so a division by a Pos can never divide by zero, and the proof costs nothing at run time. Liquid Haskell adds refinement types to Haskell, and F* has them built in:
+
+### Code Examples
+
+```text
+{-@ type Pos = { v : Int | v > 0 } @-}
+
+{-@ divide :: Int -> Pos -> Int @-}
+divide :: Int -> Int -> Int
+divide x y = x `div` y
+
+ok  = divide 10 2   -- accepted
+bad = divide 10 0   -- rejected at compile time: 0 is not a Pos
+```
+
+```csharp
+var ten = Refined<int, Positive>.From(10).Map(y => Divide(100, y)); // => Some(10)
+var zero = Refined<int, Positive>.From(0).Map(y => Divide(100, y)); // => None
+
+// Can't divide by zero: the type says y > 0
+int Divide(int x, Refined<int, Positive> y) => x / y.Value;
+
+interface IPredicate<T> { static abstract bool Holds(T value); }
+
+sealed class Positive : IPredicate<int> { public static bool Holds(int x) => x > 0; }
+
+sealed class Refined<T, P> where P : IPredicate<T>
+{
+    public T Value { get; }
+    private Refined(T value) => Value = value;
+
+    public static Option<Refined<T, P>> From(T value) =>
+        P.Holds(value) ? Some(new Refined<T, P>(value)) : None;
+}
+```
+
+---
+
 ## Dependent Type
 
 - Category: Types & Data Modeling
 - ID: #dependent-type
 - Aliases: dependent types, dependently typed, idris, agda, lean, vect, pi type, non-empty, parse don't validate
-- Related concepts: #total-function, #higher-kinded-type, #option, #type-signatures
+- Related concepts: #total-function, #higher-kinded-type, #option, #type-signatures, #smart-constructor, #refinement-type, #generalized-algebraic-data-type
 
 ### Definition
 A type that depends on a value. In C#, types can depend on other types (Seq<int>), but values can't appear in a type. With dependent types they can, so a type can say "a list of exactly 3 ints" or "an index less than the length of this array", and the compiler checks it.
 
 ### Code Examples
 
-```csharp
+```text
 data Vect : Nat -> Type -> Type where
   Nil  : Vect Z a
   (::) : a -> Vect k a -> Vect (S k) a
@@ -2259,12 +3905,291 @@ var none  = FromSeq(Seq<int>()).Map(ne => ne.Head);   // => None
 
 ---
 
+## Existential Type
+
+- Category: Types & Data Modeling
+- ID: #existential-type
+- Aliases: existential, existential quantification, exists, hidden type, abstract type, packed type
+- Related concepts: #parametricity, #rank-n-type, #type-class
+
+### Definition
+A type that says "there exists some type T" without saying which one. A value of an existential type is a package: a value of a hidden type, together with the operations that work on it. Code that receives the package can use those operations, but can never learn what T was. It is the mirror image of a generic (universal) type: Func<T, T> with T generic means "for every T the caller picks", while an existential means "for one T the producer picked and isn't telling".
+
+### Code Examples
+
+```text
+data Counter = forall s. MkCounter s (s -> s) (s -> String)
+
+counters :: [Counter]
+counters = [MkCounter 0 (+1) show, MkCounter "" ('*':) id]
+```
+
+```csharp
+var counters = Seq<ICounter>(
+    new Counter<int>(0, n => n + 1, n => n.ToString()),
+    new Counter<string>("", s => s + "*", s => s));
+
+// Only Next and Show are available; the state type is out of reach
+var shown = counters.Map(c => c.Next().Next().Show()).ToArray(); // => ["2", "**"]
+
+interface ICounter
+{
+    ICounter Next();
+    string Show();
+}
+
+// S is chosen when the counter is made, then hidden behind ICounter
+record Counter<S>(S State, Func<S, S> Step, Func<S, string> Render) : ICounter
+{
+    public ICounter Next() => this with { State = Step(State) };
+    public string Show() => Render(State);
+}
+```
+
+---
+
+## Rank-N Type
+
+- Category: Types & Data Modeling
+- ID: #rank-n-type
+- Aliases: rank-n, rank-2, rank n type, higher-rank polymorphism, higher rank, rankntypes
+- Related concepts: #church-encoding, #existential-type, #natural-transformation, #higher-kinded-type, #parametricity, #yoneda-lemma
+
+### Definition
+A type in which a function's argument is itself generic. An ordinary generic function is rank 1: the caller picks the type arguments. In a rank-2 function, one of the arguments must work for every type, and the function being called decides which types to use it at. Rank-N allows that nesting to any depth.
+
+### Code Examples
+
+```text
+-- Rank 1: the caller picks a
+reverse :: forall a. [a] -> [a]
+
+-- Rank 2: f must work for every a, because applyToBoth uses it at Int and at String
+applyToBoth :: (forall a. [a] -> [a]) -> ([Int], [String]) -> ([Int], [String])
+applyToBoth f (xs, ys) = (f xs, f ys)
+```
+
+```csharp
+(Seq<int>, Seq<string>) ApplyToBoth(ISeqFunction f, Seq<int> xs, Seq<string> ys) =>
+    (f.Apply(xs), f.Apply(ys));
+
+var both = ApplyToBoth(new FirstTwo(), Seq(1, 2, 3), Seq("a", "b", "c"));
+var ints = both.Item1;    // => [1, 2]
+var strings = both.Item2; // => [a, b]
+
+// Any implementation has to work for every A, which is the rank-2 promise
+interface ISeqFunction
+{
+    Seq<A> Apply<A>(Seq<A> xs);
+}
+
+class FirstTwo : ISeqFunction
+{
+    public Seq<A> Apply<A>(Seq<A> xs) => xs.Take(2);
+}
+```
+
+---
+
+## Generalized Algebraic Data Type
+
+- Category: Types & Data Modeling
+- ID: #generalized-algebraic-data-type
+- Aliases: gadt, gadts, generalised algebraic data type, typed expression, indexed type, type refinement
+- Related concepts: #algebraic-data-type, #sum-type, #expression-problem, #dependent-type
+
+### Definition
+An algebraic data type whose constructors can each fix the type parameter to something specific. In an ordinary generic sum type, such as Option<A>, every case has the same A. In a GADT (generalized algebraic data type), one case can build an Expr<int> and another an Expr<bool>, and matching on a case tells the compiler which one it has.
+
+### Code Examples
+
+```text
+data Expr a where
+  IntLit  :: Int -> Expr Int
+  BoolLit :: Bool -> Expr Bool
+  Add     :: Expr Int -> Expr Int -> Expr Int
+  IsZero  :: Expr Int -> Expr Bool
+  If      :: Expr Bool -> Expr a -> Expr a -> Expr a
+
+eval :: Expr a -> a
+eval (IntLit n)  = n            -- here the compiler knows a is Int
+eval (BoolLit b) = b            -- and here that a is Bool
+eval (Add x y)   = eval x + eval y
+eval (IsZero x)  = eval x == 0
+eval (If c t e)  = if eval c then eval t else eval e
+```
+
+```csharp
+var expr = new If<int>(
+    new IsZero(new Add(new IntLit(2), new IntLit(-2))),
+    new IntLit(10),
+    new IntLit(20));
+
+var result = expr.Eval(); // => 10
+var isZero = new IsZero(new IntLit(5)).Eval(); // => false
+
+// Rejected by the compiler: Add needs Expr<int>, not Expr<bool>
+// new Add(new IntLit(1), new BoolLit(true));
+
+abstract record Expr<T>
+{
+    public abstract T Eval();
+}
+
+record IntLit(int Value) : Expr<int> { public override int Eval() => Value; }
+
+record BoolLit(bool Value) : Expr<bool> { public override bool Eval() => Value; }
+
+record Add(Expr<int> Left, Expr<int> Right) : Expr<int> { public override int Eval() => Left.Eval() + Right.Eval(); }
+
+record IsZero(Expr<int> Value) : Expr<bool> { public override bool Eval() => Value.Eval() == 0; }
+
+record If<T>(Expr<bool> Cond, Expr<T> Then, Expr<T> Else) : Expr<T> { public override T Eval() => Cond.Eval() ? Then.Eval() : Else.Eval(); }
+```
+
+---
+
+## Type Inference
+
+- Category: Types & Data Modeling
+- ID: #type-inference
+- Aliases: hindley-milner, hm, var, inferred types, local type inference, natural type, lambda inference
+- Related concepts: #type-signatures, #parametricity, #lambda
+
+### Definition
+The compiler working out types that the code doesn't write down. How much it can work out varies a lot between languages.
+
+### Code Examples
+
+```text
+compose f g x = f (g x)
+-- inferred: compose :: (b -> c) -> (a -> b) -> a -> c
+```
+
+```csharp
+var count = 42;            // int, from the literal
+var xs = Seq(1, 2, 3);     // Seq<int>: A inferred from the arguments
+var doubled = xs.Map(x => x * 2); // => [2, 4, 6]
+// x is an int because xs is a Seq<int>; Map's B is int because x * 2 is
+
+// C# 10+: a lambda with typed parameters has a natural type, Func<string, int>
+var parse = (string s) => int.Parse(s);
+var seven = parse("7"); // => 7
+
+// The target type can fill in what the expression alone can't
+Option<int> nothing = None;
+var orZero = nothing.IfNone(0); // => 0
+```
+
+```csharp
+// var inc = x => x + 1;          // error: no type for x
+// var empty = Seq();             // error: no element type; write Seq<int>()
+// int n = Parse<int>("1") works, but int m = Parse("1") doesn't:
+//   C# never infers a type argument from the return type alone
+T Parse<T>(string s) where T : IParsable<T> => T.Parse(s, null);
+
+var one = Parse<int>("1"); // => 1
+```
+
+---
+
+## Structural Typing
+
+- Category: Types & Data Modeling
+- ID: #structural-typing
+- Aliases: duck typing, nominal typing, structural type system, shape, query pattern
+- Related concepts: #newtype, #monad-comprehension, #type-class
+
+### Definition
+Deciding whether types are compatible by their shape (the members they have) instead of by their name. In a structural type system, anything with an X and a Y of the right types is a point. In a nominal type system, the one C# uses, only types declared as related are compatible, however similar they look.
+
+### Code Examples
+
+```text
+// TypeScript: any object with the right fields is a Point
+interface Point { x: number; y: number }
+const size = { x: 1, y: 2, label: "size" };
+const p: Point = size; // fine, the shape fits
+
+(* OCaml: area accepts any object with width and height methods *)
+let area o = o#width * o#height
+(* area : < height : int; width : int; .. > -> int *)
+```
+
+```csharp
+// Point p = new Size(1, 2); // error: cannot convert Size to Point
+var p = new Point(1, 2);
+var s = new Size(1, 2);
+var equal = p.Equals(s); // => false
+
+record Point(int X, int Y);
+record Size(int X, int Y);
+```
+
+```csharp
+(int X, int Y) point = (1, 2);
+(int Width, int Height) size = point; // fine: same shape, names ignored
+
+// No interface needed: query syntax only looks for Select and SelectMany
+var total =
+    from a in new Box<int>(20)
+    from b in new Box<int>(22)
+    select a + b;
+var value = total.Value; // => 42
+
+record Box<A>(A Value)
+{
+    public Box<B> Select<B>(Func<A, B> f) => new(f(Value));
+    public Box<C> SelectMany<B, C>(Func<A, Box<B>> bind, Func<A, B, C> project) =>
+        new(project(Value, bind(Value).Value));
+}
+```
+
+---
+
+## Linear Type
+
+- Category: Types & Data Modeling
+- ID: #linear-type
+- Aliases: linear types, affine types, substructural types, ownership, use once, linear haskell, borrow checker, resource safety
+- Related concepts: #side-effects, #immutability
+
+### Definition
+A type whose values must be used exactly once: not copied, not dropped. If a file handle has a linear type, the compiler can check that every handle is closed, and closed only once, and that nothing uses it afterwards. Affine types are the relaxed version, at most once, which is what Rust's ownership gives you. Together they are called substructural types.
+
+### Code Examples
+
+```text
+// Rust: assigning a String moves it, and the old name can't be used again
+let s = String::from("hi");
+let t = s;
+println!("{}", s); // error: borrow of moved value `s`
+
+-- Linear Haskell: %1 -> promises to use the argument exactly once
+swap :: (a, b) %1 -> (b, a)
+swap (x, y) = (y, x)
+```
+
+```csharp
+string WriteAfterDispose()
+{
+    var stream = new MemoryStream();
+    stream.Dispose();
+    try { stream.WriteByte(1); return "wrote"; }
+    catch (ObjectDisposedException) { return "disposed"; }
+}
+
+var outcome = WriteAfterDispose(); // => "disposed"
+```
+
+---
+
 ## Expression Problem
 
 - Category: Types & Data Modeling
 - ID: #expression-problem
 - Aliases: open closed, open/closed, visitor pattern, tagless final, extensibility, dispatch, dynamic dispatch, virtual call, subtype polymorphism
-- Related concepts: #sum-type, #type-class, #higher-kinded-type
+- Related concepts: #sum-type, #type-class, #generalized-algebraic-data-type, #higher-kinded-type
 
 ### Definition
 The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard.
@@ -2315,7 +4240,7 @@ record TimesNode(INode Left, INode Right) : INode { public int Eval() => Left.Ev
 - Category: Types & Data Modeling
 - ID: #algebraic-data-type
 - Aliases: adt
-- Related concepts: #sum-type, #product-type
+- Related concepts: #sum-type, #product-type, #pattern-matching, #generalized-algebraic-data-type, #zipper
 
 ### Definition
 A composite type made from putting other types together. Two common classes of algebraic types are sum and product.
@@ -2327,7 +4252,7 @@ A composite type made from putting other types together. Two common classes of a
 - Category: Types & Data Modeling
 - ID: #sum-type
 - Aliases: union type, discriminated union, tagged union, union, oneof, c# 15 union, closed hierarchy
-- Related concepts: #algebraic-data-type, #never-type, #expression-problem, #option, #either, #prism, #functor, #monad
+- Related concepts: #algebraic-data-type, #never-type, #expression-problem, #option, #either, #prism, #church-encoding, #pattern-matching, #generalized-algebraic-data-type, #product-and-coproduct, #initial-and-terminal-objects, #functor, #monad
 
 ### Definition
 A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types.
@@ -2405,7 +4330,7 @@ partial class Payment : OneOfBase<Card, Cash>;
 - Category: Types & Data Modeling
 - ID: #product-type
 - Aliases: tuple, pair, record, struct
-- Related concepts: #algebraic-data-type, #unit-type, #bifunctor
+- Related concepts: #algebraic-data-type, #unit-type, #bifunctor, #product-and-coproduct, #initial-and-terminal-objects
 
 ### Definition
 A product type combines types together in a way you're probably more familiar with:
@@ -2426,7 +4351,7 @@ record Point(int X, int Y);
 - Category: Types & Data Modeling
 - ID: #unit-type
 - Aliases: unit, void, empty tuple
-- Related concepts: #product-type, #never-type, #algebraic-effects
+- Related concepts: #product-type, #never-type, #initial-and-terminal-objects, #monoidal-category, #algebraic-effects
 
 ### Definition
 A type with exactly one value. Since there is only one, a Unit carries no information: it is what a function returns when it has nothing to say. It is the identity of product types: a pair (A, Unit) has exactly as many possible values as A alone.
@@ -2457,7 +4382,7 @@ var same = unit == unit; // => true
 - Category: Types & Data Modeling
 - ID: #never-type
 - Aliases: never, bottom type, empty type, nothing, absurd, fx
-- Related concepts: #sum-type, #unit-type, #either, #algebraic-effects, #monad-comprehension, #monad
+- Related concepts: #sum-type, #unit-type, #either, #algebraic-effects, #monad-comprehension, #initial-and-terminal-objects, #monoidal-category, #monad
 
 ### Definition
 A type with no values at all. Nothing can produce one, so a function that returns Never can only throw or run forever, and code that is handed a Never can never actually run. It is the identity of sum types: Either<A, Never> has exactly as many possible values as A, because the Never case can't happen.
@@ -2521,12 +4446,86 @@ Admit(-1).Run(18); // => Left(negative age)
 
 ---
 
+## Pattern Matching
+
+- Category: Types & Data Modeling
+- ID: #pattern-matching
+- Aliases: switch expression, destructuring, list patterns, guards, exhaustiveness, match
+- Related concepts: #sum-type, #algebraic-data-type, #option, #either, #expression-tree
+
+### Definition
+Taking data apart by its shape: testing which case a value is, and pulling out the pieces you need, in one step. It is how functional languages consume algebraic data types, and C# has grown most of it: switch expressions with type, property, positional, relational and list patterns, combined with and, or and not, plus when guards for anything a pattern can't say.
+
+### Code Examples
+
+```csharp
+string Size(int n) => n switch
+{
+    < 0           => "negative",
+    0             => "zero",
+    > 0 and < 10  => "small",
+    _             => "large"
+};
+
+string Ends(int[] xs) => xs switch
+{
+    []                        => "empty",
+    [var only]                => $"just {only}",
+    [var first, .., var last] => $"{first} to {last}"
+};
+
+string Greet(Person p) => p switch
+{
+    { Age: < 18 }                       => $"Hi {p.Name}",
+    (var name, _) when name.Length > 10 => "Hello",
+    (var name, _)                       => $"Hello {name}"
+};
+
+Size(7);                          // => "small"
+Ends([3, 1, 4]);                  // => "3 to 4"
+Greet(new Person("Ada", 36));     // => "Hello Ada"
+
+record Person(string Name, int Age);
+```
+
+```csharp
+string Describe(Shape s) => s switch
+{
+    Circle(var r)                    => $"circle of radius {r}",
+    Rect(var w, var h) when w == h   => $"square of side {w}",
+    Rect(var w, var h)               => $"{w} by {h} rectangle"
+};
+
+Describe(new Rect(2, 2)); // => "square of side 2"
+
+union Shape(Circle, Rect);
+record Circle(double Radius);
+record Rect(double Width, double Height);
+```
+
+```csharp
+var greeting = Some("Ada").Match(Some: n => $"Hi {n}", None: () => "Hi stranger"); // => "Hi Ada"
+
+Either<string, int> parsed = Right(42);
+var shown = parsed.Match(Left: e => $"error: {e}", Right: n => $"got {n}"); // => "got 42"
+
+// Either's cases are records, so ordinary patterns work too
+int Doubled(Either<string, int> e) => e switch
+{
+    Either<string, int>.Right(var n) => n * 2,
+    _                                => 0
+};
+Doubled(parsed); // => 84
+```
+
+---
+
 ## Option
 
 - Category: Types & Data Modeling
 - ID: #option
 - Aliases: maybe, some, none, just, nothing
-- Related concepts: #monad, #dealing-with-partial-functions, #dependent-type, #sum-type, #either, #prism, #alternative, #functor, #kleisli-composition
+- Related concepts: #monad, #dealing-with-partial-functions, #dependent-type, #sum-type, #either, #prism, #alternative, #pattern-matching, #smart-constructor, #kleisli-category, #functor, #kleisli-composition
 
 ### Definition
 Option is a sum type with two cases often called Some and None.
@@ -2564,7 +4563,7 @@ record Item(decimal? Price);
 - Category: Types & Data Modeling
 - ID: #either
 - Aliases: result, left and right, right is right
-- Related concepts: #never-type, #fallible, #option, #sum-type, #monad, #bifunctor, #monad-transformer, #pure-function
+- Related concepts: #never-type, #fallible, #option, #sum-type, #monad, #bifunctor, #monad-transformer, #pattern-matching, #smart-constructor, #product-and-coproduct, #pure-function
 
 ### Definition
 A sum type with two cases, Left and Right. By convention, Right represents a successful computation and Left contains an error or failure reason ("right is right").
@@ -2592,6 +4591,49 @@ ParseJson("invalid json").Match(
     Left:  _ => "could not parse",
     Right: obj => $"hello {User(obj)}");
 // => "could not parse"
+```
+
+---
+
+## Expression Tree
+
+- Category: Types & Data Modeling
+- ID: #expression-tree
+- Aliases: expression trees, code as data, homoiconicity, ast, abstract syntax tree, interpreter
+- Related concepts: #free-monad, #pattern-matching, #lambda
+
+### Definition
+Code represented as data. When a lambda is assigned to an Expression<Func<...>> instead of a Func<...>, the C# compiler doesn't compile it to a method; it builds a tree of objects describing it (a multiplication, whose left and right are the parameter x), which your program can inspect, transform, translate or compile at run time:
+
+### Code Examples
+
+```csharp
+using System.Linq.Expressions;
+
+Expression<Func<int, int>> square = x => x * x;
+
+var text = square.Body.ToString(); // => "(x * x)"
+var kind = square.Body.NodeType;   // => Multiply
+var nine = square.Compile()(3);    // => 9
+
+// Trees can also be built by hand
+var n = Expression.Parameter(typeof(int), "n");
+var plusOne = Expression.Lambda<Func<int, int>>(Expression.Add(n, Expression.Constant(1)), n);
+var shown = plusOne.ToString();    // => "n => (n + 1)"
+```
+
+```csharp
+int Eval(Expression e, int x) => e switch
+{
+    ConstantExpression c                                  => (int)c.Value!,
+    ParameterExpression                                   => x,
+    BinaryExpression { NodeType: ExpressionType.Add } b      => Eval(b.Left, x) + Eval(b.Right, x),
+    BinaryExpression { NodeType: ExpressionType.Multiply } b => Eval(b.Left, x) * Eval(b.Right, x),
+    _ => throw new NotSupportedException(e.NodeType.ToString())
+};
+
+Eval(square.Body, 7);  // => 49
+Eval(plusOne.Body, 7); // => 8
 ```
 
 ---

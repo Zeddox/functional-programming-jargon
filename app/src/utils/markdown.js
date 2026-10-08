@@ -37,7 +37,8 @@ export function splitMarkdownParts(markdown) {
 
   while ((match = codeRegex.exec(markdown)) !== null) {
     pushText(markdown.slice(lastIndex, match.index));
-    parts.push({ type: 'code', lang: match[1] || 'csharp', code: match[2].trim() });
+    // A fence with no language is notation (lambda calculus, Haskell, pseudo-code), not C#
+    parts.push({ type: 'code', lang: match[1] || 'text', code: match[2].trim() });
     lastIndex = codeRegex.lastIndex;
   }
   pushText(markdown.slice(lastIndex));

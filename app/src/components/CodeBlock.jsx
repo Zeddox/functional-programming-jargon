@@ -10,8 +10,11 @@ const LANGUAGE_LABELS = {
   csharp: 'C#',
   cs: 'C#',
   javascript: 'JavaScript',
-  js: 'JavaScript'
+  js: 'JavaScript',
+  text: 'Notation'
 };
+
+const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export default function CodeBlock({
   code,
@@ -24,6 +27,8 @@ export default function CodeBlock({
 
   // Memoize highlighted code HTML
   const highlightedHtml = useMemo(() => {
+    // Notation (an unlabelled fence) is shown as plain text
+    if (language === 'text') return escapeHtml(code.trim());
     try {
       const grammar = Prism.languages[language] || Prism.languages.csharp;
       return Prism.highlight(code.trim(), grammar, language);

@@ -1,10 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { soundEffects } from '../utils/audio';
+import { clusterLayout, REFERENCE_EXTENT } from '../utils/clusterLayout';
 
-// Cluster geometry: each category sits on a ring of RING_RADIUS around its
-// centre; the centres are spread around a circle of CLUSTER_RADIUS
-const RING_RADIUS = 308;
-const CLUSTER_RADIUS = 653;
 
 // Category emblems (math/FP symbols)
 const CATEGORY_SYMBOLS = {
@@ -14,7 +11,8 @@ const CATEGORY_SYMBOLS = {
   'category-morphisms': '→',
   'algebraic-structures': '★',
   'effects': '↯',
-  'types-data': '∑'
+  'types-data': '∑',
+  'lambda-calculus': 'β'
 };
 
 export default function GraphCanvas({
@@ -45,7 +43,9 @@ export default function GraphCanvas({
     isPanning: false,
     dragNode: null,
     animId: null,
-    clusterCenters: {}
+    clusterCenters: {},
+    clusterRings: {},
+    clusterExtent: REFERENCE_EXTENT
   });
 
   // Touch gesture state ref
@@ -63,33 +63,18 @@ export default function GraphCanvas({
   useEffect(() => {
     if (!graphData || !graphData.nodes) return;
 
-    const clusterAngles = {
-      'core-functions': 0.1 * Math.PI,
-      'composition': (0.1 + 2 / 7) * Math.PI,
-      'effects': (0.1 + 4 / 7) * Math.PI,
-      'purity-state': (0.1 + 6 / 7) * Math.PI,
-      'category-morphisms': (0.1 + 8 / 7) * Math.PI,
-      'algebraic-structures': (0.1 + 10 / 7) * Math.PI,
-      'types-data': (0.1 + 12 / 7) * Math.PI
-    };
-
-    const clusterRadius = CLUSTER_RADIUS;
-    const clusterCenters = {};
-    Object.keys(clusterAngles).forEach(cat => {
-      const angle = clusterAngles[cat];
-      clusterCenters[cat] = {
-        x: Math.cos(angle) * clusterRadius,
-        y: Math.sin(angle) * clusterRadius
-      };
-    });
+    const { centers: clusterCenters, rings: clusterRings, extent } =
+      clusterLayout(graphData.nodes, Object.keys(categories || {}));
     stateRef.current.clusterCenters = clusterCenters;
+    stateRef.current.clusterRings = clusterRings;
+    stateRef.current.clusterExtent = extent;
 
     // Build node map and initial positions
     const nodeMap = new Map();
     const nodes = graphData.nodes.map((n, idx) => {
       const cluster = clusterCenters[n.category] || { x: 0, y: 0 };
       const spreadAngle = (idx / graphData.nodes.length) * Math.PI * 2;
-      const spreadDist = (50 + Math.random() * 140) * (RING_RADIUS / 220);
+      const spreadDist = (50 + Math.random() * 140) * ((clusterRings[n.category] || 308) / 220);
       
       const node = {
         ...n,
@@ -208,7 +193,7 @@ export default function GraphCanvas({
       if (!running) return;
       pulseTime += 0.025;
 
-      const { nodes, links, camera, clusterCenters, dragNode } = stateRef.current;
+      const { nodes, links, camera, clusterCenters, clusterRings, dragNode } = stateRef.current;
       const dpr = window.devicePixelRatio || 1;
       const width = canvas.width / dpr;
       const height = canvas.height / dpr;
@@ -219,16 +204,16 @@ export default function GraphCanvas({
       camera.scale += (camera.targetScale - camera.scale) * 0.08;
 
       // Force-directed physics calculation
-      const kRepel = 2000;
+      const kRepel = 4000;
       const kSpring = 0.0035;
       const springLength = 130;
       const kCenter = 0.0005;
       // Nodes move freely in the inner part of their ring (so they have room to
       // spread out) and are pulled back only as they near its edge. Links that
-      // cross categories pull at half strength so they don't drag nodes out.
-      const kCluster = 0.03;
-      const clusterFreeRadius = RING_RADIUS * 0.6;
-      const kCrossSpring = kSpring * 0.5;
+      // cross categories pull at 15% strength so they don't drag nodes out.
+      const kCluster = 0.05;
+      const clusterFreeShare = 0.6;
+      const kCrossSpring = kSpring * 0.15;
 
       // 1. Repulsion between nodes
       for (let i = 0; i < nodes.length; i++) {
@@ -275,7 +260,7 @@ export default function GraphCanvas({
         const cdx = center.x - n.x;
         const cdy = center.y - n.y;
         const cdist = Math.sqrt(cdx * cdx + cdy * cdy) || 1;
-        const slack = Math.max(0, cdist - clusterFreeRadius);
+        const slack = Math.max(0, cdist - (clusterRings[n.category] || 308) * clusterFreeShare);
         n.vx += (cdx / cdist) * slack * kCluster;
         n.vy += (cdy / cdist) * slack * kCluster;
 
@@ -333,15 +318,16 @@ export default function GraphCanvas({
         const cat = categories[catId];
         const center = clusterCenters[catId];
         if (!cat || !center) return;
+        const ring = clusterRings[catId];
         const color = useCategoryColors ? cat.color : (isDark ? '#38bdf8' : '#0284c7');
         
         // Radial ambient glow
-        const grad = ctx.createRadialGradient(center.x, center.y, 20, center.x, center.y, RING_RADIUS + 40);
+        const grad = ctx.createRadialGradient(center.x, center.y, 20, center.x, center.y, ring + 40);
         grad.addColorStop(0, isDark ? `${color}20` : `${color}15`);
         grad.addColorStop(1, 'transparent');
         ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(center.x, center.y, RING_RADIUS + 40, 0, Math.PI * 2);
+        ctx.arc(center.x, center.y, ring + 40, 0, Math.PI * 2);
         ctx.fill();
 
         // Constellation boundary dashed ring
@@ -350,7 +336,7 @@ export default function GraphCanvas({
         ctx.strokeStyle = isDark ? `${color}30` : `${color}40`;
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.arc(center.x, center.y, RING_RADIUS, 0, Math.PI * 2);
+        ctx.arc(center.x, center.y, ring, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
 
@@ -362,7 +348,7 @@ export default function GraphCanvas({
         const metrics = ctx.measureText(label);
         const pillW = metrics.width + 16;
         const pillH = 22;
-        const pillY = center.y - RING_RADIUS - 10;
+        const pillY = center.y - ring - 10;
 
         ctx.fillStyle = isDark ? 'rgba(26, 26, 25, 0.9)' : 'rgba(226, 226, 223, 0.92)';
         ctx.strokeStyle = isDark ? 'rgba(240, 240, 238, 0.15)' : 'rgba(26, 26, 25, 0.15)';
@@ -839,8 +825,10 @@ export default function GraphCanvas({
     const winW = typeof window !== 'undefined' ? window.innerWidth : 1280;
     const winH = typeof window !== 'undefined' ? window.innerHeight : 800;
     const isMobile = winW < 640;
-    // Fits the whole constellation of clusters
-    const targetScale = isMobile ? 0.54 : 0.68;
+    // Fits the whole constellation of clusters (the base zooms were tuned for
+    // REFERENCE_EXTENT and shrink as the layout grows)
+    const fit = REFERENCE_EXTENT / stateRef.current.clusterExtent;
+    const targetScale = (isMobile ? 0.54 : 0.68) * fit;
     let offsetX = 0;
     if (isPanelOpen && !isMobile) {
       offsetX = (panelWidth / 2) / targetScale;

@@ -13,6 +13,7 @@
   <ItemGroup>
     <!-- Pinned on purpose: v5 is pre-release and its API still moves between betas. -->
     <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-77" />
+    <PackageReference Include="CsCheck" Version="4.9.1" />
     <PackageReference Include="OneOf" Version="3.0.271" />
     <PackageReference Include="OneOf.SourceGenerator" Version="3.0.271" />
   </ItemGroup>
