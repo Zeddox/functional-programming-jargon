@@ -2373,7 +2373,119 @@
   ],
   "combinators": {
     "title": "Function Combinators in C#",
-    "markdown": "A C#-centred take on Avaq's [Common combinators in JavaScript](https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45).\n\nA [functional combinator](readme.md#functional-combinator) is a higher-order function that builds a new function only out of the functions and values it is given. The classics have single-letter names from combinatory logic, and bird names from Raymond Smullyan's *To Mock a Mockingbird* (K is the Kestrel, S the Starling, and so on).\n\nJavaScript defines them as curried, untyped lambdas. C# is typed, so each combinator here is a small generic function. They take ordinary multi-argument `Func`s, because that is how C# code is usually written; [currying](readme.md#currying) them is a `curry` call away.\n\n## Reference\n\n| Name         | #       | [Haskell](https://www.haskell.org/) | [language-ext](https://github.com/louthy/language-ext) | Signature\n|-------------:|:--------|------------------------------|---------------------------------------------|----------\n| identity     | **I**   | `id`                         | `identity`, `Combinators<A>.I`              | `a → a`\n| constant     | **K**   | `const`                      | `constant`, `Combinators<A, B>.K`           | `a → b → a`\n| apply        | **A**   | `($)`                        | ¹                                           | `(a → b) → a → b`\n| thrush       | **T**   | `(&)`                        | `Combinators<A, B>.T`                       | `a → (a → b) → b`\n| duplication  | **W**   | `join`²                      |                                             | `(a → a → b) → a → b`\n| flip         | **C**   | `flip`                       | `flip`                                      | `(a → b → c) → b → a → c`\n| compose      | **B**   | `(.)`, `fmap`²               | `BackCompose`, `compose`³                   | `(b → c) → (a → b) → a → c`\n| substitution | **S**   | `(<*>)`²                     | `Combinators<A, B, C>.S`, `Apply`²          | `(a → b → c) → (a → b) → a → c`\n| chain⁴       | **S_**  | `(=<<)`²                     | `Bind`²                                     | `(b → a → c) → (a → b) → a → c`\n| converge⁴    | **S2**  | `liftA2`²                    | `Applicative.lift`²                         | `(b → c → d) → (a → b) → (a → c) → a → d`\n| psi          | **P**   | `on`                         |                                             | `(b → b → c) → (a → b) → a → a → c`\n| fix-point⁵   | **Y**   | `fix`                        | `Combinators<A, B, C>.Y`                    | `(a → a) → a`\n\n¹) In C# applying a function is just `f(x)`. A named `Apply` only earns its keep when you want to pass \"application\" itself around as a function.\n\n²) These are really the operations of an algebra (`Apply`, `Bind`, `lift`) specialised to functions. language-ext implements them for every [applicative](readme.md#applicative-functor) and [monad](readme.md#monad), such as `Option`, `Seq` and `Reader`; on plain functions they behave like the combinators here.\n\n³) language-ext's `compose(f, g)` runs left to right (`f` first), which makes it the flipped B, also known as the Q (Queer) bird, `Combinators<A, B, C>.Q`. `g.BackCompose(f)` is B: `f` first, then `g`.\n\n⁴) Avaq could find no consistent name for these two, so named them for the implementation. The names are kept here.\n\n⁵) C#, like JavaScript, evaluates eagerly, so the textbook Y combinator would loop forever. The strict version, known as the Z combinator, wraps the self-application in a lambda to delay it. language-ext's `Combinators.Y` takes a shortcut and simply calls itself by name.\n\n## The combinators\n\nEach sample below stands alone: it defines the combinator as a generic local function, then uses it. A `// => value` comment shows the result.\n\n### I - identity\n\nReturns its argument unchanged. Handy as the \"do nothing\" function wherever a function is required.\n\n```csharp\nA Identity<A>(A x) => x;\n\nIdentity(42);                                // => 42\nSeq(1, 2, 3).Map(Identity);                  // => [1, 2, 3]\n```\n\n### K - constant\n\nTakes a value and returns a function that ignores its argument and always returns that value.\n\n```csharp\nFunc<B, A> Constant<A, B>(A x) => _ => x;\n\nSeq(1, 2, 3).Map(Constant<string, int>(\"x\")); // => [x, x, x]\nSeq(1, 2, 3).Map(constant<string, int>(\"x\")); // => [x, x, x]\n```\n\n### A - apply\n\nApplies a function to a value.\n\n```csharp\nB Apply<A, B>(Func<A, B> f, A x) => f(x);\n\nFunc<int, int> inc = x => x + 1;\n\nApply(inc, 1); // => 2\n```\n\n### T - thrush\n\nApply with the arguments swapped: the value first, then the function. Applied to a sequence of functions, it is a pipeline.\n\n```csharp\nB Thrush<A, B>(A x, Func<A, B> f) => f(x);\n\nFunc<int, int> inc = x => x + 1;\nFunc<int, int> dbl = x => x * 2;\n\nThrush(Thrush(5, inc), dbl);                 // => 12\nCombinators<int, int>.T(5)(inc);             // => 6\n```\n\n### W - duplication\n\nPasses one argument to a two-argument function twice.\n\n```csharp\nFunc<A, B> Duplicate<A, B>(Func<A, A, B> f) => x => f(x, x);\n\nFunc<int, int, int> mul = (a, b) => a * b;\nvar square = Duplicate(mul);\n\nsquare(5); // => 25\n```\n\n### C - flip\n\nSwaps the first two arguments of a function.\n\n```csharp\nFunc<B, A, C> Flip<A, B, C>(Func<A, B, C> f) => (b, a) => f(a, b);\n\nFunc<int, int, int> sub = (a, b) => a - b;\n\nsub(10, 1);           // => 9\nFlip(sub)(10, 1);     // => -9\nflip(sub)(10, 1);     // => -9\n```\n\n### B - compose\n\nCombines two functions: `Compose(f, g)` runs `g`, then `f` on the result.\n\n```csharp\nFunc<A, C> Compose<A, B, C>(Func<B, C> f, Func<A, B> g) =>\n    x => f(g(x));\n\nFunc<int, int> inc = x => x + 1;\nFunc<int, int> dbl = x => x * 2;\n\nCompose(inc, dbl)(5);    // => 11\ninc.BackCompose(dbl)(5); // => 11\ncompose(dbl, inc)(5);    // => 11\n```\n\n### S - substitution\n\nFeeds the argument to `f` both directly and through `g`: `f(x, g(x))`.\n\n```csharp\nFunc<A, C> Substitute<A, B, C>(Func<A, B, C> f, Func<A, B> g) =>\n    x => f(x, g(x));\n\nFunc<int, int, int> sub = (a, b) => a - b;\nFunc<int, int> dbl = x => x * 2;\n\nSubstitute(sub, dbl)(3); // => -3\n```\n\n### S_ - chain\n\nS with the order of `f`'s arguments reversed: `f(g(x), x)`. For functions this is exactly what `Bind` does.\n\n```csharp\nFunc<A, C> Chain<A, B, C>(Func<B, A, C> f, Func<A, B> g) =>\n    x => f(g(x), x);\n\nFunc<int, int, int> sub = (a, b) => a - b;\nFunc<int, int> dbl = x => x * 2;\n\nChain(sub, dbl)(3); // => 3\n```\n\n### S2 - converge\n\nRuns two functions on the same argument, then combines their results with a third.\n\n```csharp\nFunc<A, D> Converge<A, B, C, D>(\n    Func<B, C, D> f, Func<A, B> g, Func<A, C> h) =>\n    x => f(g(x), h(x));\n\nFunc<int, int, int> add = (a, b) => a + b;\nFunc<int, int> inc = x => x + 1;\nFunc<int, int> dbl = x => x * 2;\n\nConverge(add, inc, dbl)(5); // => 16\n```\n\nFor other applicatives, language-ext calls this `lift`:\n\n```csharp\nApplicative.lift(add, Some(6), Some(10)); // => Some(16)\n```\n\n### P - psi\n\nApplies `g` to both arguments before combining them with `f`. Useful for comparing things \"on\" some property.\n\n```csharp\nFunc<A, A, C> Psi<A, B, C>(Func<B, B, C> f, Func<A, B> g) =>\n    (x, y) => f(g(x), g(y));\n\nFunc<int, int, bool> same = (a, b) => a == b;\nFunc<string, int> length = s => s.Length;\nvar sameLength = Psi(same, length);\n\nsameLength(\"abc\", \"xyz\");  // => true\nsameLength(\"abc\", \"wxyz\"); // => false\n```\n\n### Y - fix-point\n\nGives an anonymous function a way to call itself, which makes recursion possible without naming the function. This is the strict Z variant (see footnote ⁵): `h(h)` is only evaluated when the inner lambda is called.\n\n```csharp\nFunc<A, B> Fix<A, B>(Func<Func<A, B>, Func<A, B>> f)\n{\n    SelfApply<A, B> g = h => x => f(h(h))(x);\n    return g(g);\n}\n\nvar factorial = Fix<int, int>(self => n => n <= 1 ? 1 : n * self(n - 1));\nfactorial(5); // => 120\n\n// language-ext's version passes \"self\" and the argument together:\nvar fact = Combinators<int, int, int>.Y(\n    (self, n) => n <= 1 ? 1 : n * self(n - 1));\nfact(5); // => 120\n\n// A function that takes itself as its argument.\ndelegate Func<A, B> SelfApply<A, B>(SelfApply<A, B> self);\n```\n\n## Further reading\n\n* [Common combinators in JavaScript](https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45) - Avaq's original list, which this page adapts\n* [language-ext `Combinators`](https://github.com/louthy/language-ext/blob/main/LanguageExt.Core/Combinators.cs) - typed I, K, T, Q, S, M and Y\n* [To Mock a Mockingbird](https://en.wikipedia.org/wiki/To_Mock_a_Mockingbird) - Raymond Smullyan's book of combinator puzzles that named the birds\n* [Lambda calculus combinators and birds](http://dkeenan.com/Lambda/) - a table of the bird combinators\n* [Collected Lambdas](http://jwodder.freeshell.org/lambda.html) - a collection of noteworthy combinators\n* [Combinatory logic](https://en.wikipedia.org/wiki/Combinatory_logic) (Wikipedia)\n* [SKI combinator calculus](https://en.wikipedia.org/wiki/SKI_combinator_calculus) (Wikipedia)\n* [B, C, K, W system](https://en.wikipedia.org/wiki/B,_C,_K,_W_system) (Wikipedia)\n* [Fixed-point combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator) (Wikipedia)"
+    "markdown": "A C#-centred take on Avaq's [Common combinators in JavaScript](https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45).\n\nA [functional combinator](readme.md#functional-combinator) is a higher-order function that builds a new function only out of the functions and values it is given. The classics have single-letter names from combinatory logic, and bird names from Raymond Smullyan's *To Mock a Mockingbird* (K is the Kestrel, S the Starling, and so on).\n\nJavaScript defines them as curried, untyped lambdas. C# is typed, so each combinator here is a small generic function. They take ordinary multi-argument `Func`s, because that is how C# code is usually written; [currying](readme.md#currying) them is a `curry` call away.\n\n## Reference\n\n| Name         | #       | [Haskell](https://www.haskell.org/) | [language-ext](https://github.com/louthy/language-ext) | Signature\n|-------------:|:--------|------------------------------|---------------------------------------------|----------\n| identity     | **I**   | `id`                         | `identity`, `Combinators<A>.I`              | `a → a`\n| constant     | **K**   | `const`                      | `constant`, `Combinators<A, B>.K`           | `a → b → a`\n| apply        | **A**   | `($)`                        | ¹                                           | `(a → b) → a → b`\n| thrush       | **T**   | `(&)`                        | `Combinators<A, B>.T`                       | `a → (a → b) → b`\n| duplication  | **W**   | `join`²                      |                                             | `(a → a → b) → a → b`\n| flip         | **C**   | `flip`                       | `flip`                                      | `(a → b → c) → b → a → c`\n| compose      | **B**   | `(.)`, `fmap`²               | `BackCompose`, `compose`³                   | `(b → c) → (a → b) → a → c`\n| substitution | **S**   | `(<*>)`²                     | `Combinators<A, B, C>.S`, `Apply`²          | `(a → b → c) → (a → b) → a → c`\n| chain⁴       | **S_**  | `(=<<)`²                     | `Bind`²                                     | `(b → a → c) → (a → b) → a → c`\n| converge⁴    | **S2**  | `liftA2`²                    | `Applicative.lift`²                         | `(b → c → d) → (a → b) → (a → c) → a → d`\n| psi          | **P**   | `on`                         |                                             | `(b → b → c) → (a → b) → a → a → c`\n| fix-point⁵   | **Y**   | `fix`                        | `Combinators<A, B, C>.Y`                    | `(a → a) → a`\n\n¹) In C# applying a function is just `f(x)`. A named `Apply` only earns its keep when you want to pass \"application\" itself around as a function.\n\n²) These are really the operations of an algebra (`Apply`, `Bind`, `lift`) specialised to functions. language-ext implements them for every [applicative](readme.md#applicative-functor) and [monad](readme.md#monad), such as `Option`, `Seq` and `Reader`; on plain functions they behave like the combinators here.\n\n³) language-ext's `compose(f, g)` runs left to right (`f` first), which makes it the flipped B, also known as the Q (Queer) bird, `Combinators<A, B, C>.Q`. `g.BackCompose(f)` is B: `f` first, then `g`.\n\n⁴) Avaq could find no consistent name for these two, so named them for the implementation. The names are kept here.\n\n⁵) C#, like JavaScript, evaluates eagerly, so the textbook Y combinator would loop forever. The strict version, known as the Z combinator, wraps the self-application in a lambda to delay it. language-ext's `Combinators.Y` takes a shortcut and simply calls itself by name.\n\n## The combinators\n\nEach sample below stands alone: it defines the combinator as a generic local function, then uses it. A `// => value` comment shows the result.\n\n### I - identity\n\nReturns its argument unchanged. Handy as the \"do nothing\" function wherever a function is required.\n\n```csharp\nA Identity<A>(A x) => x;\n\nIdentity(42);                                // => 42\nSeq(1, 2, 3).Map(Identity);                  // => [1, 2, 3]\n```\n\n### K - constant\n\nTakes a value and returns a function that ignores its argument and always returns that value.\n\n```csharp\nFunc<B, A> Constant<A, B>(A x) => _ => x;\n\nSeq(1, 2, 3).Map(Constant<string, int>(\"x\")); // => [x, x, x]\nSeq(1, 2, 3).Map(constant<string, int>(\"x\")); // => [x, x, x]\n```\n\n### A - apply\n\nApplies a function to a value.\n\n```csharp\nB Apply<A, B>(Func<A, B> f, A x) => f(x);\n\nFunc<int, int> inc = x => x + 1;\n\nApply(inc, 1); // => 2\n```\n\n### T - thrush\n\nApply with the arguments swapped: the value first, then the function. Applied to a sequence of functions, it is a pipeline.\n\n```csharp\nB Thrush<A, B>(A x, Func<A, B> f) => f(x);\n\nFunc<int, int> inc = x => x + 1;\nFunc<int, int> dbl = x => x * 2;\n\nThrush(Thrush(5, inc), dbl);                 // => 12\nCombinators<int, int>.T(5)(inc);             // => 6\n```\n\n### W - duplication\n\nPasses one argument to a two-argument function twice.\n\n```csharp\nFunc<A, B> Duplicate<A, B>(Func<A, A, B> f) => x => f(x, x);\n\nFunc<int, int, int> mul = (a, b) => a * b;\nvar square = Duplicate(mul);\n\nsquare(5); // => 25\n```\n\n### C - flip\n\nSwaps the first two arguments of a function.\n\n```csharp\nFunc<B, A, C> Flip<A, B, C>(Func<A, B, C> f) => (b, a) => f(a, b);\n\nFunc<int, int, int> sub = (a, b) => a - b;\n\nsub(10, 1);           // => 9\nFlip(sub)(10, 1);     // => -9\nflip(sub)(10, 1);     // => -9\n```\n\n### B - compose\n\nCombines two functions: `Compose(f, g)` runs `g`, then `f` on the result.\n\n```csharp\nFunc<A, C> Compose<A, B, C>(Func<B, C> f, Func<A, B> g) =>\n    x => f(g(x));\n\nFunc<int, int> inc = x => x + 1;\nFunc<int, int> dbl = x => x * 2;\n\nCompose(inc, dbl)(5);    // => 11\ninc.BackCompose(dbl)(5); // => 11\ncompose(dbl, inc)(5);    // => 11\n```\n\n### S - substitution\n\nFeeds the argument to `f` both directly and through `g`: `f(x, g(x))`.\n\n```csharp\nFunc<A, C> Substitute<A, B, C>(Func<A, B, C> f, Func<A, B> g) =>\n    x => f(x, g(x));\n\nFunc<int, int, int> sub = (a, b) => a - b;\nFunc<int, int> dbl = x => x * 2;\n\nSubstitute(sub, dbl)(3); // => -3\n```\n\n### S_ - chain\n\nS with the order of `f`'s arguments reversed: `f(g(x), x)`. For functions this is exactly what `Bind` does.\n\n```csharp\nFunc<A, C> Chain<A, B, C>(Func<B, A, C> f, Func<A, B> g) =>\n    x => f(g(x), x);\n\nFunc<int, int, int> sub = (a, b) => a - b;\nFunc<int, int> dbl = x => x * 2;\n\nChain(sub, dbl)(3); // => 3\n```\n\n### S2 - converge\n\nRuns two functions on the same argument, then combines their results with a third.\n\n```csharp\nFunc<A, D> Converge<A, B, C, D>(\n    Func<B, C, D> f, Func<A, B> g, Func<A, C> h) =>\n    x => f(g(x), h(x));\n\nFunc<int, int, int> add = (a, b) => a + b;\nFunc<int, int> inc = x => x + 1;\nFunc<int, int> dbl = x => x * 2;\n\nConverge(add, inc, dbl)(5); // => 16\n```\n\nFor other applicatives, language-ext calls this `lift`:\n\n```csharp\nApplicative.lift(add, Some(6), Some(10)); // => Some(16)\n```\n\n### P - psi\n\nApplies `g` to both arguments before combining them with `f`. Useful for comparing things \"on\" some property.\n\n```csharp\nFunc<A, A, C> Psi<A, B, C>(Func<B, B, C> f, Func<A, B> g) =>\n    (x, y) => f(g(x), g(y));\n\nFunc<int, int, bool> same = (a, b) => a == b;\nFunc<string, int> length = s => s.Length;\nvar sameLength = Psi(same, length);\n\nsameLength(\"abc\", \"xyz\");  // => true\nsameLength(\"abc\", \"wxyz\"); // => false\n```\n\n### Y - fix-point\n\nGives an anonymous function a way to call itself, which makes recursion possible without naming the function. This is the strict Z variant (see footnote ⁵): `h(h)` is only evaluated when the inner lambda is called.\n\n```csharp\nFunc<A, B> Fix<A, B>(Func<Func<A, B>, Func<A, B>> f)\n{\n    SelfApply<A, B> g = h => x => f(h(h))(x);\n    return g(g);\n}\n\nvar factorial = Fix<int, int>(self => n => n <= 1 ? 1 : n * self(n - 1));\nfactorial(5); // => 120\n\n// language-ext's version passes \"self\" and the argument together:\nvar fact = Combinators<int, int, int>.Y(\n    (self, n) => n <= 1 ? 1 : n * self(n - 1));\nfact(5); // => 120\n\n// A function that takes itself as its argument.\ndelegate Func<A, B> SelfApply<A, B>(SelfApply<A, B> self);\n```\n\n## Further reading\n\n* [Common combinators in JavaScript](https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45) - Avaq's original list, which this page adapts\n* [language-ext `Combinators`](https://github.com/louthy/language-ext/blob/main/LanguageExt.Core/Combinators.cs) - typed I, K, T, Q, S, M and Y\n* [To Mock a Mockingbird](https://en.wikipedia.org/wiki/To_Mock_a_Mockingbird) - Raymond Smullyan's book of combinator puzzles that named the birds\n* [Lambda calculus combinators and birds](http://dkeenan.com/Lambda/) - a table of the bird combinators\n* [Collected Lambdas](http://jwodder.freeshell.org/lambda.html) - a collection of noteworthy combinators\n* [Combinatory logic](https://en.wikipedia.org/wiki/Combinatory_logic) (Wikipedia)\n* [SKI combinator calculus](https://en.wikipedia.org/wiki/SKI_combinator_calculus) (Wikipedia)\n* [B, C, K, W system](https://en.wikipedia.org/wiki/B,_C,_K,_W_system) (Wikipedia)\n* [Fixed-point combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator) (Wikipedia)",
+    "entries": [
+      {
+        "letter": "I",
+        "name": "identity",
+        "summary": "Returns its argument unchanged. Handy as the \"do nothing\" function wherever a function is required.",
+        "aliases": [
+          "id",
+          "identity",
+          "Combinators<A>.I"
+        ]
+      },
+      {
+        "letter": "K",
+        "name": "constant",
+        "summary": "Takes a value and returns a function that ignores its argument and always returns that value.",
+        "aliases": [
+          "const",
+          "constant",
+          "Combinators<A, B>.K"
+        ]
+      },
+      {
+        "letter": "A",
+        "name": "apply",
+        "summary": "Applies a function to a value.",
+        "aliases": [
+          "($)"
+        ]
+      },
+      {
+        "letter": "T",
+        "name": "thrush",
+        "summary": "Apply with the arguments swapped: the value first, then the function. Applied to a sequence of functions, it is a pipeline.",
+        "aliases": [
+          "(&)",
+          "Combinators<A, B>.T"
+        ]
+      },
+      {
+        "letter": "W",
+        "name": "duplication",
+        "summary": "Passes one argument to a two-argument function twice.",
+        "aliases": [
+          "join"
+        ]
+      },
+      {
+        "letter": "C",
+        "name": "flip",
+        "summary": "Swaps the first two arguments of a function.",
+        "aliases": [
+          "flip",
+          "flip"
+        ]
+      },
+      {
+        "letter": "B",
+        "name": "compose",
+        "summary": "Combines two functions: Compose(f, g) runs g, then f on the result.",
+        "aliases": [
+          "(.)",
+          "fmap",
+          "BackCompose",
+          "compose"
+        ]
+      },
+      {
+        "letter": "S",
+        "name": "substitution",
+        "summary": "Feeds the argument to f both directly and through g: f(x, g(x)).",
+        "aliases": [
+          "(<*>)",
+          "Combinators<A, B, C>.S",
+          "Apply"
+        ]
+      },
+      {
+        "letter": "S_",
+        "name": "chain",
+        "summary": "S with the order of f's arguments reversed: f(g(x), x). For functions this is exactly what Bind does.",
+        "aliases": [
+          "(=<<)",
+          "Bind"
+        ]
+      },
+      {
+        "letter": "S2",
+        "name": "converge",
+        "summary": "Runs two functions on the same argument, then combines their results with a third.",
+        "aliases": [
+          "liftA2",
+          "Applicative.lift"
+        ]
+      },
+      {
+        "letter": "P",
+        "name": "psi",
+        "summary": "Applies g to both arguments before combining them with f. Useful for comparing things \"on\" some property.",
+        "aliases": [
+          "on"
+        ]
+      },
+      {
+        "letter": "Y",
+        "name": "fix-point",
+        "summary": "Gives an anonymous function a way to call itself, which makes recursion possible without naming the function. This is the strict Z variant (see footnote ⁵): h(h) is only evaluated when the inner lambda is called.",
+        "aliases": [
+          "fix",
+          "Combinators<A, B, C>.Y"
+        ]
+      }
+    ]
   },
   "graph": {
     "nodes": [

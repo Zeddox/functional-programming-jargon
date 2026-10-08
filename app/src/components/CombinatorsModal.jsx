@@ -9,6 +9,7 @@ const SOURCE_URL = 'https://github.com/Zeddox/functional-programming-jargon/blob
 // Popup with the C# function combinator reference (combinators.md)
 export default function CombinatorsModal({
   isOpen,
+  focusLetter,
   combinators,
   onClose,
   onSelectTerm,
@@ -23,11 +24,7 @@ export default function CombinatorsModal({
   );
 
   // Quick-jump chips for each `### X - name` combinator heading
-  const entries = useMemo(() => {
-    if (!combinators) return [];
-    return [...combinators.markdown.matchAll(/^###\s+(\S+)\s+-\s+(.+)$/gm)]
-      .map(([, letter, name]) => ({ letter, name: name.trim() }));
-  }, [combinators]);
+  const entries = combinators?.entries || [];
 
   // Give rendered combinator headings ids so the chips can scroll to them
   useEffect(() => {
@@ -36,8 +33,10 @@ export default function CombinatorsModal({
       const letter = h.textContent.split(/\s+/)[0];
       h.id = `combinator-${letter}`;
     });
-    bodyRef.current.scrollTop = 0;
-  }, [isOpen, parts]);
+    const focus = focusLetter && bodyRef.current.querySelector(`#combinator-${CSS.escape(focusLetter)}`);
+    if (focus) focus.scrollIntoView({ block: 'start' });
+    else bodyRef.current.scrollTop = 0;
+  }, [isOpen, focusLetter, parts]);
 
   if (!isOpen || !combinators) return null;
 

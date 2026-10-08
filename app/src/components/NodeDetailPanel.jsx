@@ -310,6 +310,28 @@ export default function NodeDetailPanel({
           </div>
         )}
 
+        {/* C# combinator reference (shown for terms that link to it) */}
+        {onOpenCombinators && /\bcombinators\.md\b/.test(term.body) && (
+          <button
+            onClick={() => {
+              onOpenCombinators();
+              soundEffects.toggle(soundEnabled);
+            }}
+            className={`w-full px-3.5 py-3 border text-left flex items-center gap-3 transition ${
+              isDark
+                ? 'border-[rgba(240,240,238,0.15)] bg-[#1a1a19] hover:bg-[#242422] hover:border-[rgba(240,240,238,0.35)]'
+                : 'border-[rgba(26,26,25,0.15)] bg-[#dededb] hover:bg-[#d4d4d1] hover:border-[rgba(26,26,25,0.35)]'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 shrink-0 opacity-70" />
+            <span className="flex-1 min-w-0">
+              <span className="block text-xs font-semibold">Combinator reference</span>
+              <span className="block text-[11px] opacity-60">I, K, S, B, C, Y and friends in C#</span>
+            </span>
+            <span className="text-[10px] opacity-50">Open →</span>
+          </button>
+        )}
+
         {/* Further Reading Links */}
         {term.furtherReading && term.furtherReading.length > 0 && (
           <div className="space-y-2 pt-1">

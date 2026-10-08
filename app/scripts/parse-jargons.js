@@ -445,8 +445,27 @@ const combinatorsPath = [path.join(__dirname, '../../combinators.md'), path.join
   .find(p => fs.existsSync(p));
 const combinatorsSource = combinatorsPath ? fs.readFileSync(combinatorsPath, 'utf8') : '';
 const combinatorsTitle = (/^#\s+(.+)$/m.exec(combinatorsSource) || [])[1] || 'Function Combinators';
+
+// One search entry per `### X - name` section: its first paragraph as summary,
+// plus the Haskell / language-ext names from the reference table as aliases
+const combinatorAliases = {};
+for (const [, name, letter, haskell, lext] of combinatorsSource.matchAll(/^\|\s*([\w-]+)\W*\|\s*\*\*(\w+)\*\*\s*\|([^|]*)\|([^|]*)\|/gm)) {
+  combinatorAliases[letter] = [...`${haskell} ${lext}`.matchAll(/`([^`]+)`/g)].map(m => m[1]);
+}
+const combinatorEntries = [...combinatorsSource.matchAll(/^###\s+(\S+)\s+-\s+(.+)\n+([^\n`][^\n]*)/gm)]
+  .map(([, letter, name, summary]) => ({
+    letter,
+    name: name.trim(),
+    summary: summary.replace(/`/g, '').trim(),
+    aliases: combinatorAliases[letter] || []
+  }));
+
 const combinators = combinatorsSource
-  ? { title: combinatorsTitle.trim(), markdown: combinatorsSource.replace(/^#\s+.+\n+/m, '').trim() }
+  ? {
+      title: combinatorsTitle.trim(),
+      markdown: combinatorsSource.replace(/^#\s+.+\n+/m, '').trim(),
+      entries: combinatorEntries
+    }
   : null;
 
 const output = {

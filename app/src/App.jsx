@@ -55,6 +55,12 @@ export default function App() {
   const [isCombinatorsOpen, setIsCombinatorsOpen] = useState(
     () => typeof window !== 'undefined' && window.location.hash === '#combinators'
   );
+  const [combinatorFocus, setCombinatorFocus] = useState(null);
+
+  const handleOpenCombinators = (letter = null) => {
+    setCombinatorFocus(letter);
+    setIsCombinatorsOpen(true);
+  };
   
   // Customization toggles
   const [useCategoryColors] = useState(true);
@@ -373,7 +379,7 @@ export default function App() {
           allTermsMap={allTermsMap}
           onSelectTerm={handleSelectNode}
           onClose={handleClosePanel}
-          onOpenCombinators={() => setIsCombinatorsOpen(true)}
+          onOpenCombinators={() => handleOpenCombinators()}
           soundEnabled={soundEnabled}
           useCategoryColors={useCategoryColors}
           isDark={isDark}
@@ -387,6 +393,7 @@ export default function App() {
       {/* C# Function Combinator Reference */}
       <CombinatorsModal
         isOpen={isCombinatorsOpen}
+        focusLetter={combinatorFocus}
         combinators={combinators}
         onClose={handleCloseCombinators}
         onSelectTerm={handleSelectNode}
@@ -404,6 +411,12 @@ export default function App() {
         }}
         terms={terms}
         categories={categories}
+        combinators={combinators?.entries || []}
+        onSelectCombinator={(letter) => {
+          setIsSearchOpen(false);
+          setSearchQuery('');
+          handleOpenCombinators(letter);
+        }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSelectTerm={(termId) => {

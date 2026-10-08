@@ -8,6 +8,8 @@ export default function SearchHUD({
   onClose,
   terms,
   categories,
+  combinators = [],
+  onSelectCombinator,
   searchQuery,
   onSearchChange,
   onSelectTerm,
@@ -77,9 +79,38 @@ export default function SearchHUD({
       }
     }
 
+    // Combinators from the C# reference; they lose ties so jargon terms come first
+    for (const c of combinators) {
+      const name = c.name.toLowerCase();
+      const aliases = c.aliases.map(a => a.toLowerCase());
+      let score = 0;
+      if (name === q || aliases.includes(q)) {
+        score = 100;
+      } else if (name.startsWith(q)) {
+        score = 80;
+      } else if (name.includes(q)) {
+        score = 60;
+      } else if (c.letter.toLowerCase() === q || aliases.some(a => a.includes(q))) {
+        score = 40;
+      } else if ('combinator'.includes(q) || q.includes('combinator') || c.summary.toLowerCase().includes(q)) {
+        score = 15;
+      }
+
+      if (score > 0) {
+        scored.push({ term: { ...c, id: `combinator:${c.letter}`, isCombinator: true }, score: score - 1 });
+      }
+    }
+
     scored.sort((a, b) => b.score - a.score);
     return scored.map(s => s.term).slice(0, 8);
-  }, [terms, categories, searchQuery, defaultSuggestions]);
+  }, [terms, categories, combinators, searchQuery, defaultSuggestions]);
+
+  const selectResult = (result) => {
+    if (result.isCombinator) onSelectCombinator?.(result.letter);
+    else onSelectTerm(result.id);
+    soundEffects.select(soundEnabled);
+    onClose();
+  };
 
   // Reset highlight when list changes
   useEffect(() => {
@@ -107,11 +138,7 @@ export default function SearchHUD({
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const selected = filteredTerms[highlightedIndex];
-      if (selected) {
-        onSelectTerm(selected.id);
-        soundEffects.select(soundEnabled);
-        onClose();
-      }
+      if (selected) selectResult(selected);
     }
   };
 
@@ -184,15 +211,13 @@ export default function SearchHUD({
           {filteredTerms.length > 0 ? (
             filteredTerms.map((term, index) => {
               const isHighlighted = index === highlightedIndex;
-              const cat = categories[term.category];
+              const cat = term.isCombinator
+                ? { name: 'Combinator', color: isDark ? '#abb2bf' : '#5c6370' }
+                : categories[term.category];
               return (
                 <div
                   key={term.id}
-                  onClick={() => {
-                    onSelectTerm(term.id);
-                    soundEffects.select(soundEnabled);
-                    onClose();
-                  }}
+                  onClick={() => selectResult(term)}
                   onMouseEnter={() => setHighlightedIndex(index)}
                   className={`px-3.5 py-2.5 cursor-pointer flex items-center justify-between transition-colors duration-100 ${
                     isHighlighted
@@ -203,7 +228,7 @@ export default function SearchHUD({
                   <div className="flex-1 min-w-0 pr-3">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-xs tracking-tight">
-                        {term.title}
+                        {term.isCombinator ? `${term.letter} · ${term.name}` : term.title}
                       </span>
                       <span
                         className="text-[9px] px-1.5 py-0.2 border"
