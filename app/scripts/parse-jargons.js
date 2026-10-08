@@ -31,8 +31,6 @@ const CATEGORY_MAP = {
   'functional-combinator': 'composition',
   'continuation': 'composition',
   'lazy-evaluation': 'composition',
-  'io': 'composition',
-  'algebraic-effects': 'composition',
 
   // Purity & State
   'side-effects': 'purity-state',
@@ -64,8 +62,7 @@ const CATEGORY_MAP = {
   'pointed-functor': 'algebraic-structures',
   'applicative-functor': 'algebraic-structures',
   'monad': 'algebraic-structures',
-  'free-monad': 'algebraic-structures',
-  'monad-transformer': 'algebraic-structures',
+  'monad-comprehension': 'algebraic-structures',
   'comonad': 'algebraic-structures',
   'monoid': 'algebraic-structures',
   'semigroup': 'algebraic-structures',
@@ -80,6 +77,15 @@ const CATEGORY_MAP = {
   'traversable': 'algebraic-structures',
   'contravariant-functor': 'algebraic-structures',
   'alternative': 'algebraic-structures',
+
+  // Effects
+  'io': 'effects',
+  'algebraic-effects': 'effects',
+  'free-monad': 'effects',
+  'monad-transformer': 'effects',
+  'reader-monad': 'effects',
+  'writer-monad': 'effects',
+  'state-monad': 'effects',
 
   // Types & Modeling
   'type-signatures': 'types-data',
@@ -130,9 +136,16 @@ const CATEGORIES = {
   'algebraic-structures': {
     id: 'algebraic-structures',
     name: 'Algebraic Structures',
-    description: 'Functors, Monads, Monoids, Semigroups, and Fantasy Land standards.',
+    description: 'Functors, Monads, Monoids, Semigroups, and the language-ext traits behind them.',
     color: '#ec4899', // pink
     accent: 'text-pink-500 bg-pink-500/10 border-pink-500/30'
+  },
+  'effects': {
+    id: 'effects',
+    name: 'Effects',
+    description: 'IO, effect systems, and the Reader, Writer and State monads that thread context through a computation.',
+    color: '#ef4444', // red
+    accent: 'text-red-500 bg-red-500/10 border-red-500/30'
   },
   'types-data': {
     id: 'types-data',
@@ -148,6 +161,10 @@ const ALIASES_MAP = {
   'either': ['result', 'left and right', 'right is right'],
   'point-free-style': ['tacit programming', 'tacit', 'point-free', 'pointfree'],
   'monad': ['flatmap', 'bind', 'chain', 'return'],
+  'monad-comprehension': ['do notation', 'do-notation', 'for comprehension', 'linq', 'query syntax', 'query expression', 'selectmany'],
+  'reader-monad': ['reader', 'environment', 'dependency injection', 'ask', 'readable'],
+  'writer-monad': ['writer', 'tell', 'logging', 'writable'],
+  'state-monad': ['state', 'get', 'put', 'modify', 'stateful'],
   'sum-type': ['union type', 'discriminated union', 'tagged union'],
   'product-type': ['tuple', 'pair', 'record', 'struct'],
   'unit-type': ['unit', 'void', 'empty tuple'],
@@ -255,7 +272,19 @@ const EXPLICIT_RELATIONSHIPS = [
   ['unit-type', 'never-type'],
   ['never-type', 'either'],
   ['never-type', 'algebraic-effects'],
-  ['never-type', 'monad'],
+  ['never-type', 'monad-comprehension'],
+  ['monad-comprehension', 'monad'],
+  ['monad-comprehension', 'kleisli-composition'],
+  ['reader-monad', 'monad'],
+  ['writer-monad', 'monad'],
+  ['state-monad', 'monad'],
+  ['writer-monad', 'monoid'],
+  ['state-monad', 'reader-monad'],
+  ['state-monad', 'writer-monad'],
+  ['state-monad', 'side-effects'],
+  ['reader-monad', 'algebraic-effects'],
+  ['monad-transformer', 'reader-monad'],
+  ['monad-transformer', 'state-monad'],
   ['option', 'sum-type'],
   ['option', 'monad'],
   ['either', 'option'],

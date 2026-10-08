@@ -71,10 +71,14 @@ __Table of Contents__
 * [Lazy evaluation](#lazy-evaluation)
 * [Monoid](#monoid)
 * [Monad](#monad)
+* [Monad Comprehension](#monad-comprehension)
 * [Comonad](#comonad)
 * [Kleisli Composition](#kleisli-composition)
 * [Free Monad](#free-monad)
 * [Monad Transformer](#monad-transformer)
+* [Reader Monad](#reader-monad)
+* [Writer Monad](#writer-monad)
+* [State Monad](#state-monad)
 * [Applicative Functor](#applicative-functor)
 * [Bifunctor](#bifunctor)
 * [Contravariant Functor](#contravariant-functor)
@@ -1028,6 +1032,47 @@ AddM(Seq(1, 2), Seq(10, 20));  // => [11, 21, 12, 22]
 `of` is also known as `return` in other functional languages.
 `chain` is also known as `flatmap` and `bind` in other languages.
 
+## Monad Comprehension
+
+Syntax for writing a chain of [monadic](#monad) binds as if it were a sequence of plain statements. Each step binds the value inside a monad to a name, the rest of the block runs "inside" it, and the compiler rewrites the whole thing into nested `Bind` calls. Haskell calls it do-notation, Scala a for-comprehension and F# a computation expression; in C# it is LINQ query syntax.
+
+```csharp
+Option<int> ParseInt(string s) => int.TryParse(s, out var n) ? Some(n) : None;
+
+var sum = from x in ParseInt("3")
+          from y in ParseInt("4")
+          select x + y;
+// => Some(7)
+
+// The compiler turns the query above into SelectMany, which is Bind plus a projection:
+var desugared = ParseInt("3").SelectMany(x => ParseInt("4"), (x, y) => x + y);
+// => Some(7)
+
+// As with Bind, one None short-circuits the rest
+var failed = from x in ParseInt("3")
+             from y in ParseInt("four")
+             select x + y;
+// => None
+```
+
+`let` names an intermediate value, and `where` filters, for types that can be empty such as `Option` and `Seq`:
+
+```csharp
+var area = from w in ParseInt("3")
+           from h in ParseInt("4")
+           let a = w * h
+           where a > 10
+           select a;
+// => Some(12)
+```
+
+C# finds `Select` and `SelectMany` by name rather than through an interface, so any type with the right methods can be used in a query, as the `Fx<R, E, A>` in [Never type](#never-type) is.
+
+__Further reading__
+* [Query expression basics](https://learn.microsoft.com/en-us/dotnet/csharp/linq/get-started/query-expression-basics) on Microsoft Learn
+* [Monads](https://blog.ploeh.dk/2022/03/28/monads/) by Mark Seemann, which covers query syntax for each monad
+* [do notation](https://en.wikibooks.org/wiki/Haskell/do_notation) in the Haskell Wikibook
+
 ## Comonad
 
 An object that has `extract` and `extend` functions.
@@ -1204,6 +1249,89 @@ string.Join(", ", log); // => "looking up 1, looking up 2"
 
 __Further reading__
 * [Monad Transformers Step by Step](https://page.mi.fu-berlin.de/scravy/realworldhaskell/materialien/monad-transformers-step-by-step.pdf)
+
+## Reader Monad
+
+A computation that reads from a shared, read-only environment. Instead of passing configuration through every function by hand, each step asks for what it needs, and the environment is supplied once, when the whole computation is run. It is dependency injection done with a [monad](#monad).
+
+```csharp
+Reader<Config, string> Greet(string name) =>
+    from greeting in Reader.asks<Config, string>(c => c.Greeting)
+    select $"{greeting}, {name}";
+
+Reader<Config, string> Shout(string name) =>
+    from line   in Greet(name)
+    from repeat in Reader.asks<Config, int>(c => c.Repeat)
+    select string.Join(" ", Enumerable.Repeat(line + "!", repeat));
+
+Shout("Ada").Run(new Config("Hello", 2)); // => "Hello, Ada! Hello, Ada!"
+
+// local runs a computation in a modified environment
+Reader.local<Config, string>(c => c with { Repeat = 1 }, Shout("Ada"))
+      .Run(new Config("Hello", 2)); // => "Hello, Ada!"
+
+record Config(string Greeting, int Repeat);
+```
+
+language-ext describes the ability to read an environment with the `Readable` trait, so the runtime of `Eff<RT, A>` in [Algebraic Effects](#algebraic-effects) and `ReaderT` (Reader stacked on another monad, see [Monad Transformer](#monad-transformer)) work the same way.
+
+__Further reading__
+* [The Reader monad](https://blog.ploeh.dk/2022/11/14/the-reader-monad/) by Mark Seemann
+* [Reader](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Reader) in language-ext
+* [Reader? Ugh, not this joke again](https://learnyouahaskell.github.io/for-a-few-monads-more.html#reader) in Learn You a Haskell
+
+## Writer Monad
+
+A computation that produces a value and, alongside it, accumulates output, typically a log. Each step adds to the output with `tell`, and the pieces are joined with a [monoid](#monoid), so steps never see or overwrite each other's output.
+
+```csharp
+Writer<Seq<string>, int> Double(int x) =>
+    from _ in Writer.tell(Seq($"doubled {x}"))
+    select x * 2;
+
+Writer<Seq<string>, int> AddOne(int x) =>
+    from _ in Writer.tell(Seq($"added one to {x}"))
+    select x + 1;
+
+var result = (from a in Double(5)
+              from b in AddOne(a)
+              select b).Run();
+
+var value = result.Value;  // => 11
+var log   = result.Output; // => [doubled 5, added one to 10]
+```
+
+__Further reading__
+* [Writer](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Writer) in language-ext
+* [Writer? I hardly know her!](https://learnyouahaskell.github.io/for-a-few-monads-more.html#writer) in Learn You a Haskell
+
+## State Monad
+
+A computation that threads a piece of state from one step to the next. Each step can read the current state (`get`), replace it (`put`) or update it (`modify`), and the state is passed along behind the scenes, so pure code can describe a stateful algorithm without a mutable variable.
+
+```csharp
+// Hand out sequential ids, threading the counter through
+State<int, int> NextId() =>
+    from id in State.get<int>()
+    from _  in State.put(id + 1)
+    select id;
+
+var labels = from a in NextId()
+             from b in NextId()
+             from c in NextId()
+             select $"#{a} #{b} #{c}";
+
+var run  = labels.Run(100);
+var text = run.Value; // => "#100 #101 #102"
+var next = run.State; // => 103
+```
+
+Reader and Writer are State with restrictions: a Reader's state can only be read, and a Writer's can only be appended to.
+
+__Further reading__
+* [The State monad](https://blog.ploeh.dk/2022/06/20/the-state-monad/) by Mark Seemann
+* [State](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/State) in language-ext
+* [Tasteful stateful computations](https://learnyouahaskell.github.io/for-a-few-monads-more.html#state) in Learn You a Haskell
 
 ## Applicative Functor
 

@@ -2,8 +2,8 @@
   "meta": {
     "title": "FP Jargon",
     "subtitle": "The vocabulary of functional programming mapped into an interactive graph",
-    "totalTerms": 77,
-    "totalRelationships": 137,
+    "totalTerms": 81,
+    "totalRelationships": 150,
     "sourceRepo": "https://github.com/hemanth/functional-programming-jargon",
     "originalAuthor": "Hemanth HM"
   },
@@ -39,9 +39,16 @@
     "algebraic-structures": {
       "id": "algebraic-structures",
       "name": "Algebraic Structures",
-      "description": "Functors, Monads, Monoids, Semigroups, and Fantasy Land standards.",
+      "description": "Functors, Monads, Monoids, Semigroups, and the language-ext traits behind them.",
       "color": "#ec4899",
       "accent": "text-pink-500 bg-pink-500/10 border-pink-500/30"
+    },
+    "effects": {
+      "id": "effects",
+      "name": "Effects",
+      "description": "IO, effect systems, and the Reader, Writer and State monads that thread context through a computation.",
+      "color": "#ef4444",
+      "accent": "text-red-500 bg-red-500/10 border-red-500/30"
     },
     "types-data": {
       "id": "types-data",
@@ -295,7 +302,7 @@
       "id": "io",
       "title": "IO",
       "depth": 2,
-      "category": "composition",
+      "category": "effects",
       "aliases": [
         "task",
         "effect container",
@@ -412,7 +419,7 @@
       "id": "algebraic-effects",
       "title": "Algebraic Effects",
       "depth": 2,
-      "category": "composition",
+      "category": "effects",
       "aliases": [],
       "summary": "A computational effect system that separates the invocation of an effect from its handling. Rather than coupling a function directly to its runtime environment, the function \"performs\" an effect operation (such as reading state, requesting configuration, or logging). An enclosing \"handler\" intercepts the performed effect and supplies the result, with the ability to resume or abort the computation—generalizing exceptions, async/await, and generators without requiring complex monad transformer stacks.",
       "body": "A computational effect system that separates the invocation of an effect from its handling. Rather than coupling a function directly to its runtime environment, the function \"performs\" an effect operation (such as reading state, requesting configuration, or logging). An enclosing \"handler\" intercepts the performed effect and supplies the result, with the ability to resume or abort the computation—generalizing exceptions, async/await, and generators without requiring complex monad transformer stacks.\n\nC# has no native algebraic effects. language-ext's `Eff<RT, A>` gets close: a program declares the effects it needs as constraints on its runtime `RT`, and whoever runs it supplies a runtime that handles them.\n\n```csharp\n// The effects a program may perform:\ninterface IConfig { string ApiUrl { get; } }\ninterface ILog { Unit Log(string message); }\n\nrecord User(int Id, string Name);\n```\n\n```csharp\n// Program performs effects without knowing who handles them:\nEff<RT, User> FetchUserProfile<RT>(int userId)\n    where RT : IConfig, ILog =>\n    from url in Eff<RT, string>.Lift(rt => rt.ApiUrl)\n    from _   in Eff<RT, Unit>.Lift(rt =>\n                    rt.Log($\"Fetching user {userId} from {url}\"))\n    select new User(userId, \"Alice\");\n```\n\n```csharp\n// A handler interprets the effects, here by collecting log lines:\nrecord TestHandler(string ApiUrl) : IConfig, ILog\n{\n    public List<string> Logged { get; } = [];\n    public Unit Log(string message) { Logged.Add(message); return unit; }\n}\n\nvar handler = new TestHandler(\"https://api.test.local\");\n\n// Running the program with that handler:\nvar user = FetchUserProfile<TestHandler>(42).Run(handler);\n// => Succ(User { Id = 42, Name = Alice })\nvar log = handler.Logged;\n// => [\"Fetching user 42 from https://api.test.local\"]\n```\n\n`Eff` fixes its error type to language-ext's `Error`. Effect types such as ZIO (Scala) and Effect (TypeScript) make the error a type parameter too, giving the `<R, E, A>` shape: needs an `R`, fails with an `E`, succeeds with an `A`. The [Never type](#never-type) entry builds a small `Fx<R, E, A>` like that.\n\n__Further reading__\n* [Algebraic Effects for the Rest of Us](https://overreacted.io/algebraic-effects-for-the-rest-of-us/)\n* [What is Algebraic Effects?](https://koka-lang.github.io/koka/doc/book.html#why-effects)\n* [Eff](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Effects/Eff) in language-ext\n* [ZIO](https://zio.dev/reference/core/zio/), the `ZIO[R, E, A]` effect type in Scala",
@@ -453,6 +460,7 @@
       ],
       "relatedIds": [
         "never-type",
+        "reader-monad",
         "continuation",
         "side-effects",
         "free-monad",
@@ -520,6 +528,7 @@
       "crossRefs": [],
       "relatedIds": [
         "pure-function",
+        "state-monad",
         "io",
         "algebraic-effects",
         "memoization",
@@ -1172,6 +1181,7 @@
       "relatedIds": [
         "semigroup",
         "foldable",
+        "writer-monad",
         "alternative",
         "homomorphism"
       ]
@@ -1213,14 +1223,68 @@
         "kleisli-composition",
         "comonad",
         "option",
-        "never-type",
+        "monad-comprehension",
+        "reader-monad",
+        "writer-monad",
+        "state-monad",
         "either",
         "io",
         "free-monad",
         "monad-transformer",
         "constant-monad",
         "pointed-functor",
-        "functor"
+        "functor",
+        "never-type"
+      ]
+    },
+    {
+      "id": "monad-comprehension",
+      "title": "Monad Comprehension",
+      "depth": 2,
+      "category": "algebraic-structures",
+      "aliases": [
+        "do notation",
+        "do-notation",
+        "for comprehension",
+        "linq",
+        "query syntax",
+        "query expression",
+        "selectmany"
+      ],
+      "summary": "Syntax for writing a chain of monadic binds as if it were a sequence of plain statements. Each step binds the value inside a monad to a name, the rest of the block runs \"inside\" it, and the compiler rewrites the whole thing into nested Bind calls. Haskell calls it do-notation, Scala a for-comprehension and F# a computation expression; in C# it is LINQ query syntax.",
+      "body": "Syntax for writing a chain of [monadic](#monad) binds as if it were a sequence of plain statements. Each step binds the value inside a monad to a name, the rest of the block runs \"inside\" it, and the compiler rewrites the whole thing into nested `Bind` calls. Haskell calls it do-notation, Scala a for-comprehension and F# a computation expression; in C# it is LINQ query syntax.\n\n```csharp\nOption<int> ParseInt(string s) => int.TryParse(s, out var n) ? Some(n) : None;\n\nvar sum = from x in ParseInt(\"3\")\n          from y in ParseInt(\"4\")\n          select x + y;\n// => Some(7)\n\n// The compiler turns the query above into SelectMany, which is Bind plus a projection:\nvar desugared = ParseInt(\"3\").SelectMany(x => ParseInt(\"4\"), (x, y) => x + y);\n// => Some(7)\n\n// As with Bind, one None short-circuits the rest\nvar failed = from x in ParseInt(\"3\")\n             from y in ParseInt(\"four\")\n             select x + y;\n// => None\n```\n\n`let` names an intermediate value, and `where` filters, for types that can be empty such as `Option` and `Seq`:\n\n```csharp\nvar area = from w in ParseInt(\"3\")\n           from h in ParseInt(\"4\")\n           let a = w * h\n           where a > 10\n           select a;\n// => Some(12)\n```\n\nC# finds `Select` and `SelectMany` by name rather than through an interface, so any type with the right methods can be used in a query, as the `Fx<R, E, A>` in [Never type](#never-type) is.\n\n__Further reading__\n* [Query expression basics](https://learn.microsoft.com/en-us/dotnet/csharp/linq/get-started/query-expression-basics) on Microsoft Learn\n* [Monads](https://blog.ploeh.dk/2022/03/28/monads/) by Mark Seemann, which covers query syntax for each monad\n* [do notation](https://en.wikibooks.org/wiki/Haskell/do_notation) in the Haskell Wikibook",
+      "codeBlocks": [
+        {
+          "lang": "csharp",
+          "code": "Option<int> ParseInt(string s) => int.TryParse(s, out var n) ? Some(n) : None;\n\nvar sum = from x in ParseInt(\"3\")\n          from y in ParseInt(\"4\")\n          select x + y;\n// => Some(7)\n\n// The compiler turns the query above into SelectMany, which is Bind plus a projection:\nvar desugared = ParseInt(\"3\").SelectMany(x => ParseInt(\"4\"), (x, y) => x + y);\n// => Some(7)\n\n// As with Bind, one None short-circuits the rest\nvar failed = from x in ParseInt(\"3\")\n             from y in ParseInt(\"four\")\n             select x + y;\n// => None"
+        },
+        {
+          "lang": "csharp",
+          "code": "var area = from w in ParseInt(\"3\")\n           from h in ParseInt(\"4\")\n           let a = w * h\n           where a > 10\n           select a;\n// => Some(12)"
+        }
+      ],
+      "furtherReading": [
+        {
+          "title": "Query expression basics",
+          "url": "https://learn.microsoft.com/en-us/dotnet/csharp/linq/get-started/query-expression-basics"
+        },
+        {
+          "title": "Monads",
+          "url": "https://blog.ploeh.dk/2022/03/28/monads/"
+        },
+        {
+          "title": "do notation",
+          "url": "https://en.wikibooks.org/wiki/Haskell/do_notation"
+        }
+      ],
+      "crossRefs": [
+        "monad",
+        "never-type"
+      ],
+      "relatedIds": [
+        "never-type",
+        "monad",
+        "kleisli-composition"
       ]
     },
     {
@@ -1277,6 +1341,7 @@
       ],
       "relatedIds": [
         "monad",
+        "monad-comprehension",
         "monad-transformer",
         "option"
       ]
@@ -1285,7 +1350,7 @@
       "id": "free-monad",
       "title": "Free Monad",
       "depth": 2,
-      "category": "algebraic-structures",
+      "category": "effects",
       "aliases": [],
       "summary": "A Free Monad is a construction that builds a monad out of any functor without adding any domain-specific behavior. It cleanly separates the description of a program (an Abstract Syntax Tree of commands) from its execution (an interpreter that evaluates the AST).",
       "body": "A Free Monad is a construction that builds a [monad](#monad) out of any [functor](#functor) without adding any domain-specific behavior. It cleanly separates the description of a program (an Abstract Syntax Tree of commands) from its execution (an interpreter that evaluates the AST).\n\nA Free Monad has two cases:\n* `Pure`: wraps a final value and terminates computation.\n* `Free` (called `Bind` in language-ext): wraps a functor containing the next step of the computation.\n\nlanguage-ext provides `Free<F, A>`, with the cases `Pure<F, A>` and `Bind<F, A>`. All you supply is the instruction set, as a functor:\n\n```csharp\n// The instruction set: a functor of logging commands.\n// `Next` is the continuation: what to do once the command has run.\nabstract record Cmd<A> : K<Cmd, A>;\nrecord Log<A>(string Message, Func<Unit, A> Next) : Cmd<A>;\n\nclass Cmd : Functor<Cmd>\n{\n    public static K<Cmd, B> Map<A, B>(Func<A, B> f, K<Cmd, A> ma) =>\n        ma switch\n        {\n            Log<A>(var msg, var next) => new Log<B>(msg, x => f(next(x))),\n            _                         => throw new NotSupportedException()\n        };\n}\n```\n\nA program built from those instructions only *describes* what to do; nothing runs yet:\n\n```csharp\nFree<Cmd, Unit> LogMsg(string msg) =>\n    Free.lift(new Log<Unit>(msg, identity));\n\nvar program = from _1 in LogMsg(\"Starting\")\n              from _2 in LogMsg(\"Done\")\n              select 42;\n```\n\nAn interpreter walks the instruction tree and gives it meaning. Here it collects the log; another interpreter could write to a console, a file or a test double instead:\n\n```csharp\n(A, Seq<string>) Interpret<A>(K<Free<Cmd>, A> fa, Seq<string> log) =>\n    fa switch\n    {\n        Pure<Cmd, A>(var value) =>\n            (value, log),\n\n        Bind<Cmd, A>(Log<Free<Cmd, A>>(var msg, var next)) =>\n            Interpret(next(unit), log.Add(msg)),\n\n        _ => throw new NotSupportedException()\n    };\n\nInterpret(program, []); // => (42, [Starting, Done])\n```\n\n__Further reading__\n* [Song recommendations with C# free monads](https://blog.ploeh.dk/2025/09/01/song-recommendations-with-c-free-monads/) by Mark Seemann\n* [Why free monads matter](https://www.haskellforall.com/2012/06/you-could-have-invented-free-monads.html) by Gabriella Gonzalez\n* [Free](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/Free) in language-ext",
@@ -1332,7 +1397,7 @@
       "id": "monad-transformer",
       "title": "Monad Transformer",
       "depth": 2,
-      "category": "algebraic-structures",
+      "category": "effects",
       "aliases": [],
       "summary": "While functors and applicative functors compose naturally, monads do not compose generally without knowing their specific types. A Monad Transformer is a type constructor that takes an existing monad and produces a new monad with combined capabilities (such as combining error handling, asynchronous tasks, and state).",
       "body": "While [functors](#functor) and [applicative functors](#applicative-functor) compose naturally, [monads](#monad) do not compose generally without knowing their specific types. A Monad Transformer is a type constructor that takes an existing monad and produces a new monad with combined capabilities (such as combining error handling, asynchronous tasks, and state).\n\nMonad transformers typically end in `T` (e.g. `MaybeT`, `ReaderT`, `StateT`). language-ext ships `OptionT`, `EitherT`, `FinT`, `TryT`, `ValidationT`, `ReaderT`, `StateT`, `WriterT` and more.\n\n`OptionT<M, A>` wraps any monad `M` to add optionality. Wrapping the `Identity` monad (which adds no effect of its own) shows the mechanics most plainly:\n\n```csharp\nOptionT<Identity, User> FindUser(int id) =>\n    id == 1\n        ? OptionT.Some<Identity, User>(new User(\"Alice\", 30))\n        : OptionT.None<Identity, User>();\n\nOption<int> GetAge(int id) =>\n    FindUser(id)\n        .Map(user => user.Age)\n        .Run()          // unwrap the transformer: Identity<Option<int>>\n        .As().Value;    // unwrap the Identity\n\nGetAge(1); // => Some(30)\nGetAge(2); // => None\n\nrecord User(string Name, int Age);\n```\n\nThe payoff comes with a real outer monad. Here `OptionT<IO, A>` adds \"might not find a user\" on top of `IO`'s side effects, and LINQ sequences both. The lookup stops early on `None`:\n\n```csharp\nvar log = new List<string>();\n\nOptionT<IO, User> FindUserIO(int id) =>\n    OptionT.liftIO<IO, User>(IO.lift(() =>\n    {\n        log.Add($\"looking up {id}\");\n        return id == 1 ? Some(new User(\"Alice\", 30)) : None;\n    }));\n\nvar ages = from a in FindUserIO(1)\n           from b in FindUserIO(2)\n           select a.Age + b.Age;\n\nages.Run().As().Run(); // => None\nstring.Join(\", \", log); // => \"looking up 1, looking up 2\"\n```\n\n__Further reading__\n* [Monad Transformers Step by Step](https://page.mi.fu-berlin.de/scravy/realworldhaskell/materialien/monad-transformers-step-by-step.pdf)",
@@ -1358,11 +1423,140 @@
         "monad"
       ],
       "relatedIds": [
+        "reader-monad",
+        "state-monad",
         "monad",
         "kleisli-composition",
         "either",
         "functor",
         "applicative-functor"
+      ]
+    },
+    {
+      "id": "reader-monad",
+      "title": "Reader Monad",
+      "depth": 2,
+      "category": "effects",
+      "aliases": [
+        "reader",
+        "environment",
+        "dependency injection",
+        "ask",
+        "readable"
+      ],
+      "summary": "A computation that reads from a shared, read-only environment. Instead of passing configuration through every function by hand, each step asks for what it needs, and the environment is supplied once, when the whole computation is run. It is dependency injection done with a monad.",
+      "body": "A computation that reads from a shared, read-only environment. Instead of passing configuration through every function by hand, each step asks for what it needs, and the environment is supplied once, when the whole computation is run. It is dependency injection done with a [monad](#monad).\n\n```csharp\nReader<Config, string> Greet(string name) =>\n    from greeting in Reader.asks<Config, string>(c => c.Greeting)\n    select $\"{greeting}, {name}\";\n\nReader<Config, string> Shout(string name) =>\n    from line   in Greet(name)\n    from repeat in Reader.asks<Config, int>(c => c.Repeat)\n    select string.Join(\" \", Enumerable.Repeat(line + \"!\", repeat));\n\nShout(\"Ada\").Run(new Config(\"Hello\", 2)); // => \"Hello, Ada! Hello, Ada!\"\n\n// local runs a computation in a modified environment\nReader.local<Config, string>(c => c with { Repeat = 1 }, Shout(\"Ada\"))\n      .Run(new Config(\"Hello\", 2)); // => \"Hello, Ada!\"\n\nrecord Config(string Greeting, int Repeat);\n```\n\nlanguage-ext describes the ability to read an environment with the `Readable` trait, so the runtime of `Eff<RT, A>` in [Algebraic Effects](#algebraic-effects) and `ReaderT` (Reader stacked on another monad, see [Monad Transformer](#monad-transformer)) work the same way.\n\n__Further reading__\n* [The Reader monad](https://blog.ploeh.dk/2022/11/14/the-reader-monad/) by Mark Seemann\n* [Reader](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Reader) in language-ext\n* [Reader? Ugh, not this joke again](https://learnyouahaskell.github.io/for-a-few-monads-more.html#reader) in Learn You a Haskell",
+      "codeBlocks": [
+        {
+          "lang": "csharp",
+          "code": "Reader<Config, string> Greet(string name) =>\n    from greeting in Reader.asks<Config, string>(c => c.Greeting)\n    select $\"{greeting}, {name}\";\n\nReader<Config, string> Shout(string name) =>\n    from line   in Greet(name)\n    from repeat in Reader.asks<Config, int>(c => c.Repeat)\n    select string.Join(\" \", Enumerable.Repeat(line + \"!\", repeat));\n\nShout(\"Ada\").Run(new Config(\"Hello\", 2)); // => \"Hello, Ada! Hello, Ada!\"\n\n// local runs a computation in a modified environment\nReader.local<Config, string>(c => c with { Repeat = 1 }, Shout(\"Ada\"))\n      .Run(new Config(\"Hello\", 2)); // => \"Hello, Ada!\"\n\nrecord Config(string Greeting, int Repeat);"
+        }
+      ],
+      "furtherReading": [
+        {
+          "title": "The Reader monad",
+          "url": "https://blog.ploeh.dk/2022/11/14/the-reader-monad/"
+        },
+        {
+          "title": "Reader",
+          "url": "https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Reader"
+        },
+        {
+          "title": "Reader? Ugh, not this joke again",
+          "url": "https://learnyouahaskell.github.io/for-a-few-monads-more.html#reader"
+        }
+      ],
+      "crossRefs": [
+        "monad",
+        "algebraic-effects",
+        "monad-transformer"
+      ],
+      "relatedIds": [
+        "monad",
+        "state-monad",
+        "algebraic-effects",
+        "monad-transformer"
+      ]
+    },
+    {
+      "id": "writer-monad",
+      "title": "Writer Monad",
+      "depth": 2,
+      "category": "effects",
+      "aliases": [
+        "writer",
+        "tell",
+        "logging",
+        "writable"
+      ],
+      "summary": "A computation that produces a value and, alongside it, accumulates output, typically a log. Each step adds to the output with tell, and the pieces are joined with a monoid, so steps never see or overwrite each other's output.",
+      "body": "A computation that produces a value and, alongside it, accumulates output, typically a log. Each step adds to the output with `tell`, and the pieces are joined with a [monoid](#monoid), so steps never see or overwrite each other's output.\n\n```csharp\nWriter<Seq<string>, int> Double(int x) =>\n    from _ in Writer.tell(Seq($\"doubled {x}\"))\n    select x * 2;\n\nWriter<Seq<string>, int> AddOne(int x) =>\n    from _ in Writer.tell(Seq($\"added one to {x}\"))\n    select x + 1;\n\nvar result = (from a in Double(5)\n              from b in AddOne(a)\n              select b).Run();\n\nvar value = result.Value;  // => 11\nvar log   = result.Output; // => [doubled 5, added one to 10]\n```\n\n__Further reading__\n* [Writer](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Writer) in language-ext\n* [Writer? I hardly know her!](https://learnyouahaskell.github.io/for-a-few-monads-more.html#writer) in Learn You a Haskell",
+      "codeBlocks": [
+        {
+          "lang": "csharp",
+          "code": "Writer<Seq<string>, int> Double(int x) =>\n    from _ in Writer.tell(Seq($\"doubled {x}\"))\n    select x * 2;\n\nWriter<Seq<string>, int> AddOne(int x) =>\n    from _ in Writer.tell(Seq($\"added one to {x}\"))\n    select x + 1;\n\nvar result = (from a in Double(5)\n              from b in AddOne(a)\n              select b).Run();\n\nvar value = result.Value;  // => 11\nvar log   = result.Output; // => [doubled 5, added one to 10]"
+        }
+      ],
+      "furtherReading": [
+        {
+          "title": "Writer",
+          "url": "https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Writer"
+        },
+        {
+          "title": "Writer? I hardly know her!",
+          "url": "https://learnyouahaskell.github.io/for-a-few-monads-more.html#writer"
+        }
+      ],
+      "crossRefs": [
+        "monoid"
+      ],
+      "relatedIds": [
+        "monad",
+        "monoid",
+        "state-monad"
+      ]
+    },
+    {
+      "id": "state-monad",
+      "title": "State Monad",
+      "depth": 2,
+      "category": "effects",
+      "aliases": [
+        "state",
+        "get",
+        "put",
+        "modify",
+        "stateful"
+      ],
+      "summary": "A computation that threads a piece of state from one step to the next. Each step can read the current state (get), replace it (put) or update it (modify), and the state is passed along behind the scenes, so pure code can describe a stateful algorithm without a mutable variable.",
+      "body": "A computation that threads a piece of state from one step to the next. Each step can read the current state (`get`), replace it (`put`) or update it (`modify`), and the state is passed along behind the scenes, so pure code can describe a stateful algorithm without a mutable variable.\n\n```csharp\n// Hand out sequential ids, threading the counter through\nState<int, int> NextId() =>\n    from id in State.get<int>()\n    from _  in State.put(id + 1)\n    select id;\n\nvar labels = from a in NextId()\n             from b in NextId()\n             from c in NextId()\n             select $\"#{a} #{b} #{c}\";\n\nvar run  = labels.Run(100);\nvar text = run.Value; // => \"#100 #101 #102\"\nvar next = run.State; // => 103\n```\n\nReader and Writer are State with restrictions: a Reader's state can only be read, and a Writer's can only be appended to.\n\n__Further reading__\n* [The State monad](https://blog.ploeh.dk/2022/06/20/the-state-monad/) by Mark Seemann\n* [State](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/State) in language-ext\n* [Tasteful stateful computations](https://learnyouahaskell.github.io/for-a-few-monads-more.html#state) in Learn You a Haskell",
+      "codeBlocks": [
+        {
+          "lang": "csharp",
+          "code": "// Hand out sequential ids, threading the counter through\nState<int, int> NextId() =>\n    from id in State.get<int>()\n    from _  in State.put(id + 1)\n    select id;\n\nvar labels = from a in NextId()\n             from b in NextId()\n             from c in NextId()\n             select $\"#{a} #{b} #{c}\";\n\nvar run  = labels.Run(100);\nvar text = run.Value; // => \"#100 #101 #102\"\nvar next = run.State; // => 103"
+        }
+      ],
+      "furtherReading": [
+        {
+          "title": "The State monad",
+          "url": "https://blog.ploeh.dk/2022/06/20/the-state-monad/"
+        },
+        {
+          "title": "State",
+          "url": "https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/State"
+        },
+        {
+          "title": "Tasteful stateful computations",
+          "url": "https://learnyouahaskell.github.io/for-a-few-monads-more.html#state"
+        }
+      ],
+      "crossRefs": [],
+      "relatedIds": [
+        "monad",
+        "reader-monad",
+        "writer-monad",
+        "side-effects",
+        "monad-transformer"
       ]
     },
     {
@@ -2305,6 +2499,7 @@
         "unit-type",
         "either",
         "algebraic-effects",
+        "monad-comprehension",
         "monad"
       ]
     },
@@ -2725,7 +2920,7 @@
       {
         "id": "io",
         "name": "IO",
-        "category": "composition",
+        "category": "effects",
         "val": 10,
         "summary": "A pure data structure that encapsulates a side effect. Instead of performing the effect immediately, IO wraps the action in a nullary function (thunk), allowing effectful operations to be transformed, chained, and composed as pure values without actually executing them until explicitly triggered."
       },
@@ -2746,8 +2941,8 @@
       {
         "id": "algebraic-effects",
         "name": "Algebraic Effects",
-        "category": "composition",
-        "val": 9,
+        "category": "effects",
+        "val": 10,
         "summary": "A computational effect system that separates the invocation of an effect from its handling. Rather than coupling a function directly to its runtime environment, the function \"performs\" an effect operation (such as reading state, requesting configuration, or logging). An enclosing \"handler\" intercepts the performed effect and supplies the result, with the ability to resume or abort the computation—generalizing exceptions, async/await, and generators without requiring complex monad transformer stacks."
       },
       {
@@ -2761,7 +2956,7 @@
         "id": "side-effects",
         "name": "Side effects",
         "category": "purity-state",
-        "val": 9,
+        "val": 10,
         "summary": "A function or expression is said to have a side effect if apart from returning a value, it interacts with (reads from or writes to) external mutable state."
       },
       {
@@ -2915,15 +3110,22 @@
         "id": "monoid",
         "name": "Monoid",
         "category": "algebraic-structures",
-        "val": 8,
+        "val": 9,
         "summary": "An object with a function that \"combines\" that object with another of the same type (semigroup) which has an \"identity\" value."
       },
       {
         "id": "monad",
         "name": "Monad",
         "category": "algebraic-structures",
-        "val": 16,
+        "val": 20,
         "summary": "A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object."
+      },
+      {
+        "id": "monad-comprehension",
+        "name": "Monad Comprehension",
+        "category": "algebraic-structures",
+        "val": 7,
+        "summary": "Syntax for writing a chain of monadic binds as if it were a sequence of plain statements. Each step binds the value inside a monad to a name, the rest of the block runs \"inside\" it, and the compiler rewrites the whole thing into nested Bind calls. Haskell calls it do-notation, Scala a for-comprehension and F# a computation expression; in C# it is LINQ query syntax."
       },
       {
         "id": "comonad",
@@ -2936,22 +3138,43 @@
         "id": "kleisli-composition",
         "name": "Kleisli Composition",
         "category": "algebraic-structures",
-        "val": 7,
+        "val": 8,
         "summary": "An operation for composing two monad-returning functions (Kleisli Arrows) where they have compatible types. In Haskell this is the >=> operator."
       },
       {
         "id": "free-monad",
         "name": "Free Monad",
-        "category": "algebraic-structures",
+        "category": "effects",
         "val": 8,
         "summary": "A Free Monad is a construction that builds a monad out of any functor without adding any domain-specific behavior. It cleanly separates the description of a program (an Abstract Syntax Tree of commands) from its execution (an interpreter that evaluates the AST)."
       },
       {
         "id": "monad-transformer",
         "name": "Monad Transformer",
-        "category": "algebraic-structures",
-        "val": 9,
+        "category": "effects",
+        "val": 11,
         "summary": "While functors and applicative functors compose naturally, monads do not compose generally without knowing their specific types. A Monad Transformer is a type constructor that takes an existing monad and produces a new monad with combined capabilities (such as combining error handling, asynchronous tasks, and state)."
+      },
+      {
+        "id": "reader-monad",
+        "name": "Reader Monad",
+        "category": "effects",
+        "val": 8,
+        "summary": "A computation that reads from a shared, read-only environment. Instead of passing configuration through every function by hand, each step asks for what it needs, and the environment is supplied once, when the whole computation is run. It is dependency injection done with a monad."
+      },
+      {
+        "id": "writer-monad",
+        "name": "Writer Monad",
+        "category": "effects",
+        "val": 7,
+        "summary": "A computation that produces a value and, alongside it, accumulates output, typically a log. Each step adds to the output with tell, and the pieces are joined with a monoid, so steps never see or overwrite each other's output."
+      },
+      {
+        "id": "state-monad",
+        "name": "State Monad",
+        "category": "effects",
+        "val": 9,
+        "summary": "A computation that threads a piece of state from one step to the next. Each step can read the current state (get), replace it (put) or update it (modify), and the state is passed along behind the scenes, so pure code can describe a stateful algorithm without a mutable variable."
       },
       {
         "id": "applicative-functor",
@@ -3153,7 +3376,7 @@
         "id": "never-type",
         "name": "Never type",
         "category": "types-data",
-        "val": 7,
+        "val": 8,
         "summary": "A type with no values at all. Nothing can produce one, so a function that returns Never can only throw or run forever, and code that is handed a Never can never actually run. It is the identity of sum types: Either<A, Never> has exactly as many possible values as A, because the Never case can't happen."
       },
       {
@@ -3514,7 +3737,67 @@
       },
       {
         "source": "never-type",
+        "target": "monad-comprehension",
+        "type": "core"
+      },
+      {
+        "source": "monad-comprehension",
         "target": "monad",
+        "type": "core"
+      },
+      {
+        "source": "monad-comprehension",
+        "target": "kleisli-composition",
+        "type": "core"
+      },
+      {
+        "source": "reader-monad",
+        "target": "monad",
+        "type": "core"
+      },
+      {
+        "source": "writer-monad",
+        "target": "monad",
+        "type": "core"
+      },
+      {
+        "source": "state-monad",
+        "target": "monad",
+        "type": "core"
+      },
+      {
+        "source": "writer-monad",
+        "target": "monoid",
+        "type": "core"
+      },
+      {
+        "source": "state-monad",
+        "target": "reader-monad",
+        "type": "core"
+      },
+      {
+        "source": "state-monad",
+        "target": "writer-monad",
+        "type": "core"
+      },
+      {
+        "source": "state-monad",
+        "target": "side-effects",
+        "type": "core"
+      },
+      {
+        "source": "reader-monad",
+        "target": "algebraic-effects",
+        "type": "core"
+      },
+      {
+        "source": "monad-transformer",
+        "target": "reader-monad",
+        "type": "core"
+      },
+      {
+        "source": "monad-transformer",
+        "target": "state-monad",
         "type": "core"
       },
       {
@@ -3870,6 +4153,11 @@
       {
         "source": "unit-type",
         "target": "algebraic-effects",
+        "type": "reference"
+      },
+      {
+        "source": "never-type",
+        "target": "monad",
         "type": "reference"
       },
       {

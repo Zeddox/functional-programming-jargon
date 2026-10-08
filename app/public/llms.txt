@@ -1,6 +1,6 @@
 # FP Jargon
 
-> Interactive functional programming knowledge graph and specification exploring 77 concepts, category theory morphisms, and algebraic structures with C# (language-ext) examples.
+> Interactive functional programming knowledge graph and specification exploring 81 concepts, category theory morphisms, and algebraic structures with C# (language-ext) examples.
 
 FP Jargon maps out the entire vocabulary of functional programming into an interconnected graph with deterministic explanations, formal properties, and executable C# (language-ext) examples.
 
@@ -34,8 +34,6 @@ FP Jargon maps out the entire vocabulary of functional programming into an inter
 - [Auto Currying](https://hemanth.github.io/functional-programming-jargon/#auto-currying): Transforming a function that takes multiple arguments into one that if given less than its correct number of arguments r
 - [Function Composition](https://hemanth.github.io/functional-programming-jargon/#function-composition): The act of putting two functions together to form a third function where the output of one function is the input of the 
 - [Continuation](https://hemanth.github.io/functional-programming-jargon/#continuation): At any given point in a program, the part of the code that's yet to be executed is known as a continuation.
-- [IO](https://hemanth.github.io/functional-programming-jargon/#io): A pure data structure that encapsulates a side effect. Instead of performing the effect immediately, IO wraps the action
-- [Algebraic Effects](https://hemanth.github.io/functional-programming-jargon/#algebraic-effects): A computational effect system that separates the invocation of an effect from its handling. Rather than coupling a funct
 - [Point-Free Style](https://hemanth.github.io/functional-programming-jargon/#point-free-style): Writing functions where the definition does not explicitly identify the arguments used. This style usually requires curr
 - [Functional Combinator](https://hemanth.github.io/functional-programming-jargon/#functional-combinator): A higher-order function, usually curried, which returns a new function changed in some way. Functional combinators are o
 - [Lazy evaluation](https://hemanth.github.io/functional-programming-jargon/#lazy-evaluation): Lazy evaluation is a call-by-need evaluation mechanism that delays the evaluation of an expression until its value is ne
@@ -73,10 +71,9 @@ FP Jargon maps out the entire vocabulary of functional programming into an inter
 - [Lift](https://hemanth.github.io/functional-programming-jargon/#lift): Lifting is when you take a value and put it into an object like a functor. If you lift a function into an Applicative Fu
 - [Monoid](https://hemanth.github.io/functional-programming-jargon/#monoid): An object with a function that "combines" that object with another of the same type (semigroup) which has an "identity" 
 - [Monad](https://hemanth.github.io/functional-programming-jargon/#monad): A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object.
+- [Monad Comprehension](https://hemanth.github.io/functional-programming-jargon/#monad-comprehension): Syntax for writing a chain of monadic binds as if it were a sequence of plain statements. Each step binds the value insi
 - [Comonad](https://hemanth.github.io/functional-programming-jargon/#comonad): An object that has extract and extend functions.
 - [Kleisli Composition](https://hemanth.github.io/functional-programming-jargon/#kleisli-composition): An operation for composing two monad-returning functions (Kleisli Arrows) where they have compatible types. In Haskell t
-- [Free Monad](https://hemanth.github.io/functional-programming-jargon/#free-monad): A Free Monad is a construction that builds a monad out of any functor without adding any domain-specific behavior. It cl
-- [Monad Transformer](https://hemanth.github.io/functional-programming-jargon/#monad-transformer): While functors and applicative functors compose naturally, monads do not compose generally without knowing their specifi
 - [Applicative Functor](https://hemanth.github.io/functional-programming-jargon/#applicative-functor): An applicative functor is an object with an ap function. ap applies a function in the object to a value in another objec
 - [Bifunctor](https://hemanth.github.io/functional-programming-jargon/#bifunctor): A structure with two independent type parameters that can map over both of them simultaneously. A Bifunctor provides bim
 - [Contravariant Functor](https://hemanth.github.io/functional-programming-jargon/#contravariant-functor): A structure similar to a functor, but whose transformation flows in the opposite direction. While a covariant functor tr
@@ -86,6 +83,15 @@ FP Jargon maps out the entire vocabulary of functional programming into an inter
 - [Semigroup](https://hemanth.github.io/functional-programming-jargon/#semigroup): An object that has a concat function that combines it with another object of the same type.
 - [Foldable](https://hemanth.github.io/functional-programming-jargon/#foldable): An object that has a reduce function that applies a function against an accumulator and each element in the array (from 
 - [Traversable](https://hemanth.github.io/functional-programming-jargon/#traversable): A Foldable and Functor that can turn a collection of wrapped values inside-out via sequence or traverse, transforming F<
+
+### Effects
+- [IO](https://hemanth.github.io/functional-programming-jargon/#io): A pure data structure that encapsulates a side effect. Instead of performing the effect immediately, IO wraps the action
+- [Algebraic Effects](https://hemanth.github.io/functional-programming-jargon/#algebraic-effects): A computational effect system that separates the invocation of an effect from its handling. Rather than coupling a funct
+- [Free Monad](https://hemanth.github.io/functional-programming-jargon/#free-monad): A Free Monad is a construction that builds a monad out of any functor without adding any domain-specific behavior. It cl
+- [Monad Transformer](https://hemanth.github.io/functional-programming-jargon/#monad-transformer): While functors and applicative functors compose naturally, monads do not compose generally without knowing their specifi
+- [Reader Monad](https://hemanth.github.io/functional-programming-jargon/#reader-monad): A computation that reads from a shared, read-only environment. Instead of passing configuration through every function b
+- [Writer Monad](https://hemanth.github.io/functional-programming-jargon/#writer-monad): A computation that produces a value and, alongside it, accumulates output, typically a log. Each step adds to the output
+- [State Monad](https://hemanth.github.io/functional-programming-jargon/#state-monad): A computation that threads a piece of state from one step to the next. Each step can read the current state (get), repla
 
 ### Types & Data Modeling
 - [Lambda Calculus](https://hemanth.github.io/functional-programming-jargon/#lambda-calculus): A branch of mathematics that uses functions to create a universal model of computation.

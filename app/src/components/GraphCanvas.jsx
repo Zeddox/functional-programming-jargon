@@ -8,6 +8,7 @@ const CATEGORY_SYMBOLS = {
   'purity-state': '≡',
   'category-morphisms': '→',
   'algebraic-structures': '★',
+  'effects': '↯',
   'types-data': '∑'
 };
 
@@ -59,14 +60,16 @@ export default function GraphCanvas({
 
     const clusterAngles = {
       'core-functions': 0.1 * Math.PI,
-      'composition': 0.45 * Math.PI,
-      'purity-state': 0.8 * Math.PI,
-      'category-morphisms': 1.15 * Math.PI,
-      'algebraic-structures': 1.5 * Math.PI,
-      'types-data': 1.85 * Math.PI
+      'composition': (0.1 + 2 / 7) * Math.PI,
+      'effects': (0.1 + 4 / 7) * Math.PI,
+      'purity-state': (0.1 + 6 / 7) * Math.PI,
+      'category-morphisms': (0.1 + 8 / 7) * Math.PI,
+      'algebraic-structures': (0.1 + 10 / 7) * Math.PI,
+      'types-data': (0.1 + 12 / 7) * Math.PI
     };
 
-    const clusterRadius = 400;
+    // Keeps the gap between neighbouring clusters the same as with six of them
+    const clusterRadius = 400 * 7 / 6;
     const clusterCenters = {};
     Object.keys(clusterAngles).forEach(cat => {
       const angle = clusterAngles[cat];

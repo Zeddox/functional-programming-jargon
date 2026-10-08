@@ -1,6 +1,6 @@
 # FP Jargon - Full Reference
 
-> Complete catalog of 77 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
+> Complete catalog of 81 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
 > Source: https://github.com/hemanth/functional-programming-jargon
 > Live app: https://hemanth.github.io/functional-programming-jargon/
 
@@ -233,7 +233,7 @@ async Task ReadAndContinue(string path)
 
 ## IO
 
-- Category: Composition & Flow
+- Category: Effects
 - ID: #io
 - Aliases: task, effect container, side effect recipe
 - Related concepts: #side-effects, #monad, #lazy-evaluation, #thunk, #free-monad, #value
@@ -309,9 +309,9 @@ thunk(); // => 84
 
 ## Algebraic Effects
 
-- Category: Composition & Flow
+- Category: Effects
 - ID: #algebraic-effects
-- Related concepts: #never-type, #continuation, #side-effects, #free-monad, #unit-type
+- Related concepts: #never-type, #reader-monad, #continuation, #side-effects, #free-monad, #unit-type
 
 ### Definition
 A computational effect system that separates the invocation of an effect from its handling. Rather than coupling a function directly to its runtime environment, the function "performs" an effect operation (such as reading state, requesting configuration, or logging). An enclosing "handler" intercepts the performed effect and supplies the result, with the ability to resume or abort the computation—generalizing exceptions, async/await, and generators without requiring complex monad transformer stacks.
@@ -398,7 +398,7 @@ var result = greeting; // => "Hi, Brianne"
 
 - Category: Purity & Reasoning
 - ID: #side-effects
-- Related concepts: #pure-function, #io, #algebraic-effects, #memoization, #function
+- Related concepts: #pure-function, #state-monad, #io, #algebraic-effects, #memoization, #function
 
 ### Definition
 A function or expression is said to have a side effect if apart from returning a value, it interacts with (reads from or writes to) external mutable state.
@@ -988,7 +988,7 @@ toSeq(Naturals()).Map(n => n * n).Take(4); // => [0, 1, 4, 9]
 - Category: Algebraic Structures
 - ID: #monoid
 - Aliases: empty, identity, semigroup with identity
-- Related concepts: #semigroup, #foldable, #alternative, #homomorphism
+- Related concepts: #semigroup, #foldable, #writer-monad, #alternative, #homomorphism
 
 ### Definition
 An object with a function that "combines" that object with another of the same type (semigroup) which has an "identity" value.
@@ -1043,7 +1043,7 @@ var commutes = 0 - 4 == 4 - 0; // => false
 - Category: Algebraic Structures
 - ID: #monad
 - Aliases: flatmap, bind, chain, return
-- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #never-type, #either, #io, #free-monad, #monad-transformer, #constant-monad, #pointed-functor, #functor
+- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #monad-comprehension, #reader-monad, #writer-monad, #state-monad, #either, #io, #free-monad, #monad-transformer, #constant-monad, #pointed-functor, #functor, #never-type
 
 ### Definition
 A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object.
@@ -1074,6 +1074,48 @@ K<M, int> AddM<M>(K<M, int> mx, K<M, int> my) where M : Monad<M> =>
 AddM(Some(1), Some(2));        // => Some(3)
 AddM(Some(1), Option<int>.None); // => None
 AddM(Seq(1, 2), Seq(10, 20));  // => [11, 21, 12, 22]
+```
+
+---
+
+## Monad Comprehension
+
+- Category: Algebraic Structures
+- ID: #monad-comprehension
+- Aliases: do notation, do-notation, for comprehension, linq, query syntax, query expression, selectmany
+- Related concepts: #never-type, #monad, #kleisli-composition
+
+### Definition
+Syntax for writing a chain of monadic binds as if it were a sequence of plain statements. Each step binds the value inside a monad to a name, the rest of the block runs "inside" it, and the compiler rewrites the whole thing into nested Bind calls. Haskell calls it do-notation, Scala a for-comprehension and F# a computation expression; in C# it is LINQ query syntax.
+
+### Code Examples
+
+```csharp
+Option<int> ParseInt(string s) => int.TryParse(s, out var n) ? Some(n) : None;
+
+var sum = from x in ParseInt("3")
+          from y in ParseInt("4")
+          select x + y;
+// => Some(7)
+
+// The compiler turns the query above into SelectMany, which is Bind plus a projection:
+var desugared = ParseInt("3").SelectMany(x => ParseInt("4"), (x, y) => x + y);
+// => Some(7)
+
+// As with Bind, one None short-circuits the rest
+var failed = from x in ParseInt("3")
+             from y in ParseInt("four")
+             select x + y;
+// => None
+```
+
+```csharp
+var area = from w in ParseInt("3")
+           from h in ParseInt("4")
+           let a = w * h
+           where a > 10
+           select a;
+// => Some(12)
 ```
 
 ---
@@ -1114,7 +1156,7 @@ new CoIdentity<int>(1).Extend(co => co.Extract() + 1);
 
 - Category: Algebraic Structures
 - ID: #kleisli-composition
-- Related concepts: #monad, #monad-transformer, #option
+- Related concepts: #monad, #monad-comprehension, #monad-transformer, #option
 
 ### Definition
 An operation for composing two monad-returning functions (Kleisli Arrows) where they have compatible types. In Haskell this is the >=> operator.
@@ -1151,7 +1193,7 @@ parseAndValidate("999");  // => Some(999)
 
 ## Free Monad
 
-- Category: Algebraic Structures
+- Category: Effects
 - ID: #free-monad
 - Related concepts: #monad, #functor, #io, #algebraic-effects
 
@@ -1206,9 +1248,9 @@ Interpret(program, []); // => (42, [Starting, Done])
 
 ## Monad Transformer
 
-- Category: Algebraic Structures
+- Category: Effects
 - ID: #monad-transformer
-- Related concepts: #monad, #kleisli-composition, #either, #functor, #applicative-functor
+- Related concepts: #reader-monad, #state-monad, #monad, #kleisli-composition, #either, #functor, #applicative-functor
 
 ### Definition
 While functors and applicative functors compose naturally, monads do not compose generally without knowing their specific types. A Monad Transformer is a type constructor that takes an existing monad and produces a new monad with combined capabilities (such as combining error handling, asynchronous tasks, and state).
@@ -1249,6 +1291,101 @@ var ages = from a in FindUserIO(1)
 
 ages.Run().As().Run(); // => None
 string.Join(", ", log); // => "looking up 1, looking up 2"
+```
+
+---
+
+## Reader Monad
+
+- Category: Effects
+- ID: #reader-monad
+- Aliases: reader, environment, dependency injection, ask, readable
+- Related concepts: #monad, #state-monad, #algebraic-effects, #monad-transformer
+
+### Definition
+A computation that reads from a shared, read-only environment. Instead of passing configuration through every function by hand, each step asks for what it needs, and the environment is supplied once, when the whole computation is run. It is dependency injection done with a monad.
+
+### Code Examples
+
+```csharp
+Reader<Config, string> Greet(string name) =>
+    from greeting in Reader.asks<Config, string>(c => c.Greeting)
+    select $"{greeting}, {name}";
+
+Reader<Config, string> Shout(string name) =>
+    from line   in Greet(name)
+    from repeat in Reader.asks<Config, int>(c => c.Repeat)
+    select string.Join(" ", Enumerable.Repeat(line + "!", repeat));
+
+Shout("Ada").Run(new Config("Hello", 2)); // => "Hello, Ada! Hello, Ada!"
+
+// local runs a computation in a modified environment
+Reader.local<Config, string>(c => c with { Repeat = 1 }, Shout("Ada"))
+      .Run(new Config("Hello", 2)); // => "Hello, Ada!"
+
+record Config(string Greeting, int Repeat);
+```
+
+---
+
+## Writer Monad
+
+- Category: Effects
+- ID: #writer-monad
+- Aliases: writer, tell, logging, writable
+- Related concepts: #monad, #monoid, #state-monad
+
+### Definition
+A computation that produces a value and, alongside it, accumulates output, typically a log. Each step adds to the output with tell, and the pieces are joined with a monoid, so steps never see or overwrite each other's output.
+
+### Code Examples
+
+```csharp
+Writer<Seq<string>, int> Double(int x) =>
+    from _ in Writer.tell(Seq($"doubled {x}"))
+    select x * 2;
+
+Writer<Seq<string>, int> AddOne(int x) =>
+    from _ in Writer.tell(Seq($"added one to {x}"))
+    select x + 1;
+
+var result = (from a in Double(5)
+              from b in AddOne(a)
+              select b).Run();
+
+var value = result.Value;  // => 11
+var log   = result.Output; // => [doubled 5, added one to 10]
+```
+
+---
+
+## State Monad
+
+- Category: Effects
+- ID: #state-monad
+- Aliases: state, get, put, modify, stateful
+- Related concepts: #monad, #reader-monad, #writer-monad, #side-effects, #monad-transformer
+
+### Definition
+A computation that threads a piece of state from one step to the next. Each step can read the current state (get), replace it (put) or update it (modify), and the state is passed along behind the scenes, so pure code can describe a stateful algorithm without a mutable variable.
+
+### Code Examples
+
+```csharp
+// Hand out sequential ids, threading the counter through
+State<int, int> NextId() =>
+    from id in State.get<int>()
+    from _  in State.put(id + 1)
+    select id;
+
+var labels = from a in NextId()
+             from b in NextId()
+             from c in NextId()
+             select $"#{a} #{b} #{c}";
+
+var run  = labels.Run(100);
+var text = run.Value; // => "#100 #101 #102"
+var next = run.State; // => 103
 ```
 
 ---
@@ -2035,7 +2172,7 @@ var same = unit == unit; // => true
 - Category: Types & Data Modeling
 - ID: #never-type
 - Aliases: never, bottom type, empty type, nothing, absurd, fx
-- Related concepts: #sum-type, #unit-type, #either, #algebraic-effects, #monad
+- Related concepts: #sum-type, #unit-type, #either, #algebraic-effects, #monad-comprehension, #monad
 
 ### Definition
 A type with no values at all. Nothing can produce one, so a function that returns Never can only throw or run forever, and code that is handed a Never can never actually run. It is the identity of sum types: Either<A, Never> has exactly as many possible values as A, because the Never case can't happen.
