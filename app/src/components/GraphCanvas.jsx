@@ -219,7 +219,10 @@ export default function GraphCanvas({
       const kSpring = 0.0035;
       const springLength = 130;
       const kCenter = 0.0005;
-      const kCluster = 0.0055;
+      // Strong enough to keep each category inside its ring; links that cross
+      // categories pull at half strength so they don't drag nodes out
+      const kCluster = 0.011;
+      const kCrossSpring = kSpring * 0.5;
 
       // 1. Repulsion between nodes
       for (let i = 0; i < nodes.length; i++) {
@@ -249,7 +252,7 @@ export default function GraphCanvas({
         const dy = target.y - source.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
         const displacement = dist - springLength;
-        const force = displacement * kSpring;
+        const force = displacement * (source.category === target.category ? kSpring : kCrossSpring);
         const fx = (dx / dist) * force;
         const fy = (dy / dist) * force;
         if (source !== dragNode) { source.vx += fx; source.vy += fy; }
