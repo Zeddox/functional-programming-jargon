@@ -1,6 +1,6 @@
 # FP Jargon - Full Reference
 
-> Complete catalog of 75 functional programming concepts, morphisms, algebraic structures, and category theory terms with JavaScript ES2015 examples.
+> Complete catalog of 75 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
 > Source: https://github.com/hemanth/functional-programming-jargon
 > Live app: https://hemanth.github.io/functional-programming-jargon/
 
@@ -16,12 +16,12 @@ The number of arguments a function takes. From words like unary, binary, ternary
 
 ### Code Examples
 
-```js
-const sum = (a, b) => a + b
+```csharp
+Func<int, int, int> sum = (a, b) => a + b;
 // The arity of sum is 2 (binary)
-const inc = a => a + 1
+Func<int, int> inc = a => a + 1;
 // The arity of inc is 1 (unary)
-const zero = () => 0
+Func<int> zero = () => 0;
 // The arity of zero is 0 (nullary)
 ```
 
@@ -39,16 +39,17 @@ A function which takes a function as an argument and/or returns a function.
 
 ### Code Examples
 
-```js
-const filter = (predicate, xs) => xs.filter(predicate)
+```csharp
+IEnumerable<A> Filter<A>(Func<A, bool> predicate, IEnumerable<A> xs) =>
+    xs.Where(predicate);
 ```
 
-```js
-const is = (type) => (x) => Object(x) instanceof type
+```csharp
+Func<object?, bool> Is<T>() => x => x is T;
 ```
 
-```js
-filter(is(Number), [0, '1', 2, null]) // [0, 2]
+```csharp
+Filter(Is<int>(), new object?[] { 0, "1", 2, null }); // => [0, 2]
 ```
 
 ---
@@ -64,10 +65,10 @@ A closure is a scope which captures local variables of a function for access eve
 
 ### Code Examples
 
-```js
-const addTo = x => y => x + y
-const addToFive = addTo(5)
-addToFive(3) // => 8
+```csharp
+Func<int, int> AddTo(int x) => y => x + y;
+var addToFive = AddTo(5);
+addToFive(3); // => 8
 ```
 
 ---
@@ -83,26 +84,26 @@ Partially applying a function means creating a new function by pre-filling some 
 
 ### Code Examples
 
-```js
-// Helper to create partially applied functions
-// Takes a function and some arguments
-const partial = (f, ...args) =>
-  // returns a function that takes the rest of the arguments
-  (...moreArgs) =>
+```csharp
+// Helper to create partially applied functions:
+// takes a function and some arguments...
+Func<C, R> Partial<A, B, C, R>(Func<A, B, C, R> f, A a, B b) =>
+    // ...returns a function that takes the rest of the arguments
     // and calls the original function with all of them
-    f(...args, ...moreArgs)
+    c => f(a, b, c);
 
 // Something to apply
-const add3 = (a, b, c) => a + b + c
+Func<int, int, int, int> add3 = (a, b, c) => a + b + c;
 
-// Partially applying `2` and `3` to `add3` gives you a one-argument function
-const fivePlus = partial(add3, 2, 3) // (c) => 2 + 3 + c
+// Partially applying `2` and `3` to `add3` gives a one-argument function
+var fivePlus = Partial(add3, 2, 3); // (c) => 2 + 3 + c
 
-fivePlus(4) // 9
+fivePlus(4); // => 9
 ```
 
-```js
-const add1More = add3.bind(null, 2, 3) // (c) => 2 + 3 + c
+```csharp
+var add1More = par(add3, 2, 3); // (c) => 2 + 3 + c
+add1More(4); // => 9
 ```
 
 ---
@@ -119,16 +120,16 @@ The process of converting a function that takes multiple arguments into a functi
 
 ### Code Examples
 
-```js
-const sum = (a, b) => a + b
+```csharp
+Func<int, int, int> sum = (a, b) => a + b;
 
-const curriedSum = (a) => (b) => a + b
+Func<int, Func<int, int>> curriedSum = a => b => a + b;
 
-curriedSum(40)(2) // 42.
+curriedSum(40)(2); // => 42
 
-const add2 = curriedSum(2) // (b) => 2 + b
+var add2 = curriedSum(2); // (b) => 2 + b
 
-add2(10) // 12
+add2(10); // => 12
 ```
 
 ---
@@ -144,13 +145,14 @@ Transforming a function that takes multiple arguments into one that if given les
 
 ### Code Examples
 
-```js
-const add = (x, y) => x + y
+```csharp
+Func<int, int, int> add = (x, y) => x + y;
 
-const curriedAdd = _.curry(add)
-curriedAdd(1, 2) // 3
-curriedAdd(1) // (y) => 1 + y
-curriedAdd(1)(2) // 3
+var curriedAdd = curry(add);
+curriedAdd(1)(2);           // => 3
+var add1 = curriedAdd(1);   // (y) => 1 + y
+add1(2);                    // => 3
+uncurry(curriedAdd)(1, 2);  // => 3
 ```
 
 ---
@@ -166,10 +168,19 @@ The act of putting two functions together to form a third function where the out
 
 ### Code Examples
 
-```js
-const compose = (f, g) => (a) => f(g(a)) // Definition
-const floorAndToString = compose((val) => val.toString(), Math.floor) // Usage
-floorAndToString(121.212121) // '121'
+```csharp
+// Definition
+Func<A, C> Compose<A, B, C>(Func<B, C> f, Func<A, B> g) => a => f(g(a));
+
+// Usage
+Func<double, double> floor = Math.Floor;
+var floorAndToString = Compose((double x) => x.ToString(), floor);
+floorAndToString(121.212121); // => "121"
+```
+
+```csharp
+var floorThenToString = compose(floor, (double x) => x.ToString());
+floorThenToString(121.212121); // => "121"
 ```
 
 ---
@@ -185,29 +196,37 @@ At any given point in a program, the part of the code that's yet to be executed 
 
 ### Code Examples
 
-```js
-const printAsString = (num) => console.log(`Given ${num}`)
+```csharp
+string PrintAsString(int num) => $"Given {num}";
 
-const addOneAndContinue = (num, cc) => {
-  const result = num + 1
-  cc(result)
+R AddOneAndContinue<R>(int num, Func<int, R> cc)
+{
+    var result = num + 1;
+    return cc(result);
 }
 
-addOneAndContinue(2, printAsString) // 'Given 3'
+AddOneAndContinue(2, PrintAsString); // => "Given 3"
 ```
 
-```js
-const continueProgramWith = (data) => {
-  // Continues program with data
+```csharp
+void ContinueProgramWith(string data)
+{
+    // Continues program with data
 }
 
-readFileAsync('path/to/file', (err, response) => {
-  if (err) {
-    // handle error
-    return
-  }
-  continueProgramWith(response)
-})
+async Task ReadAndContinue(string path)
+{
+    try
+    {
+        var response = await File.ReadAllTextAsync(path);
+        // Everything after the `await` is the continuation:
+        ContinueProgramWith(response);
+    }
+    catch (IOException)
+    {
+        // handle error
+    }
+}
 ```
 
 ---
@@ -224,19 +243,16 @@ A pure data structure that encapsulates a side effect. Instead of performing the
 
 ### Code Examples
 
-```js
-const IO = (run) => ({
-  run,
-  map: (f) => IO(() => f(run())),
-  chain: (f) => IO(() => f(run()).run())
-})
+```csharp
+var count = 0;
 
 // Pure description - nothing executes yet
-const readTimestamp = IO(() => Date.now())
-const formatted = readTimestamp.map((ts) => new Date(ts).toISOString())
+var tick = IO.lift(() => ++count);
+var formatted = tick.Map(n => $"tick {n}");
 
-// Side effect executes only when calling .run()
-formatted.run()
+// Side effect executes only when calling .Run()
+formatted.Run(); // => "tick 1"
+formatted.Run(); // => "tick 2"
 ```
 
 ---
@@ -253,23 +269,15 @@ A mechanism that enables deep or mutually recursive functions to run without exc
 
 ### Code Examples
 
-```js
-const trampoline = (fn) => (...args) => {
-  let result = fn(...args)
-  while (typeof result === 'function') {
-    result = result()
-  }
-  return result
-}
+```csharp
+// Plain recursion with n = 1_000_000 would overflow the stack
+Trampoline<long> SumBelow(long n, long acc) =>
+    n == 0
+        ? Trampoline.Pure(acc)
+        // returns a thunk instead of recursing directly
+        : Trampoline.More(() => SumBelow(n - 1, acc + n));
 
-// Without trampoline: sumBelow(1000000) throws "Maximum call stack size exceeded"
-const sumBelow = (n, acc = 0) =>
-  n === 0
-    ? acc
-    : () => sumBelow(n - 1, acc + n) // returns a thunk instead of recursing directly
-
-const safeSum = trampoline(sumBelow)
-safeSum(1000000) // 500000500000
+SumBelow(1_000_000, 0).Run(); // => 500000500000
 ```
 
 ---
@@ -286,15 +294,15 @@ A nullary function (a function taking zero arguments) that wraps an expression t
 
 ### Code Examples
 
-```js
+```csharp
 // An eager calculation executes immediately:
-// const data = expensiveCalculation()
+// var data = ExpensiveCalculation();
 
 // A thunk wraps the expression in a function, deferring execution:
-const thunk = () => 42 * 2
+Func<int> thunk = () => 42 * 2;
 
 // The expression is only evaluated when explicitly called:
-thunk() // 84
+thunk(); // => 84
 ```
 
 ---
@@ -310,45 +318,39 @@ A computational effect system that separates the invocation of an effect from it
 
 ### Code Examples
 
-```js
-// Generators model delimited continuations / algebraic effects:
-const perform = (effect) => ({ [Symbol.for('effect')]: true, effect })
+```csharp
+// The effects a program may perform:
+interface IConfig { string ApiUrl { get; } }
+interface ILog { Unit Log(string message); }
 
+record User(int Id, string Name);
+```
+
+```csharp
 // Program performs effects without knowing who handles them:
-function * fetchUserProfile (userId) {
-  const config = yield perform({ type: 'ask_config' })
-  yield perform({ type: 'log', message: `Fetching user ${userId} from ${config.apiUrl}` })
-  return { id: userId, name: 'Alice' }
+Eff<RT, User> FetchUserProfile<RT>(int userId)
+    where RT : IConfig, ILog =>
+    from url in Eff<RT, string>.Lift(rt => rt.ApiUrl)
+    from _   in Eff<RT, Unit>.Lift(rt =>
+                    rt.Log($"Fetching user {userId} from {url}"))
+    select new User(userId, "Alice");
+```
+
+```csharp
+// A handler interprets the effects, here by collecting log lines:
+record TestHandler(string ApiUrl) : IConfig, ILog
+{
+    public List<string> Logged { get; } = [];
+    public Unit Log(string message) { Logged.Add(message); return unit; }
 }
 
-// Effect handler interprets effects and resumes the computation:
-const handle = (generator, handlers) => {
-  const iter = generator()
-  const step = (value) => {
-    const { done, value: yielded } = iter.next(value)
-    if (done) return yielded
-    if (yielded && yielded[Symbol.for('effect')]) {
-      const { type } = yielded.effect
-      if (handlers[type]) {
-        return handlers[type](yielded.effect, (resumeVal) => step(resumeVal))
-      }
-    }
-    return step(yielded)
-  }
-  return step()
-}
+var handler = new TestHandler("https://api.test.local");
 
-// Running with an interpreter / handler:
-handle(
-  () => fetchUserProfile(42),
-  {
-    ask_config: (effect, resume) => resume({ apiUrl: 'https://api.test.local' }),
-    log: (effect, resume) => {
-      console.log(effect.message)
-      return resume()
-    }
-  }
-)
+// Running the program with that handler:
+var user = FetchUserProfile<TestHandler>(42).Run(handler);
+// => Succ(User { Id = 42, Name = Alice })
+var log = handler.Logged;
+// => ["Fetching user 42 from https://api.test.local"]
 ```
 
 ---
@@ -365,29 +367,29 @@ A function is pure if the return value is only determined by its input values, a
 
 ### Code Examples
 
-```js
-const greet = (name) => `Hi, ${name}`
+```csharp
+string Greet(string name) => $"Hi, {name}";
 
-greet('Brianne') // 'Hi, Brianne'
+Greet("Brianne"); // => "Hi, Brianne"
 ```
 
-```js
-window.name = 'Brianne'
+```csharp
+Globals.Name = "Brianne";
 
-const greet = () => `Hi, ${window.name}`
+string GreetGlobal() => $"Hi, {Globals.Name}";
 
-greet() // "Hi, Brianne"
+GreetGlobal(); // => "Hi, Brianne"
+
+static class Globals { public static string Name = ""; }
 ```
 
-```js
-let greeting
+```csharp
+var greeting = "";
 
-const greet = (name) => {
-  greeting = `Hi, ${name}`
-}
+void GreetInPlace(string name) => greeting = $"Hi, {name}";
 
-greet('Brianne')
-greeting // "Hi, Brianne"
+GreetInPlace("Brianne");
+var result = greeting; // => "Hi, Brianne"
 ```
 
 ---
@@ -403,12 +405,12 @@ A function or expression is said to have a side effect if apart from returning a
 
 ### Code Examples
 
-```js
-const differentEveryTime = new Date()
+```csharp
+var differentEveryTime = DateTime.Now;
 ```
 
-```js
-console.log('IO is a side effect!')
+```csharp
+Console.WriteLine("IO is a side effect!");
 ```
 
 ---
@@ -424,12 +426,14 @@ A function is idempotent if reapplying it to its result does not produce a diffe
 
 ### Code Examples
 
-```js
-Math.abs(Math.abs(10))
+```csharp
+Math.Abs(Math.Abs(10)); // => 10
 ```
 
-```js
-sort(sort(sort([2, 1])))
+```csharp
+Seq<int> Sort(Seq<int> xs) => toSeq(xs.OrderBy(x => x));
+
+Sort(Sort(Sort(Seq(2, 1)))); // => [1, 2]
 ```
 
 ---
@@ -446,18 +450,21 @@ Writing functions where the definition does not explicitly identify the argument
 
 ### Code Examples
 
-```js
+```csharp
 // Given
-const map = (fn) => (list) => list.map(fn)
-const add = (a) => (b) => a + b
+Func<Func<int, int>, Func<Seq<int>, Seq<int>>> map =
+    f => xs => xs.Map(f);
+Func<int, Func<int, int>> add = a => b => a + b;
 
 // Then
 
 // Not point-free - `numbers` is an explicit argument
-const incrementAll = (numbers) => map(add(1))(numbers)
+Func<Seq<int>, Seq<int>> incrementAll = numbers => map(add(1))(numbers);
 
 // Point-free - The list is an implicit argument
-const incrementAll2 = map(add(1))
+Func<Seq<int>, Seq<int>> incrementAll2 = map(add(1));
+
+incrementAll2(Seq(1, 2, 3)); // => [2, 3, 4]
 ```
 
 ---
@@ -469,14 +476,14 @@ const incrementAll2 = map(add(1))
 - Related concepts: #higher-order-functions-hof, #contravariant-functor
 
 ### Definition
-A predicate is a function that returns true or false for a given value. A common use of a predicate is as the callback for array filter.
+A predicate is a function that returns true or false for a given value. A common use of a predicate is as the callback for filtering a collection.
 
 ### Code Examples
 
-```js
-const predicate = (a) => a > 2
+```csharp
+Func<int, bool> predicate = a => a > 2;
 
-;[1, 2, 3, 4].filter(predicate) // [3, 4]
+Seq(1, 2, 3, 4).Filter(predicate); // => [3, 4]
 ```
 
 ---
@@ -492,17 +499,19 @@ A contract specifies the obligations and guarantees of the behavior from a funct
 
 ### Code Examples
 
-```js
-// Define our contract : int -> boolean
-const contract = (input) => {
-  if (typeof input === 'number') return true
-  throw new Error('Contract violated: expected int -> boolean')
-}
+```csharp
+using LanguageExt.Common;
 
-const addOne = (num) => contract(num) && num + 1
+// Define our contract: the input must be non-negative
+Fin<int> Contract(int input) =>
+    input >= 0
+        ? input
+        : Error.New("Contract violated: expected a non-negative int");
 
-addOne(2) // 3
-addOne('some string') // Contract violated: expected int -> boolean
+Fin<int> AddOne(int num) => Contract(num).Map(n => n + 1);
+
+AddOne(2);  // => Succ(3)
+AddOne(-1); // => Fail(Contract violated: expected a non-negative int)
 ```
 
 ---
@@ -518,26 +527,16 @@ A category in category theory is a collection of objects and morphisms between t
 
 ### Code Examples
 
-```js
-class Max {
-  constructor (a) {
-    this.a = a
-  }
+```csharp
+new Max(2).Compose(new Max(3)).Compose(new Max(5)).Id().Id();
+// => Max(5)
 
-  id () {
-    return this
-  }
-
-  compose (b) {
-    return this.a > b.a ? this : b
-  }
-
-  toString () {
-    return `Max(${this.a})`
-  }
+record Max(int A)
+{
+    public Max Id() => this;
+    public Max Compose(Max b) => A > b.A ? this : b;
+    public override string ToString() => $"Max({A})";
 }
-
-new Max(2).compose(new Max(3)).compose(new Max(5)).id().id() // => Max(5)
 ```
 
 ---
@@ -553,17 +552,12 @@ An algebraic structure with objects and morphisms that can be associatively comp
 
 ### Code Examples
 
-```js
-const Semigroupoid = (fn) => ({
-  run: fn,
-  compose: (other) => Semigroupoid((x) => fn(other.run(x)))
-})
+```csharp
+Func<string, string> toUpper = s => s.ToUpper();
+Func<string, string> exclaim = s => $"{s}!";
 
-const toUpper = Semigroupoid((s) => s.toUpperCase())
-const exclaim = Semigroupoid((s) => `${s}!`)
-
-const loudGreeting = exclaim.compose(toUpper)
-loudGreeting.run('hello') // 'HELLO!'
+var loudGreeting = exclaim.BackCompose(toUpper);
+loudGreeting("hello"); // => "HELLO!"
 ```
 
 ---
@@ -579,12 +573,17 @@ Anything that can be assigned to a variable.
 
 ### Code Examples
 
-```js
-5
-Object.freeze({ name: 'John', age: 30 }) // The `freeze` function enforces immutability.
-;(a) => a
-;[1]
-undefined
+```csharp
+object[] values =
+[
+    5,
+    new Person("John", 30), // A record with init-only properties.
+    (Func<int, int>)(a => a),
+    Seq(1),
+    unit,                   // `Unit`: the value that carries no information.
+];
+
+record Person(string Name, int Age);
 ```
 
 ---
@@ -600,13 +599,20 @@ A variable that cannot be reassigned once defined.
 
 ### Code Examples
 
-```js
-const five = 5
-const john = Object.freeze({ name: 'John', age: 30 })
+```csharp
+static class Constants
+{
+    public const int Five = 5;
+    public static readonly Person John = new("John", 30);
+}
+
+record Person(string Name, int Age);
 ```
 
-```js
-john.age + five === ({ name: 'John', age: 30 }).age + 5
+```csharp
+var same = Constants.John.Age + Constants.Five
+        == new Person("John", 30).Age + 5;
+// => true
 ```
 
 ---
@@ -618,14 +624,12 @@ john.age + five === ({ name: 'John', age: 30 }).age + 5
 - Related concepts: #constant, #constant-functor, #currying
 
 ### Definition
-A curried function that ignores its second argument:
+A curried function that ignores its second argument. language-ext calls it constant:
 
 ### Code Examples
 
-```js
-const constant = a => () => a
-
-;[1, 2].map(constant(0)) // => [0, 0]
+```csharp
+Seq(1, 2).Map(constant<int, int>(0)); // => [0, 0]
 ```
 
 ---
@@ -637,12 +641,19 @@ const constant = a => () => a
 - Related concepts: #constant-function, #constant-monad, #functor
 
 ### Definition
-Object whose map doesn't transform the contents. See Functor.
+Object whose Map doesn't transform the contents. See Functor. language-ext has no Const functor type, so here is a minimal one:
 
 ### Code Examples
 
-```js
-Constant(1).map(n => n + 1) // => Constant(1)
+```csharp
+new Constant<int, int>(1).Map(n => n + 1); // => Constant(1)
+
+// `A` is a "phantom" type: no value of it is ever stored.
+record Constant<C, A>(C Value)
+{
+    public Constant<C, B> Map<B>(Func<A, B> f) => new(Value);
+    public override string ToString() => $"Constant({Value})";
+}
 ```
 
 ---
@@ -654,12 +665,20 @@ Constant(1).map(n => n + 1) // => Constant(1)
 - Related concepts: #constant-functor, #monad
 
 ### Definition
-Object whose chain doesn't transform the contents. See Monad.
+Object whose Bind doesn't transform the contents. See Monad.
 
 ### Code Examples
 
-```js
-Constant(1).chain(n => Constant(n + 1)) // => Constant(1)
+```csharp
+new Constant<int, int>(1).Bind(n => new Constant<int, int>(n + 1));
+// => Constant(1)
+
+record Constant<C, A>(C Value)
+{
+    public Constant<C, B> Bind<B>(Func<A, Constant<C, B>> f) =>
+        new(Value);
+    public override string ToString() => $"Constant({Value})";
+}
 ```
 
 ---
@@ -676,28 +695,36 @@ An object that implements a map function that takes a function which is run on t
 
 ### Code Examples
 
-```js
-object.map(x => x)
+```csharp
+fa.Map(x => x)
 ```
 
-```js
-object.map(x => g(f(x)))
+```csharp
+fa.Map(x => g(f(x)))
 ```
 
-```js
-object.map(f).map(g)
+```csharp
+fa.Map(f).Map(g)
 ```
 
-```js
-Some(1).map(x => x) // = Some(1)
+```csharp
+Some(1).Map(x => x); // => Some(1)
 ```
 
-```js
-const f = x => x + 1
-const g = x => x * 2
+```csharp
+Func<int, int> f = x => x + 1;
+Func<int, int> g = x => x * 2;
 
-Some(1).map(x => g(f(x))) // = Some(4)
-Some(1).map(f).map(g) // = Some(4)
+Some(1).Map(x => g(f(x))); // => Some(4)
+Some(1).Map(f).Map(g);     // => Some(4)
+```
+
+```csharp
+K<F, string> Describe<F>(K<F, int> fa) where F : Functor<F> =>
+    fa.Map(x => $"got {x}");
+
+Describe(Some(1));          // => Some(got 1)
+Describe(Seq(1, 2));        // => [got 1, got 2]
 ```
 
 ---
@@ -713,8 +740,9 @@ An object with an of function that puts any single value into it.
 
 ### Code Examples
 
-```js
-Array.of(1) // [1]
+```csharp
+pure<Seq, int>(1);    // => [1]
+pure<Option, int>(1); // => Some(1)
 ```
 
 ---
@@ -730,26 +758,30 @@ Lifting is when you take a value and put it into an object like a functor. If yo
 
 ### Code Examples
 
-```js
-const liftA2 = (f) => (a, b) => a.map(f).ap(b) // note it's `ap` and not `map`.
+```csharp
+Func<int, Func<int, int>> mult = a => b => a * b;
 
-const mult = a => b => a * b
+// This function now works on any applicative, like Seq or Option
+K<F, int> LiftedMult<F>(K<F, int> a, K<F, int> b)
+    where F : Applicative<F> =>
+    Applicative.lift(mult, a, b);
 
-const liftedMult = liftA2(mult) // this function now works on functors like array
+LiftedMult(Seq(1, 2), Seq(3));  // => [3, 6]
+LiftedMult(Some(2), Some(3));   // => Some(6)
 
-liftedMult([1, 2], [3]) // [3, 6]
-liftA2(a => b => a + b)([1, 2], [30, 40]) // [31, 41, 32, 42]
+Applicative.lift((int a, int b) => a + b, Seq(1, 2), Seq(30, 40));
+// => [31, 41, 32, 42]
 ```
 
-```js
-const increment = (x) => x + 1
+```csharp
+Func<int, int> increment = x => x + 1;
 
-lift(increment)([2]) // [3]
-;[2].map(increment) // [3]
+Applicative.lift(increment, Seq(2)); // => [3]
+Seq(2).Map(increment);               // => [3]
 ```
 
-```js
-Array.of(1) // => [1]
+```csharp
+pure<Seq, int>(1); // => [1]
 ```
 
 ---
@@ -766,8 +798,10 @@ An expression that can be replaced with its value without changing the behavior 
 
 ### Code Examples
 
-```js
-const greet = () => 'Hello World!'
+```csharp
+string Greet() => "Hello World!";
+
+Greet(); // => "Hello World!"
 ```
 
 ---
@@ -784,9 +818,16 @@ When an application is composed of expressions and devoid of side effects, truth
 
 ### Code Examples
 
-```js
-const grainToDogs = compose(chickenIntoDogs, grainIntoChicken)
-const grainToCats = compose(dogsIntoCats, grainToDogs)
+```csharp
+Func<string, string> grainIntoChicken = grain => $"chicken({grain})";
+Func<string, string> chickenIntoDogs  = chicken => $"dogs({chicken})";
+Func<string, string> dogsIntoCats     = dogs => $"cats({dogs})";
+
+// language-ext's `compose` runs left-to-right: first, then second.
+var grainToDogs = compose(grainIntoChicken, chickenIntoDogs);
+var grainToCats = compose(grainToDogs, dogsIntoCats);
+
+grainToCats("grain"); // => "cats(dogs(chicken(grain)))"
 ```
 
 ---
@@ -803,20 +844,29 @@ An optimization technique that caches the return value of a function based on it
 
 ### Code Examples
 
-```js
-const memoize = (fn) => {
-  const cache = new Map()
-  return (arg) => {
-    if (!cache.has(arg)) {
-      cache.set(arg, fn(arg))
-    }
-    return cache.get(arg)
-  }
+```csharp
+Func<A, B> Memoize<A, B>(Func<A, B> fn) where A : notnull
+{
+    var cache = new Dictionary<A, B>();
+    return arg => cache.TryGetValue(arg, out var hit)
+        ? hit
+        : cache[arg] = fn(arg);
 }
+```
 
-const factorial = memoize((n) => (n <= 1 ? 1 : n * factorial(n - 1)))
-factorial(5) // Calculated: 120
-factorial(5) // Retrieved from cache: 120
+```csharp
+var calls = 0;
+Func<int, long> factorial = null!;
+factorial = memoUnsafe((int n) =>
+{
+    calls++;
+    return n <= 1 ? 1L : n * factorial(n - 1);
+});
+
+factorial(5); // => 120
+factorial(5); // => 120
+var computed = calls; // => 5
+// 5, not 10: the second call was answered from the cache
 ```
 
 ---
@@ -833,20 +883,22 @@ An anonymous function that can be treated like a value.
 
 ### Code Examples
 
-```js
-;(function (a) {
-  return a + 1
-})
+```csharp
+// An anonymous method...
+Func<int, int> f1 = delegate (int a) { return a + 1; };
 
-;(a) => a + 1
+// ...and the same thing as a lambda expression
+Func<int, int> f2 = a => a + 1;
 ```
 
-```js
-;[1, 2].map((a) => a + 1) // [2, 3]
+```csharp
+Seq(1, 2).Map(a => a + 1); // => [2, 3]
 ```
 
-```js
-const add1 = (a) => a + 1
+```csharp
+var add1 = (int a) => a + 1;
+
+add1(2); // => 3
 ```
 
 ---
@@ -873,17 +925,23 @@ A higher-order function, usually curried, which returns a new function changed i
 
 ### Code Examples
 
-```js
-// The "C" combinator takes a curried two-argument function and returns one which calls the original function with the arguments reversed.
-const C = (f) => (a) => (b) => f(b)(a)
+```csharp
+// The "C" combinator takes a curried two-argument function and returns
+// one which calls the original function with the arguments reversed.
+Func<A, Func<B, R>> C<A, B, R>(Func<B, Func<A, R>> f) =>
+    a => b => f(b)(a);
 
-const divide = (a) => (b) => a / b
+Func<double, Func<double, double>> divide = a => b => a / b;
 
-const divideBy = C(divide)
+var divideBy = C(divide);
 
-const divBy10 = divideBy(10)
+var divBy10 = divideBy(10);
 
-divBy10(30) // => 3
+divBy10(30); // => 3
+```
+
+```csharp
+flip(divide)(10)(30); // => 3
 ```
 
 ---
@@ -900,17 +958,27 @@ Lazy evaluation is a call-by-need evaluation mechanism that delays the evaluatio
 
 ### Code Examples
 
-```js
-const rand = function * () {
-  while (1 < 2) {
-    yield Math.random()
-  }
+```csharp
+IEnumerable<double> Rand()
+{
+    while (true) yield return Random.Shared.NextDouble();
 }
 ```
 
-```js
-const randIter = rand()
-randIter.next() // Each execution gives a random value, expression is evaluated on need.
+```csharp
+using var randIter = Rand().GetEnumerator();
+// Each call computes a new random value, evaluated only on need.
+randIter.MoveNext();
+var r = randIter.Current;
+```
+
+```csharp
+IEnumerable<int> Naturals()
+{
+    for (var n = 0; ; n++) yield return n;
+}
+
+toSeq(Naturals()).Map(n => n * n).Take(4); // => [0, 1, 4, 9]
 ```
 
 ---
@@ -927,30 +995,45 @@ An object with a function that "combines" that object with another of the same t
 
 ### Code Examples
 
-```js
-1 + 1 // 2
+```csharp
+var two = 1 + 1; // => 2
 ```
 
-```js
-1 + 0 // 1
-0 + 1 // 1
-1 + 0 === 0 + 1
+```csharp
+var right = 1 + 0;          // => 1
+var left = 0 + 1;           // => 1
+var same = 1 + 0 == 0 + 1;  // => true
 ```
 
-```js
-1 + (2 + 3) === (1 + 2) + 3 // true
+```csharp
+var assoc = 1 + (2 + 3) == (1 + 2) + 3; // => true
 ```
 
-```js
-;[1, 2].concat([3, 4]) // [1, 2, 3, 4]
+```csharp
+var xs = Seq(1, 2) + Seq(3, 4); // => [1, 2, 3, 4]
 ```
 
-```js
-;[1, 2].concat([]) // [1, 2]
+```csharp
+var ys = Seq(1, 2) + Monoid.empty<Seq<int>>(); // => [1, 2]
 ```
 
-```js
-0 - 4 === 4 - 0 // false
+```csharp
+record Sum(int Value) : Monoid<Sum>
+{
+    public Sum Combine(Sum rhs) => new(Value + rhs.Value);
+    public static Sum Empty { get; } = new(0);
+}
+```
+
+```csharp
+Monoid.combine(Seq(new Sum(1), new Sum(2), new Sum(3)));
+// => Sum { Value = 6 }
+
+Monoid.combine(Seq<Sum>()); // => Sum { Value = 0 }
+```
+
+```csharp
+var commutes = 0 - 4 == 4 - 0; // => false
 ```
 
 ---
@@ -967,17 +1050,30 @@ A monad is an object with of and chain functions. chain is like map except it un
 
 ### Code Examples
 
-```js
-// Implementation
-Array.prototype.chain = function (f) {
-  return this.reduce((acc, it) => acc.concat(f(it)), [])
-}
+```csharp
+var pets = Seq("cat,dog", "fish,bird");
 
 // Usage
-Array.of('cat,dog', 'fish,bird').chain((a) => a.split(',')) // ['cat', 'dog', 'fish', 'bird']
+pets.Bind(a => toSeq(a.Split(','))); // => [cat, dog, fish, bird]
 
 // Contrast to map
-Array.of('cat,dog', 'fish,bird').map((a) => a.split(',')) // [['cat', 'dog'], ['fish', 'bird']]
+pets.Map(a => toSeq(a.Split(','))); // => [[cat, dog], [fish, bird]]
+```
+
+```csharp
+var shouted = from pet  in pets
+              from name in toSeq(pet.Split(','))
+              select name.ToUpper();
+// => [CAT, DOG, FISH, BIRD]
+```
+
+```csharp
+K<M, int> AddM<M>(K<M, int> mx, K<M, int> my) where M : Monad<M> =>
+    mx.Bind(x => my.Map(y => x + y));
+
+AddM(Some(1), Some(2));        // => Some(3)
+AddM(Some(1), Option<int>.None); // => None
+AddM(Seq(1, 2), Seq(10, 20));  // => [11, 21, 12, 22]
 ```
 
 ---
@@ -993,24 +1089,23 @@ An object that has extract and extend functions.
 
 ### Code Examples
 
-```js
-const CoIdentity = (v) => ({
-  val: v,
-  extract () {
-    return this.val
-  },
-  extend (f) {
-    return CoIdentity(f(this))
-  }
-})
+```csharp
+record CoIdentity<A>(A Value)
+{
+    public A Extract() => Value;
+
+    public CoIdentity<B> Extend<B>(Func<CoIdentity<A>, B> f) =>
+        new(f(this));
+}
 ```
 
-```js
-CoIdentity(1).extract() // 1
+```csharp
+new CoIdentity<int>(1).Extract(); // => 1
 ```
 
-```js
-CoIdentity(1).extend((co) => co.extract() + 1) // CoIdentity(2)
+```csharp
+new CoIdentity<int>(1).Extend(co => co.Extract() + 1);
+// => CoIdentity { Value = 2 }
 ```
 
 ---
@@ -1026,25 +1121,30 @@ An operation for composing two monad-returning functions (Kleisli Arrows) where 
 
 ### Code Examples
 
-```js
-// safeParseNum :: String -> Option Number
-const safeParseNum = (b) => {
-  const n = parseNumber(b)
-  return isNaN(n) ? None() : Some(n)
-}
+```csharp
+// SafeParseNum :: string -> Option<int>
+// (language-ext's parseInt already returns an Option)
+Option<int> SafeParseNum(string s) => parseInt(s);
 
-// validatePositive :: Number -> Option Number
-const validatePositive = (a) => a > 0 ? Some(a) : None()
+// ValidatePositive :: int -> Option<int>
+Option<int> ValidatePositive(int a) => a > 0 ? Some(a) : None;
 
-// kleisliCompose :: Monad M => ((b -> M c), (a -> M b)) -> a -> M c
-const kleisliCompose = (g, f) => (x) => f(x).chain(g)
+// KleisliCompose :: Monad M => (B -> M C, A -> M B) -> A -> M C
+Func<A, K<M, C>> KleisliCompose<M, A, B, C>(
+    Func<B, K<M, C>> g, Func<A, K<M, B>> f)
+    where M : Monad<M> =>
+    x => f(x).Bind(g);
 
-// parseAndValidate :: String -> Option Number
-const parseAndValidate = kleisliCompose(validatePositive, safeParseNum)
+// ParseAndValidate :: string -> Option<int>
+// (Option<A> is a struct, so we wrap the functions in lambdas to
+// convert their results to K<Option, A>.)
+var parseAndValidate = KleisliCompose<Option, string, int, int>(
+    x => ValidatePositive(x), s => SafeParseNum(s));
 
-parseAndValidate('1') // => Some(1)
-parseAndValidate('asdf') // => None
-parseAndValidate('999') // => Some(999)
+parseAndValidate("1");    // => Some(1)
+parseAndValidate("asdf"); // => None
+parseAndValidate("-5");   // => None
+parseAndValidate("999");  // => Some(999)
 ```
 
 ---
@@ -1060,48 +1160,46 @@ A Free Monad is a construction that builds a monad out of any functor without ad
 
 ### Code Examples
 
-```js
-// Free monad constructors:
-const Pure = (x) => ({
-  isPure: true,
-  value: x,
-  map: (f) => Pure(f(x)),
-  chain: (f) => f(x)
-})
+```csharp
+// The instruction set: a functor of logging commands.
+// `Next` is the continuation: what to do once the command has run.
+abstract record Cmd<A> : K<Cmd, A>;
+record Log<A>(string Message, Func<Unit, A> Next) : Cmd<A>;
 
-const Free = (fn) => ({
-  isPure: false,
-  functor: fn,
-  map: (f) => Free(fn.map((next) => next.map(f))),
-  chain: (f) => Free(fn.map((next) => next.chain(f)))
-})
-
-// Lift an instruction functor into a Free monad:
-const liftF = (cmd) => Free(cmd.map(Pure))
-
-// Functor representing logging instructions:
-const Log = (msg, next) => ({
-  type: 'log',
-  msg,
-  next,
-  map: (f) => Log(msg, f(next))
-})
-
-// Program: purely describes actions without executing them:
-const logMsg = (msg) => liftF(Log(msg, null))
-const program = logMsg('Starting').chain(() => logMsg('Done')).chain(() => Pure(42))
-
-// Interpreter: executes the instruction tree:
-const interpret = (freeMonad) => {
-  if (freeMonad.isPure) return freeMonad.value
-  const { type, msg, next } = freeMonad.functor
-  if (type === 'log') {
-    console.log(msg)
-    return interpret(next)
-  }
+class Cmd : Functor<Cmd>
+{
+    public static K<Cmd, B> Map<A, B>(Func<A, B> f, K<Cmd, A> ma) =>
+        ma switch
+        {
+            Log<A>(var msg, var next) => new Log<B>(msg, x => f(next(x))),
+            _                         => throw new NotSupportedException()
+        };
 }
+```
 
-interpret(program) // Logs 'Starting', 'Done', returns 42
+```csharp
+Free<Cmd, Unit> LogMsg(string msg) =>
+    Free.lift(new Log<Unit>(msg, identity));
+
+var program = from _1 in LogMsg("Starting")
+              from _2 in LogMsg("Done")
+              select 42;
+```
+
+```csharp
+(A, Seq<string>) Interpret<A>(K<Free<Cmd>, A> fa, Seq<string> log) =>
+    fa switch
+    {
+        Pure<Cmd, A>(var value) =>
+            (value, log),
+
+        Bind<Cmd, A>(Log<Free<Cmd, A>>(var msg, var next)) =>
+            Interpret(next(unit), log.Add(msg)),
+
+        _ => throw new NotSupportedException()
+    };
+
+Interpret(program, []); // => (42, [Starting, Done])
 ```
 
 ---
@@ -1117,48 +1215,40 @@ While functors and applicative functors compose naturally, monads do not compose
 
 ### Code Examples
 
-```js
-// MaybeT wraps any outer monad M to add optionality:
-const MaybeT = (M) => {
-  const of = (value) => MaybeTInstance(M.of({ isSome: true, value }))
-  const none = () => MaybeTInstance(M.of({ isSome: false }))
+```csharp
+OptionT<Identity, User> FindUser(int id) =>
+    id == 1
+        ? OptionT.Some<Identity, User>(new User("Alice", 30))
+        : OptionT.None<Identity, User>();
 
-  const MaybeTInstance = (run) => ({
-    run,
-    chain: (f) =>
-      MaybeTInstance(
-        run.chain((opt) => (opt.isSome ? f(opt.value).run : M.of(opt)))
-      ),
-    map: (f) =>
-      MaybeTInstance(
-        run.map((opt) => (opt.isSome ? { isSome: true, value: f(opt.value) } : opt))
-      )
-  })
+Option<int> GetAge(int id) =>
+    FindUser(id)
+        .Map(user => user.Age)
+        .Run()          // unwrap the transformer: Identity<Option<int>>
+        .As().Value;    // unwrap the Identity
 
-  return { of, none, from: MaybeTInstance }
-}
+GetAge(1); // => Some(30)
+GetAge(2); // => None
 
-// Identity monad:
-const Id = (x) => ({
-  value: x,
-  map: (f) => Id(f(x)),
-  chain: (f) => f(x)
-})
-Id.of = Id
+record User(string Name, int Age);
+```
 
-// Combine Id monad with Maybe effect:
-const MaybeId = MaybeT(Id)
+```csharp
+var log = new List<string>();
 
-const findUser = (id) =>
-  id === 1 ? MaybeId.of({ name: 'Alice', age: 30 }) : MaybeId.none()
+OptionT<IO, User> FindUserIO(int id) =>
+    OptionT.liftIO<IO, User>(IO.lift(() =>
+    {
+        log.Add($"looking up {id}");
+        return id == 1 ? Some(new User("Alice", 30)) : None;
+    }));
 
-const getAge = (id) =>
-  findUser(id)
-    .chain((user) => MaybeId.of(user.age))
-    .run
+var ages = from a in FindUserIO(1)
+           from b in FindUserIO(2)
+           select a.Age + b.Age;
 
-getAge(1).value // { isSome: true, value: 30 }
-getAge(2).value // { isSome: false }
+ages.Run().As().Run(); // => None
+string.Join(", ", log); // => "looking up 1, looking up 2"
 ```
 
 ---
@@ -1175,29 +1265,30 @@ An applicative functor is an object with an ap function. ap applies a function i
 
 ### Code Examples
 
-```js
-// Implementation
-Array.prototype.ap = function (xs) {
-  return this.reduce((acc, f) => acc.concat(xs.map(f)), [])
-}
-
-// Example usage
-;[(a) => a + 1].ap([1]) // [2]
+```csharp
+// A sequence containing a function, applied to a sequence of values
+Seq<Func<int, int>>(a => a + 1).Apply(Seq(1)); // => [2]
 ```
 
-```js
-// Arrays that you want to combine
-const arg1 = [1, 3]
-const arg2 = [4, 5]
+```csharp
+// Sequences that you want to combine
+var arg1 = Seq(1, 3);
+var arg2 = Seq(4, 5);
 
 // combining function - must be curried for this to work
-const add = (x) => (y) => x + y
+Func<int, Func<int, int>> add = x => y => x + y;
 
-const partiallyAppliedAdds = [add].ap(arg1) // [(y) => 1 + y, (y) => 3 + y]
+// [y => 1 + y, y => 3 + y]
+var partiallyAppliedAdds = Seq(add).Apply(arg1);
 ```
 
-```js
-partiallyAppliedAdds.ap(arg2) // [5, 6, 7, 8]
+```csharp
+partiallyAppliedAdds.Apply(arg2); // => [5, 6, 7, 8]
+```
+
+```csharp
+(arg1, arg2).Apply((x, y) => x + y);      // => [5, 6, 7, 8]
+(Some(1), Some(2)).Apply((x, y) => x + y); // => Some(3)
 ```
 
 ---
@@ -1214,18 +1305,19 @@ A structure with two independent type parameters that can map over both of them 
 
 ### Code Examples
 
-```js
-const Pair = (first, second) => ({
-  first,
-  second,
-  bimap: (f, g) => Pair(f(first), g(second)),
-  firstMap: (f) => Pair(f(first), second),
-  secondMap: (g) => Pair(first, g(second))
-})
+```csharp
+Either<string, int> found   = Right(10);
+Either<string, int> missing = Left("no score for alice");
 
-const score = Pair('alice', 10)
-score.bimap((name) => name.toUpperCase(), (points) => points * 2)
-// Pair('ALICE', 20)
+found.BiMap(Left: e => e.ToUpper(), Right: n => n * 2);
+// => Right(20)
+missing.BiMap(Left: e => e.ToUpper(), Right: n => n * 2);
+// => Left(NO SCORE FOR ALICE)
+```
+
+```csharp
+missing.MapFirst(e => e.Length);  // => Left(18)
+found.MapSecond(n => n + 1);      // => Right(11)
 ```
 
 ---
@@ -1242,22 +1334,30 @@ A structure similar to a functor, but whose transformation flows in the opposite
 
 ### Code Examples
 
-```js
-// Predicate wraps a test function (x) -> Boolean
-const Predicate = (test) => ({
-  test,
-  // cmap :: (b -> a) -> Predicate a -> Predicate b
-  cmap: (f) => Predicate((x) => test(f(x)))
-})
+```csharp
+// A Validator wraps a test function A -> bool
+record Validator<A>(Func<A, bool> Test) : K<Validator, A>;
 
-// An existing predicate checking if a string is long
-const isLongString = Predicate((s) => s.length > 5)
+class Validator : Cofunctor<Validator>
+{
+    // Comap :: (A -> B) -> Validator<B> -> Validator<A>
+    public static K<Validator, A> Comap<A, B>(
+        Func<A, B> f, K<Validator, B> fb) =>
+        new Validator<A>(a => ((Validator<B>)fb).Test(f(a)));
+}
 
-// Contramap pre-processes a User object into a string (user.bio)
-const hasLongBio = isLongString.cmap((user) => user.bio)
+record User(string Bio);
+```
 
-hasLongBio.test({ bio: 'Hello World' }) // true
-hasLongBio.test({ bio: 'Hi' }) // false
+```csharp
+// An existing validator checking if a string is long
+var isLongString = new Validator<string>(s => s.Length > 5);
+
+// Comap pre-processes a User into a string (its Bio)
+var hasLongBio = (Validator<User>)isLongString.Comap((User u) => u.Bio);
+
+hasLongBio.Test(new User("Hello World")); // => true
+hasLongBio.Test(new User("Hi"));          // => false
 ```
 
 ---
@@ -1273,25 +1373,24 @@ A Profunctor is a bifunctor that is contravariant in its first argument and cova
 
 ### Code Examples
 
-```js
-// Functions are natural profunctors:
-const Profunctor = (fn) => ({
-  run: fn,
-  // promap :: (a' -> a) -> (b -> b') -> P a b -> P a' b'
-  promap: (f, g) => Profunctor((x) => g(fn(f(x))))
-})
+```csharp
+// Promap :: (A2 -> A) -> (B -> B2) -> Func<A, B> -> Func<A2, B2>
+Func<A2, B2> Promap<A, B, A2, B2>(
+    Func<A, B> f, Func<A2, A> pre, Func<B, B2> post) =>
+    x => post(f(pre(x)));
 
-// An existing function: String -> Number
-const stringLength = Profunctor((str) => str.length)
+// An existing function: string -> int
+Func<string, int> stringLength = s => s.Length;
 
-// Pre-process input (trim whitespace) and post-process output (check if even):
-const isTrimmedLengthEven = stringLength.promap(
-  (raw) => raw.trim(), // contravariant: pre-process input
-  (len) => len % 2 === 0 // covariant: post-process output
-)
+// Pre-process input (trim whitespace), post-process output (is it even?)
+var isTrimmedLengthEven = Promap(
+    stringLength,
+    (string raw) => raw.Trim(), // contravariant: pre-process input
+    (int len) => len % 2 == 0); // covariant: post-process output
 
-isTrimmedLengthEven.run('   code   ') // 4 is even -> true
-isTrimmedLengthEven.run(' hello ') // 5 is odd -> false
+// "code" has 4 characters, "hello" has 5:
+isTrimmedLengthEven("   code   "); // => true
+isTrimmedLengthEven(" hello ");    // => false
 ```
 
 ---
@@ -1308,25 +1407,16 @@ An applicative functor that also forms a monoid, providing a binary choice opera
 
 ### Code Examples
 
-```js
-const AltOption = {
-  Some: (x) => ({
-    alt: (_other) => AltOption.Some(x),
-    value: x
-  }),
-  None: () => ({
-    alt: (other) => other,
-    value: null
-  })
-}
-
+```csharp
 // Fallback configuration chain: first valid value wins
-const primaryConfig = AltOption.None()
-const secondaryConfig = AltOption.Some({ port: 8080 })
-const defaultConfig = AltOption.Some({ port: 3000 })
+Option<Config> primaryConfig   = None;
+Option<Config> secondaryConfig = Some(new Config(8080));
+Option<Config> defaultConfig   = Some(new Config(3000));
 
-const finalConfig = primaryConfig.alt(secondaryConfig).alt(defaultConfig)
-finalConfig.value // { port: 8080 }
+var finalConfig = primaryConfig | secondaryConfig | defaultConfig;
+// => Some(Config { Port = 8080 })
+
+record Config(int Port);
 ```
 
 ---
@@ -1353,9 +1443,17 @@ A function where there is a structural property that is the same in the input as
 
 ### Code Examples
 
-```js
-// toList :: [number] -> string
-const toList = (a) => a.join(', ')
+```csharp
+// Concat :: Seq<string> -> string
+string Concat(Seq<string> xs) => string.Concat(xs);
+```
+
+```csharp
+var (xs, ys) = (Seq("functional", " "), Seq("jargon"));
+
+var preservesAppend = Concat(xs + ys) == Concat(xs) + Concat(ys);
+// => true
+var preservesEmpty = Concat([]) == "";  // => true
 ```
 
 ---
@@ -1371,12 +1469,12 @@ A function where the input type is the same as the output. Since the types are i
 
 ### Code Examples
 
-```js
-// uppercase :: String -> String
-const uppercase = (str) => str.toUpperCase()
+```csharp
+// Uppercase :: string -> string
+Func<string, string> uppercase = s => s.ToUpper();
 
-// decrement :: Number -> Number
-const decrement = (x) => x - 1
+// Decrement :: int -> int
+Func<int, int> decrement = x => x - 1;
 ```
 
 ---
@@ -1392,15 +1490,18 @@ A morphism made of a pair of transformations between 2 types of objects that is 
 
 ### Code Examples
 
-```js
-// Providing functions to convert in both directions makes the 2D coordinate structures isomorphic.
-const pairToCoords = (pair) => ({ x: pair[0], y: pair[1] })
+```csharp
+// Functions to convert in both directions make the two
+// representations of 2D coordinates isomorphic.
+Coords PairToCoords((int, int) pair) => new(pair.Item1, pair.Item2);
 
-const coordsToPair = (coords) => [coords.x, coords.y]
+(int, int) CoordsToPair(Coords c) => (c.X, c.Y);
 
-coordsToPair(pairToCoords([1, 2])) // [1, 2]
+CoordsToPair(PairToCoords((1, 2)));          // => (1, 2)
 
-pairToCoords(coordsToPair({ x: 1, y: 2 })) // {x: 1, y: 2}
+PairToCoords(CoordsToPair(new Coords(1, 2))); // => Coords { X = 1, Y = 2 }
+
+record Coords(int X, int Y);
 ```
 
 ---
@@ -1413,15 +1514,15 @@ pairToCoords(coordsToPair({ x: 1, y: 2 })) // {x: 1, y: 2}
 - Related concepts: #anamorphism, #foldable, #hylomorphism, #paramorphism
 
 ### Definition
-A function which deconstructs a structure into a single value. reduceRight is an example of a catamorphism for array structures.
+A function which deconstructs a structure into a single value. FoldBack (a right fold, provided for every Foldable) is an example of a catamorphism.
 
 ### Code Examples
 
-```js
-// sum is a catamorphism from [Number] -> Number
-const sum = xs => xs.reduceRight((acc, x) => acc + x, 0)
+```csharp
+// Sum is a catamorphism from Seq<int> -> int
+int Sum(Seq<int> xs) => xs.FoldBack(0, (acc, x) => acc + x);
 
-sum([1, 2, 3, 4, 5]) // 15
+Sum(Seq(1, 2, 3, 4, 5)); // => 15
 ```
 
 ---
@@ -1434,26 +1535,23 @@ sum([1, 2, 3, 4, 5]) // 15
 - Related concepts: #catamorphism, #hylomorphism, #apomorphism
 
 ### Definition
-A function that builds up a structure by repeatedly applying a function to its argument. unfold is an example which generates an array from a function and a seed value. This is the opposite of a catamorphism. You can think of this as an anamorphism builds up a structure and catamorphism breaks it down.
+A function that builds up a structure by repeatedly applying a function to its argument. Unfold is an example which generates a sequence from a function and a seed value. This is the opposite of a catamorphism. You can think of this as an anamorphism builds up a structure and catamorphism breaks it down.
 
 ### Code Examples
 
-```js
-const unfold = (f, seed) => {
-  function go (f, seed, acc) {
-    const res = f(seed)
-    return res ? go(f, res[1], acc.concat([res[0]])) : acc
-  }
-  return go(f, seed, [])
-}
+```csharp
+// Keeps producing values until `f` returns None
+Seq<A> Unfold<A, S>(Func<S, Option<(A Value, S Next)>> f, S seed) =>
+    f(seed).Match(
+        Some: r => r.Value.Cons(Unfold(f, r.Next)),
+        None: () => Seq<A>());
 ```
 
-```js
-const countDown = n => unfold((n) => {
-  return n <= 0 ? undefined : [n, n - 1]
-}, n)
+```csharp
+Seq<int> CountDown(int n) =>
+    Unfold(k => k <= 0 ? None : Some((k, k - 1)), n);
 
-countDown(5) // [5, 4, 3, 2, 1]
+CountDown(5); // => [5, 4, 3, 2, 1]
 ```
 
 ---
@@ -1470,9 +1568,14 @@ The function which composes an anamorphism followed by a catamorphism.
 
 ### Code Examples
 
-```js
-const sumUpToX = (x) => sum(countDown(x))
-sumUpToX(5) // 15
+```csharp
+// CountDown (an anamorphism) and Sum (a catamorphism) from above:
+Seq<int> CountDown(int n) => n <= 0 ? [] : n.Cons(CountDown(n - 1));
+int Sum(Seq<int> xs) => xs.FoldBack(0, (acc, x) => acc + x);
+
+int SumUpTo(int x) => Sum(CountDown(x));
+
+SumUpTo(5); // => 15
 ```
 
 ---
@@ -1485,29 +1588,23 @@ sumUpToX(5) // 15
 - Related concepts: #catamorphism
 
 ### Definition
-A function just like reduceRight. However, there's a difference:
+A function just like FoldBack. However, there's a difference:
 
 ### Code Examples
 
-```js
-// Obviously not safe for lists containing `undefined`,
-// but good enough to make the point.
-const para = (reducer, accumulator, elements) => {
-  if (elements.length === 0) { return accumulator }
+```csharp
+B Para<A, B>(Func<A, Seq<A>, B, B> reducer, B acc, Seq<A> xs) =>
+    xs.Head.Match(
+        Some: head => reducer(head, xs.Tail, Para(reducer, acc, xs.Tail)),
+        None: () => acc);
 
-  const head = elements[0]
-  const tail = elements.slice(1)
+Seq<Seq<A>> Suffixes<A>(Seq<A> list) =>
+    Para((A x, Seq<A> xs, Seq<Seq<A>> suffxs) => xs.Cons(suffxs),
+         Seq<Seq<A>>(),
+         list);
 
-  return reducer(head, tail, para(reducer, accumulator, tail))
-}
-
-const suffixes = list => para(
-  (x, xs, suffxs) => [xs, ...suffxs],
-  [],
-  list
-)
-
-suffixes([1, 2, 3, 4, 5]) // [[2, 3, 4, 5], [3, 4, 5], [4, 5], [5], []]
+Suffixes(Seq(1, 2, 3, 4, 5));
+// => [[2, 3, 4, 5], [3, 4, 5], [4, 5], [5], []]
 ```
 
 ---
@@ -1536,17 +1633,23 @@ A structure-preserving mapping between two functors, transforming F<A> into G<A>
 
 ### Code Examples
 
-```js
-// nat :: F a -> G a
-// e.g. Array to Option (taking the head element)
-const listToOption = (arr) => (arr.length > 0 ? { value: arr[0], isSome: true } : { value: null, isSome: false })
+```csharp
+// nat :: Seq<A> -> Option<A>  (taking the head element)
+Option<A> SeqToOption<A>(Seq<A> xs) => xs.Head;
 
-const double = (x) => x * 2
+Func<int, int> twice = x => x * 2;
 
 // Naturality law: transforming after map equals mapping after transform
-const arrayTransformed = listToOption([1, 2, 3].map(double)) // { value: 2, isSome: true }
-const mappedOption = { value: double(listToOption([1, 2, 3]).value), isSome: true } // { value: 2, isSome: true }
-arrayTransformed.value === mappedOption.value // true
+SeqToOption(Seq(1, 2, 3).Map(twice)); // => Some(2)
+SeqToOption(Seq(1, 2, 3)).Map(twice); // => Some(2)
+```
+
+```csharp
+K<Seq, A> OptionToSeq<A>(K<Option, A> fa) =>
+    Natural.transform<Option, Seq, A>(fa);
+
+OptionToSeq(Some(1).Map(twice)); // => [2]
+OptionToSeq(Some(1)).Map(twice); // => [2]
 ```
 
 ---
@@ -1562,22 +1665,24 @@ An object that has an equals function which can be used to compare other objects
 
 ### Code Examples
 
-```js
-Array.prototype.equals = function (arr) {
-  const len = this.length
-  if (len !== arr.length) {
-    return false
-  }
-  for (let i = 0; i < len; i++) {
-    if (this[i] !== arr[i]) {
-      return false
-    }
-  }
-  return true
-}
+```csharp
+using LanguageExt.ClassInstances;
 
-;[1, 2].equals([1, 2]) // true
-;[1, 2].equals([0]) // false
+EqArray<EqInt, int>.Equals([1, 2], [1, 2]); // => true
+EqArray<EqInt, int>.Equals([1, 2], [0]);    // => false
+```
+
+```csharp
+equals<EqIgnoreCase, string>("Haskell", "HASKELL"); // => true
+
+struct EqIgnoreCase : Eq<string>
+{
+    public static bool Equals(string x, string y) =>
+        string.Equals(x, y, StringComparison.OrdinalIgnoreCase);
+
+    public static int GetHashCode(string x) =>
+        StringComparer.OrdinalIgnoreCase.GetHashCode(x);
+}
 ```
 
 ---
@@ -1593,8 +1698,15 @@ An object that has a concat function that combines it with another object of the
 
 ### Code Examples
 
-```js
-;[1].concat([2]) // [1, 2]
+```csharp
+Seq(1).Combine(Seq(2)); // => [1, 2]
+var both = Seq(1) + Seq(2);  // => [1, 2]
+```
+
+```csharp
+A Twice<A>(A x) where A : Semigroup<A> => x + x;
+
+Twice(Seq(1, 2)); // => [1, 2, 1, 2]
 ```
 
 ---
@@ -1610,9 +1722,10 @@ An object that has a reduce function that applies a function against an accumula
 
 ### Code Examples
 
-```js
-const sum = (list) => list.reduce((acc, val) => acc + val, 0)
-sum([1, 2, 3]) // 6
+```csharp
+int Sum(Seq<int> list) => list.Fold(0, (acc, val) => acc + val);
+
+Sum(Seq(1, 2, 3)); // => 6
 ```
 
 ---
@@ -1629,20 +1742,14 @@ A Foldable and Functor that can turn a collection of wrapped values inside-out v
 
 ### Code Examples
 
-```js
-// sequence transforms a list of Promises into a Promise of a list
-// [Promise<1>, Promise<2>] -> Promise<[1, 2]>
-const promiseSequence = (promises) =>
-  promises.reduce(
-    (acc, p) => acc.then((arr) => p.then((val) => [...arr, val])),
-    Promise.resolve([])
-  )
+```csharp
+// parseInt :: string -> Option<int>
+// Traverse runs it on every item, then flips the result inside-out:
+// Seq<Option<int>> becomes Option<Seq<int>>
+Seq("1", "2", "3").Traverse(s => parseInt(s)).As(); // => Some([1, 2, 3])
 
-promiseSequence([
-  Promise.resolve(1),
-  Promise.resolve(2),
-  Promise.resolve(3)
-]).then(console.log) // [1, 2, 3]
+// a single None makes the whole result None
+Seq("1", "x", "3").Traverse(s => parseInt(s)).As(); // => None
 ```
 
 ---
@@ -1659,42 +1766,46 @@ A lens is a structure (often an object or function) that pairs a getter and a no
 
 ### Code Examples
 
-```js
-// Using [Ramda's lens](http://ramdajs.com/docs/#lens)
-const nameLens = R.lens(
-  // getter for name property on an object
-  (obj) => obj.name,
-  // setter for name property
-  (val, obj) => Object.assign({}, obj, { name: val })
-)
+```csharp
+// Using language-ext's Lens<A, B>
+var nameLens = Lens<Person, string>.New(
+    // getter for the Name property
+    Get: p => p.Name,
+    // non-mutating setter for the Name property
+    Set: name => p => p with { Name = name });
+
+record Person(string Name);
 ```
 
-```js
-const person = { name: 'Gertrude Blanch' }
+```csharp
+var person = new Person("Gertrude Blanch");
 
 // invoke the getter
-R.view(nameLens, person) // 'Gertrude Blanch'
+nameLens.Get(person); // => "Gertrude Blanch"
 
 // invoke the setter
-R.set(nameLens, 'Shafi Goldwasser', person) // {name: 'Shafi Goldwasser'}
+nameLens.Set("Shafi Goldwasser", person);
+// => Person { Name = Shafi Goldwasser }
 
 // run a function on the value in the structure
-R.over(nameLens, uppercase, person) // {name: 'GERTRUDE BLANCH'}
+nameLens.Update(s => s.ToUpper(), person);
+// => Person { Name = GERTRUDE BLANCH }
 ```
 
-```js
-// This lens focuses on the first item in a non-empty array
-const firstLens = R.lens(
-  // get first item in array
-  xs => xs[0],
-  // non-mutating setter for first item in array
-  (val, [__, ...xs]) => [val, ...xs]
-)
+```csharp
+// This lens focuses on the first item in a non-empty sequence
+Lens<Seq<A>, A> FirstLens<A>() => Lens<Seq<A>, A>.New(
+    // get first item in the sequence
+    Get: xs => xs[0],
+    // non-mutating setter for first item in the sequence
+    Set: x => xs => x.Cons(xs.Tail));
 
-const people = [{ name: 'Gertrude Blanch' }, { name: 'Shafi Goldwasser' }]
+var people = Seq(new Person("Gertrude Blanch"),
+                 new Person("Shafi Goldwasser"));
 
-// Despite what you may assume, lenses compose left-to-right.
-R.over(compose(firstLens, nameLens), uppercase, people) // [{'name': 'GERTRUDE BLANCH'}, {'name': 'Shafi Goldwasser'}]
+// `lens` composes left-to-right: first focus on the head, then on its name.
+lens(FirstLens<Person>(), nameLens).Update(s => s.ToUpper(), people);
+// => [Person { Name = GERTRUDE BLANCH }, Person { Name = Shafi Goldwasser }]
 ```
 
 ---
@@ -1711,21 +1822,21 @@ An optic that focuses on a sub-case or variant of a sum type. Unlike a Lens, whi
 
 ### Code Examples
 
-```js
-const Prism = (preview, review) => ({
-  preview,
-  review
-})
+```csharp
+var radius = Prism<Shape, double>.New(
+    Get: s => s is Circle c ? Some(c.Radius) : None,
+    Set: r => s => s is Circle ? new Circle(r) : s);
 
-// A prism focusing on numeric string values
-const integerPrism = Prism(
-  (str) => (/^-?\d+$/.test(str) ? Number(str) : null),
-  (num) => String(num)
-)
+radius.Get(new Circle(2)); // => Some(2)
+radius.Get(new Square(3)); // => None
 
-integerPrism.preview('42') // 42
-integerPrism.preview('hello') // null
-integerPrism.review(42) // '42'
+// Update only touches values of the focused case
+radius.Update(r => r * 2, new Circle(2)); // => Circle { Radius = 4 }
+radius.Update(r => r * 2, new Square(3)); // => Square { Side = 3 }
+
+abstract record Shape;
+record Circle(double Radius) : Shape;
+record Square(double Side) : Shape;
 ```
 
 ---
@@ -1738,24 +1849,20 @@ integerPrism.review(42) // '42'
 - Related concepts: #lens, #prism, #isomorphism
 
 ### Definition
-An optic that defines a lossless, reversible two-way mapping between two representations of the same information (s and a). An Iso consists of a to function (s -> a) and a from function (a -> s) such that from(to(x)) === x and to(from(y)) === y.
+An optic that defines a lossless, reversible two-way mapping between two representations of the same information (s and a). An Iso consists of a to function (s -> a) and a from function (a -> s) such that from(to(x)) == x and to(from(y)) == y.
 
 ### Code Examples
 
-```js
-const Iso = (to, from) => ({
-  to,
-  from
-})
-
+```csharp
 // Conversion between Celsius and Fahrenheit
-const tempIso = Iso(
-  (c) => (c * 9) / 5 + 32, // to Fahrenheit
-  (f) => ((f - 32) * 5) / 9 // from Fahrenheit
-)
+var tempIso = new Iso<double, double>(
+    To:   c => c * 9 / 5 + 32,   // to Fahrenheit
+    From: f => (f - 32) * 5 / 9); // from Fahrenheit
 
-tempIso.to(100) // 212
-tempIso.from(212) // 100
+tempIso.To(100);   // => 212
+tempIso.From(212); // => 100
+
+record Iso<S, A>(Func<S, A> To, Func<A, S> From);
 ```
 
 ---
@@ -1771,22 +1878,20 @@ An optic that focuses on zero, one, or multiple values (0..*) inside a data stru
 
 ### Code Examples
 
-```js
-const Traversal = (getAll, modify) => ({
-  getAll,
-  modify
-})
+```csharp
+// Traversal focusing only on even numbers in a sequence:
+var evens = new Traversal<Seq<int>, int>(
+    GetAll: xs => xs.Filter(n => n % 2 == 0),
+    Modify: f => xs => xs.Map(n => n % 2 == 0 ? f(n) : n));
 
-// Traversal focusing only on even numbers in an array:
-const evenTraversal = Traversal(
-  (arr) => arr.filter((n) => n % 2 === 0),
-  (f, arr) => arr.map((n) => (n % 2 === 0 ? f(n) : n))
-)
+var numbers = Seq(1, 2, 3, 4, 5, 6);
 
-const numbers = [1, 2, 3, 4, 5, 6]
+evens.GetAll(numbers);           // => [2, 4, 6]
+evens.Modify(n => n * 10)(numbers); // => [1, 20, 3, 40, 5, 60]
 
-evenTraversal.getAll(numbers) // [2, 4, 6]
-evenTraversal.modify((n) => n * 10, numbers) // [1, 20, 3, 40, 5, 60]
+record Traversal<S, A>(
+    Func<S, Seq<A>> GetAll,
+    Func<Func<A, A>, Func<S, S>> Modify);
 ```
 
 ---
@@ -1798,28 +1903,33 @@ evenTraversal.modify((n) => n * 10, numbers) // [1, 20, 3, 40, 5, 60]
 - Related concepts: #contracts
 
 ### Definition
-Often functions in JavaScript will include comments that indicate the types of their arguments and return values.
+In C# the types of arguments and return values are part of every function's signature. Even so, functional programmers often describe functions with Haskell-style type signatures in comments, because they are short and easy to read.
 
 ### Code Examples
 
-```js
+```csharp
 // functionName :: firstArgType -> secondArgType -> returnType
 
-// add :: Number -> Number -> Number
-const add = (x) => (y) => x + y
+// add :: int -> int -> int
+Func<int, Func<int, int>> add = x => y => x + y;
 
-// increment :: Number -> Number
-const increment = (x) => x + 1
+// increment :: int -> int
+Func<int, int> increment = x => x + 1;
+
+add(1)(2);    // => 3
+increment(2); // => 3
 ```
 
-```js
+```csharp
 // call :: (a -> b) -> a -> b
-const call = (f) => (x) => f(x)
+Func<A, B> Call<A, B>(Func<A, B> f) => x => f(x);
 ```
 
-```js
+```csharp
 // map :: (a -> b) -> [a] -> [b]
-const map = (f) => (list) => list.map(f)
+Func<Seq<A>, Seq<B>> Map<A, B>(Func<A, B> f) => list => list.Map(f);
+
+Map<int, int>(x => x + 1)(Seq(1, 2)); // => [2, 3]
 ```
 
 ---
@@ -1848,13 +1958,22 @@ A Sum type is the combination of two types together into another one. It is call
 
 ### Code Examples
 
-```js
-// imagine that rather than sets here we have types that can only have these values
-const bools = new Set([true, false])
-const halfTrue = new Set(['half-true'])
+```csharp
+// Known has 2 possible values (true, false) and HalfTrue has 1,
+// so WeakLogic has 2 + 1 = 3 possible values.
+string Describe(WeakLogic w) => w switch
+{
+    Known(true)  => "true",
+    Known(false) => "false",
+    HalfTrue     => "half-true",
+    _            => throw new ArgumentOutOfRangeException(nameof(w))
+};
 
-// The weakLogic type contains the sum of the values from bools and halfTrue
-const weakLogicValues = new Set([...bools, ...halfTrue])
+Describe(new HalfTrue()); // => "half-true"
+
+abstract record WeakLogic;
+record Known(bool Value) : WeakLogic;
+record HalfTrue : WeakLogic;
 ```
 
 ---
@@ -1871,9 +1990,11 @@ A product type combines types together in a way you're probably more familiar wi
 
 ### Code Examples
 
-```js
-// point :: (Number, Number) -> {x: Number, y: Number}
-const point = (x, y) => ({ x, y })
+```csharp
+// Point :: (int, int) -> Point
+var p = new Point(1, 2); // => Point { X = 1, Y = 2 }
+
+record Point(int X, int Y);
 ```
 
 ---
@@ -1890,45 +2011,28 @@ Option is a sum type with two cases often called Some and None.
 
 ### Code Examples
 
-```js
-// Naive definition
-
-const Some = (v) => ({
-  val: v,
-  map (f) {
-    return Some(f(this.val))
-  },
-  chain (f) {
-    return f(this.val)
-  }
-})
-
-const None = () => ({
-  map (f) {
-    return this
-  },
-  chain (f) {
-    return this
-  }
-})
-
-// maybeProp :: (String, {a}) -> Option a
-const maybeProp = (key, obj) => typeof obj[key] === 'undefined' ? None() : Some(obj[key])
+```csharp
+// Lookups in a dictionary might not find anything, so return an Option:
+Option<V> MaybeProp<V>(string key, IReadOnlyDictionary<string, V> obj) =>
+    obj.TryGetValue(key, out var value) ? Some(value) : None;
 ```
 
-```js
-// getItem :: Cart -> Option CartItem
-const getItem = (cart) => maybeProp('item', cart)
+```csharp
+// GetItem :: Cart -> Option<Item>
+Option<Item> GetItem(Cart cart) => Optional(cart.Item);
 
-// getPrice :: Item -> Option Number
-const getPrice = (item) => maybeProp('price', item)
+// GetPrice :: Item -> Option<decimal>
+Option<decimal> GetPrice(Item item) => Optional(item.Price);
 
-// getNestedPrice :: cart -> Option a
-const getNestedPrice = (cart) => getItem(cart).chain(getPrice)
+// GetNestedPrice :: Cart -> Option<decimal>
+Option<decimal> GetNestedPrice(Cart cart) => GetItem(cart).Bind(GetPrice);
 
-getNestedPrice({}) // None()
-getNestedPrice({ item: { foo: 1 } }) // None()
-getNestedPrice({ item: { price: 9.99 } }) // Some(9.99)
+GetNestedPrice(new Cart(null));                       // => None
+GetNestedPrice(new Cart(new Item(null)));             // => None
+GetNestedPrice(new Cart(new Item(9.99m)));            // => Some(9.99)
+
+record Cart(Item? Item);
+record Item(decimal? Price);
 ```
 
 ---
@@ -1945,34 +2049,27 @@ A sum type with two cases, Left and Right. By convention, Right represents a suc
 
 ### Code Examples
 
-```js
-const Left = (x) => ({
-  value: x,
-  map: (_f) => Left(x),
-  chain: (_f) => Left(x),
-  fold: (f, _g) => f(x),
-  isLeft: true
-})
+```csharp
+using System.Text.Json;
 
-const Right = (x) => ({
-  value: x,
-  map: (f) => Right(f(x)),
-  chain: (f) => f(x),
-  fold: (_f, g) => g(x),
-  isRight: true
-})
-
-// parseJson :: String -> Either String Object
-const parseJson = (str) => {
-  try {
-    return Right(JSON.parse(str))
-  } catch (err) {
-    return Left(err.message)
-  }
+// ParseJson :: string -> Either<string, JsonElement>
+Either<string, JsonElement> ParseJson(string json)
+{
+    try   { return Right(JsonDocument.Parse(json).RootElement); }
+    catch (JsonException e) { return Left(e.Message); }
 }
 
-parseJson('{"user": "hemanth"}').map((obj) => obj.user) // Right('hemanth')
-parseJson('invalid json').map((obj) => obj.user) // Left('Unexpected token...')
+string? User(JsonElement obj) => obj.GetProperty("user").GetString();
+
+ParseJson("""{"user": "hemanth"}""").Map(User); // => Right(hemanth)
+var failed = ParseJson("invalid json").Map(User).IsLeft; // => true
+```
+
+```csharp
+ParseJson("invalid json").Match(
+    Left:  _ => "could not parse",
+    Right: obj => $"hello {User(obj)}");
+// => "could not parse"
 ```
 
 ---
@@ -1988,11 +2085,11 @@ A function f :: A => B is an expression - often called arrow or lambda expressio
 
 ### Code Examples
 
-```js
-// times2 :: Number -> Number
-const times2 = n => n * 2
+```csharp
+// times2 :: int -> int
+Func<int, int> times2 = n => n * 2;
 
-;[1, 2, 3].map(times2) // [2, 4, 6]
+Seq(1, 2, 3).Map(times2); // => [2, 4, 6]
 ```
 
 ---
@@ -2008,31 +2105,32 @@ A partial function is a function which is not defined for all arguments - it mig
 
 ### Code Examples
 
-```js
+```csharp
 // example 1: sum of the list
-// sum :: [Number] -> Number
-const sum = arr => arr.reduce((a, b) => a + b)
-sum([1, 2, 3]) // 6
-sum([]) // TypeError: Reduce of empty array with no initial value
+// sum :: [int] -> int
+int Sum(int[] xs) => xs.Aggregate((a, b) => a + b);
+Sum([1, 2, 3]); // => 6
+// Sum([]);  InvalidOperationException: Sequence contains no elements
 
 // example 2: get the first item in list
 // first :: [A] -> A
-const first = a => a[0]
-first([42]) // 42
-first([]) // undefined
-// or even worse:
-first([[42]])[0] // 42
-first([])[0] // Uncaught TypeError: Cannot read property '0' of undefined
+A First<A>(A[] xs) => xs[0];
+First([42]); // => 42
+// First(Array.Empty<int>());  IndexOutOfRangeException
 
 // example 3: repeat function N times
-// times :: Number -> (Number -> Number) -> Number
-const times = n => fn => n && (fn(n), times(n - 1)(fn))
-times(3)(console.log)
+// times :: int -> (int -> ()) -> ()
+void Times(int n, Action<int> f)
+{
+    if (n == 0) return;
+    f(n);
+    Times(n - 1, f);
+}
+Times(3, Console.WriteLine);
 // 3
 // 2
 // 1
-times(-1)(console.log)
-// RangeError: Maximum call stack size exceeded
+// Times(-1, Console.WriteLine);  StackOverflowException
 ```
 
 ---
@@ -2048,36 +2146,38 @@ Partial functions are dangerous as they need to be treated with great caution. Y
 
 ### Code Examples
 
-```js
+```csharp
 // example 1: sum of the list
-// we can provide default value so it will always return result
-// sum :: [Number] -> Number
-const sum = arr => arr.reduce((a, b) => a + b, 0)
-sum([1, 2, 3]) // 6
-sum([]) // 0
+// we can provide a default value so it will always return a result
+// sum :: [int] -> int
+int Sum(Seq<int> xs) => xs.Fold(0, (a, b) => a + b);
+Sum([1, 2, 3]); // => 6
+Sum([]);        // => 0
 
 // example 2: get the first item in list
 // change result to Option
-// first :: [A] -> Option A
-const first = a => a.length ? Some(a[0]) : None()
-first([42]).map(a => console.log(a)) // 42
-first([]).map(a => console.log(a)) // console.log won't execute at all
-// our previous worst case
-first([[42]]).map(a => console.log(a[0])) // 42
-first([]).map(a => console.log(a[0])) // won't execute, so we won't have error here
-// more of that, you will know by function return type (Option)
-// that you should use `.map` method to access the data and you will never forget
-// to check your input because such check become built-in into the function
+// first :: [A] -> Option<A>
+Option<A> First<A>(Seq<A> xs) => xs.Head;
+First<int>([42]); // => Some(42)
+First<int>([]);   // => None
+// The Option return type tells you to deal with the missing case,
+// e.g. with Map, Match or IfNone, so you can't forget to check.
+First<int>([]).Map(x => x + 1).IfNone(0); // => 0
 
 // example 3: repeat function N times
-// we should make function always terminate by changing conditions:
-// times :: Number -> (Number -> Number) -> Number
-const times = n => fn => n > 0 && (fn(n), times(n - 1)(fn))
-times(3)(console.log)
+// we should make the function always terminate by changing conditions:
+// times :: int -> (int -> ()) -> ()
+void Times(int n, Action<int> f)
+{
+    if (n <= 0) return;
+    f(n);
+    Times(n - 1, f);
+}
+Times(3, Console.WriteLine);
 // 3
 // 2
 // 1
-times(-1)(console.log)
+Times(-1, Console.WriteLine);
 // won't execute anything
 ```
 
@@ -2094,13 +2194,13 @@ A function which returns a valid result for all inputs defined in its type. This
 
 ---
 
-## Functional Programming Libraries in JavaScript
+## Functional Programming Libraries for .NET
 
 - Category: Types & Data Modeling
-- ID: #functional-programming-libraries-in-javascript
+- ID: #functional-programming-libraries-for-net
 
 ### Definition
-A curated catalog of functional programming libraries and toolkits in JavaScript including Ramda, Folktale, Sanctuary, and fp-ts.
+A curated catalog of functional programming libraries and toolkits for C# and .NET including language-ext, OneOf, MoreLINQ, and Pidgin.
 
 ---
 

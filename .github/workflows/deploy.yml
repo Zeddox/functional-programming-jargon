@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - main
+      - worktree-csharp-language-ext
   workflow_dispatch:
 
 permissions:

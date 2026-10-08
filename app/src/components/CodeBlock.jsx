@@ -1,12 +1,21 @@
 import React, { useState, useMemo } from 'react';
 import Prism from 'prismjs';
+import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-csharp';
 import { Check, Copy } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
 
+const LANGUAGE_LABELS = {
+  csharp: 'C#',
+  cs: 'C#',
+  javascript: 'JavaScript',
+  js: 'JavaScript'
+};
+
 export default function CodeBlock({
   code,
-  language = 'javascript',
+  language = 'csharp',
   isDark = true,
   soundEnabled = true,
   showLineNumbers = true
@@ -16,7 +25,7 @@ export default function CodeBlock({
   // Memoize highlighted code HTML
   const highlightedHtml = useMemo(() => {
     try {
-      const grammar = Prism.languages[language] || Prism.languages.javascript;
+      const grammar = Prism.languages[language] || Prism.languages.csharp;
       return Prism.highlight(code.trim(), grammar, language);
     } catch {
       return code;
@@ -49,7 +58,7 @@ export default function CodeBlock({
           {/* Subtle status dot */}
           <span className="w-2 h-2 rounded-full border border-current opacity-40" />
           <span className="text-[10px] uppercase tracking-wider font-semibold opacity-80">
-            {language === 'javascript' ? 'JavaScript' : language}
+            {LANGUAGE_LABELS[language] || language}
           </span>
         </div>
 
@@ -93,7 +102,7 @@ export default function CodeBlock({
           isDark ? 'text-[#f0f0ee]' : 'text-[#1a1a19]'
         }`}>
           <code
-            className="language-javascript font-mono"
+            className={`language-${language} font-mono`}
             dangerouslySetInnerHTML={{ __html: highlightedHtml }}
           />
         </pre>

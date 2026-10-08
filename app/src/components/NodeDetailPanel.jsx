@@ -77,7 +77,7 @@ export default function NodeDetailPanel({
       }
       parts.push({
         type: 'code',
-        lang: match[1] || 'javascript',
+        lang: match[1] || 'csharp',
         code: match[2].trim()
       });
       lastIndex = codeRegex.lastIndex;

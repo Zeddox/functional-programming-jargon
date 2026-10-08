@@ -1,8 +1,8 @@
 # FP Jargon
 
-> Interactive functional programming knowledge graph and specification exploring 75 concepts, category theory morphisms, and algebraic structures with JavaScript ES2015 examples.
+> Interactive functional programming knowledge graph and specification exploring 75 concepts, category theory morphisms, and algebraic structures with C# (language-ext) examples.
 
-FP Jargon maps out the entire vocabulary of functional programming into an interconnected graph with deterministic explanations, formal properties, and executable JavaScript examples.
+FP Jargon maps out the entire vocabulary of functional programming into an interconnected graph with deterministic explanations, formal properties, and executable C# (language-ext) examples.
 
 ## Links
 
@@ -46,7 +46,7 @@ FP Jargon maps out the entire vocabulary of functional programming into an inter
 - [Contracts](https://hemanth.github.io/functional-programming-jargon/#contracts): A contract specifies the obligations and guarantees of the behavior from a function or expression at runtime. This acts 
 - [Value](https://hemanth.github.io/functional-programming-jargon/#value): Anything that can be assigned to a variable.
 - [Constant](https://hemanth.github.io/functional-programming-jargon/#constant): A variable that cannot be reassigned once defined.
-- [Constant Function](https://hemanth.github.io/functional-programming-jargon/#constant-function): A curried function that ignores its second argument:
+- [Constant Function](https://hemanth.github.io/functional-programming-jargon/#constant-function): A curried function that ignores its second argument. language-ext calls it constant:
 - [Referential Transparency](https://hemanth.github.io/functional-programming-jargon/#referential-transparency): An expression that can be replaced with its value without changing the behavior of the program is said to be referential
 - [Equational Reasoning](https://hemanth.github.io/functional-programming-jargon/#equational-reasoning): When an application is composed of expressions and devoid of side effects, truths about the system can be derived from t
 - [Memoization](https://hemanth.github.io/functional-programming-jargon/#memoization): An optimization technique that caches the return value of a function based on its input parameters. Memoization is only 
@@ -58,16 +58,16 @@ FP Jargon maps out the entire vocabulary of functional programming into an inter
 - [Homomorphism](https://hemanth.github.io/functional-programming-jargon/#homomorphism): A function where there is a structural property that is the same in the input as well as the output.
 - [Endomorphism](https://hemanth.github.io/functional-programming-jargon/#endomorphism): A function where the input type is the same as the output. Since the types are identical, endomorphisms are also homomor
 - [Isomorphism](https://hemanth.github.io/functional-programming-jargon/#isomorphism): A morphism made of a pair of transformations between 2 types of objects that is structural in nature and no data is lost
-- [Catamorphism](https://hemanth.github.io/functional-programming-jargon/#catamorphism): A function which deconstructs a structure into a single value. reduceRight is an example of a catamorphism for array str
-- [Anamorphism](https://hemanth.github.io/functional-programming-jargon/#anamorphism): A function that builds up a structure by repeatedly applying a function to its argument. unfold is an example which gene
+- [Catamorphism](https://hemanth.github.io/functional-programming-jargon/#catamorphism): A function which deconstructs a structure into a single value. FoldBack (a right fold, provided for every Foldable) is a
+- [Anamorphism](https://hemanth.github.io/functional-programming-jargon/#anamorphism): A function that builds up a structure by repeatedly applying a function to its argument. Unfold is an example which gene
 - [Hylomorphism](https://hemanth.github.io/functional-programming-jargon/#hylomorphism): The function which composes an anamorphism followed by a catamorphism.
-- [Paramorphism](https://hemanth.github.io/functional-programming-jargon/#paramorphism): A function just like reduceRight. However, there's a difference:
+- [Paramorphism](https://hemanth.github.io/functional-programming-jargon/#paramorphism): A function just like FoldBack. However, there's a difference:
 - [Apomorphism](https://hemanth.github.io/functional-programming-jargon/#apomorphism): The opposite of paramorphism, just as anamorphism is the opposite of catamorphism. With paramorphism, you retain access 
 - [Natural Transformation](https://hemanth.github.io/functional-programming-jargon/#natural-transformation): A structure-preserving mapping between two functors, transforming F<A> into G<A> without altering or inspecting the unde
 
 ### Algebraic Structures
-- [Constant Functor](https://hemanth.github.io/functional-programming-jargon/#constant-functor): Object whose map doesn't transform the contents. See Functor.
-- [Constant Monad](https://hemanth.github.io/functional-programming-jargon/#constant-monad): Object whose chain doesn't transform the contents. See Monad.
+- [Constant Functor](https://hemanth.github.io/functional-programming-jargon/#constant-functor): Object whose Map doesn't transform the contents. See Functor. language-ext has no Const functor type, so here is a minim
+- [Constant Monad](https://hemanth.github.io/functional-programming-jargon/#constant-monad): Object whose Bind doesn't transform the contents. See Monad.
 - [Functor](https://hemanth.github.io/functional-programming-jargon/#functor): An object that implements a map function that takes a function which is run on the contents of that object. A functor mu
 - [Pointed Functor](https://hemanth.github.io/functional-programming-jargon/#pointed-functor): An object with an of function that puts any single value into it.
 - [Lift](https://hemanth.github.io/functional-programming-jargon/#lift): Lifting is when you take a value and put it into an object like a functor. If you lift a function into an Applicative Fu
@@ -93,13 +93,13 @@ FP Jargon maps out the entire vocabulary of functional programming into an inter
 - [Prism](https://hemanth.github.io/functional-programming-jargon/#prism): An optic that focuses on a sub-case or variant of a sum type. Unlike a Lens, which always assumes the target field exist
 - [Iso](https://hemanth.github.io/functional-programming-jargon/#iso): An optic that defines a lossless, reversible two-way mapping between two representations of the same information (s and 
 - [Traversal](https://hemanth.github.io/functional-programming-jargon/#traversal): An optic that focuses on zero, one, or multiple values (0..*) inside a data structure simultaneously.
-- [Type Signatures](https://hemanth.github.io/functional-programming-jargon/#type-signatures): Often functions in JavaScript will include comments that indicate the types of their arguments and return values.
+- [Type Signatures](https://hemanth.github.io/functional-programming-jargon/#type-signatures): In C# the types of arguments and return values are part of every function's signature. Even so, functional programmers o
 - [Algebraic data type](https://hemanth.github.io/functional-programming-jargon/#algebraic-data-type): A composite type made from putting other types together. Two common classes of algebraic types are sum and product.
 - [Sum type](https://hemanth.github.io/functional-programming-jargon/#sum-type): A Sum type is the combination of two types together into another one. It is called sum because the number of possible va
 - [Product type](https://hemanth.github.io/functional-programming-jargon/#product-type): A product type combines types together in a way you're probably more familiar with:
 - [Option](https://hemanth.github.io/functional-programming-jargon/#option): Option is a sum type with two cases often called Some and None.
 - [Either](https://hemanth.github.io/functional-programming-jargon/#either): A sum type with two cases, Left and Right. By convention, Right represents a successful computation and Left contains an
-- [Functional Programming Libraries in JavaScript](https://hemanth.github.io/functional-programming-jargon/#functional-programming-libraries-in-javascript): A curated catalog of functional programming libraries and toolkits in JavaScript including Ramda, Folktale, Sanctuary, a
+- [Functional Programming Libraries for .NET](https://hemanth.github.io/functional-programming-jargon/#functional-programming-libraries-for-net): A curated catalog of functional programming libraries and toolkits for C# and .NET including language-ext, OneOf, MoreLI
 
 ## Agent & LLM Usage
 

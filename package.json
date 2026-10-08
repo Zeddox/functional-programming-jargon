@@ -8,6 +8,7 @@
     "build": "npm --prefix app run build",
     "preview": "npm --prefix app run preview",
     "test": "eslint readme.md",
+    "test:csharp": "samples/csharp/run.sh",
     "toc": "roadmarks"
   },
   "repository": {

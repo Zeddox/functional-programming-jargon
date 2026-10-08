@@ -1,6 +1,6 @@
 # fpjargon
 
-Interactive knowledge graph exploring 69 functional programming jargons with JavaScript ES2015 examples.
+Interactive knowledge graph exploring 69 functional programming jargons with C# (language-ext) examples.
 
 ```bash
 npm install

@@ -93,7 +93,7 @@ const CATEGORY_MAP = {
   'iso': 'types-data',
   'traversal': 'types-data',
   'lambda-calculus': 'types-data',
-  'functional-programming-libraries-in-javascript': 'types-data'
+  'functional-programming-libraries-for-net': 'types-data'
 };
 
 const CATEGORIES = {
@@ -329,16 +329,16 @@ while ((match = sectionRegex.exec(mainBody)) !== null) {
   const rawTitle = match[2].trim();
   const rawBody = match[3].trim();
 
-  // If this is the "Functional Programming Libraries in JavaScript" section, handle specially or include as a term
+  // If this is the "Functional Programming Libraries for .NET" section, handle specially or include as a term
   const slug = slugify(rawTitle);
 
   // Extract code snippets
   const codeBlocks = [];
-  const codeRegex = /```(js|javascript)?\n([\s\S]*?)```/g;
+  const codeRegex = /```(csharp|cs|js|javascript)?\n([\s\S]*?)```/g;
   let codeMatch;
   while ((codeMatch = codeRegex.exec(rawBody)) !== null) {
     codeBlocks.push({
-      lang: codeMatch[1] || 'js',
+      lang: codeMatch[1] || 'csharp',
       code: codeMatch[2].trim()
     });
   }
@@ -373,8 +373,8 @@ while ((match = sectionRegex.exec(mainBody)) !== null) {
     .filter(p => p.length > 0 && !p.startsWith('```') && !p.startsWith('__Further') && !p.startsWith('*'));
 
   let summary = '';
-  if (slug === 'functional-programming-libraries-in-javascript') {
-    summary = 'A curated catalog of functional programming libraries and toolkits in JavaScript including Ramda, Folktale, Sanctuary, and fp-ts.';
+  if (slug === 'functional-programming-libraries-for-net') {
+    summary = 'A curated catalog of functional programming libraries and toolkits for C# and .NET including language-ext, OneOf, MoreLINQ, and Pidgin.';
   } else if (paragraphs[0]) {
     summary = paragraphs[0]
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
@@ -474,7 +474,7 @@ fs.writeFileSync(path.join(publicDataDir, 'jargons.json'), JSON.stringify(output
 // Generate agent-readable full text reference (llms-full.txt)
 let llmsFull = `# FP Jargon - Full Reference
 
-> Complete catalog of ${entries.length} functional programming concepts, morphisms, algebraic structures, and category theory terms with JavaScript ES2015 examples.
+> Complete catalog of ${entries.length} functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
 > Source: https://github.com/hemanth/functional-programming-jargon
 > Live app: https://hemanth.github.io/functional-programming-jargon/
 
@@ -508,9 +508,9 @@ fs.writeFileSync(llmsFullPath, llmsFull, 'utf8');
 // Also generate llms.txt index per llmstxt.org specification
 let llmsTxt = `# FP Jargon
 
-> Interactive functional programming knowledge graph and specification exploring ${entries.length} concepts, category theory morphisms, and algebraic structures with JavaScript ES2015 examples.
+> Interactive functional programming knowledge graph and specification exploring ${entries.length} concepts, category theory morphisms, and algebraic structures with C# (language-ext) examples.
 
-FP Jargon maps out the entire vocabulary of functional programming into an interconnected graph with deterministic explanations, formal properties, and executable JavaScript examples.
+FP Jargon maps out the entire vocabulary of functional programming into an interconnected graph with deterministic explanations, formal properties, and executable C# (language-ext) examples.
 
 ## Links
 
