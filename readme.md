@@ -103,6 +103,10 @@ __Table of Contents__
 * [Iso](#iso)
 * [Traversal](#traversal)
 * [Type Signatures](#type-signatures)
+* [Polymorphism](#polymorphism)
+* [Type Class](#type-class)
+* [Higher-Kinded Type](#higher-kinded-type)
+* [Expression Problem](#expression-problem)
 * [Algebraic data type](#algebraic-data-type)
   * [Sum type](#sum-type)
   * [Product type](#product-type)
@@ -1923,6 +1927,179 @@ __Further reading__
 * [Function signatures](https://fsharpforfunandprofit.com/posts/function-signatures/) on F# for fun and profit
 * [Func delegate](https://learn.microsoft.com/en-us/dotnet/api/system.func-2) on Microsoft Learn
 * [What is Hindley-Milner?](http://stackoverflow.com/a/399392/22425) on Stack Overflow
+
+## Polymorphism
+
+Writing code once that works for values of many types. There are three main kinds.
+
+**Parametric** polymorphism is the same code for every type. A generic function knows nothing about its type parameter, so it can only pass values of that type around:
+
+```csharp
+Seq<A> Twice<A>(A x) => Seq(x, x);
+
+Twice(1);    // => [1, 1]
+Twice("hi"); // => [hi, hi]
+```
+
+Because `Twice` can't look inside an `A`, its signature alone rules out a lot of possible behaviour, a property known as parametricity.
+
+**Ad hoc** polymorphism is one name with a different implementation for each type. Overloading is the simplest form; [type classes](#type-class) are the generic form:
+
+```csharp
+Describe.Of(42);   // => "the number 42"
+Describe.Of(true); // => "yes"
+
+static class Describe
+{
+    public static string Of(int n) => $"the number {n}";
+    public static string Of(bool b) => b ? "yes" : "no";
+}
+```
+
+**Subtype** polymorphism is the object-oriented kind: code written against a base type works with every derived type, each overriding behaviour in its own way:
+
+```csharp
+var shapes = Seq<Shape>(new Square(2), new Circle(1));
+var areas  = shapes.Map(s => Math.Round(s.Area, 2)); // => [4, 3.14]
+
+abstract record Shape { public abstract double Area { get; } }
+record Square(double Side) : Shape { public override double Area => Side * Side; }
+record Circle(double Radius) : Shape { public override double Area => Math.PI * Radius * Radius; }
+```
+
+The kinds differ in when the code to run is chosen, called dispatch. With parametric and ad hoc polymorphism the compiler picks it (static dispatch). With subtyping it is picked at run time from the object's actual class, through a virtual call (dynamic dispatch). Pattern matching over a [sum type](#sum-type) is another form of run-time dispatch, over a closed set of cases; the [Expression Problem](#expression-problem) compares the two.
+
+__Further reading__
+* [Polymorphism](https://en.wikipedia.org/wiki/Polymorphism_(computer_science)) on Wikipedia
+* [Parametricity](https://en.wikipedia.org/wiki/Parametricity) on Wikipedia
+* [Ad hoc polymorphism](https://en.wikipedia.org/wiki/Ad_hoc_polymorphism) on Wikipedia
+
+## Type Class
+
+An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time.
+
+C# 11's static abstract interface members make this possible. Here a constraint on `Monoid<A>` (see [Monoid](#monoid)) lets a generic function call `A.Empty`, which belongs to the type, not to any value:
+
+```csharp
+A ConcatAll<A>(Seq<A> xs) where A : Monoid<A> =>
+    xs.Aggregate(A.Empty, (acc, x) => acc + x);
+
+ConcatAll(Seq(Seq(1, 2), Seq(3))); // => [1, 2, 3]
+ConcatAll(Seq(new Max(3), new Max(9), new Max(4))); // => Max { Value = 9 }
+
+// An instance for our own type: Max combines by keeping the larger value
+record Max(int Value) : Monoid<Max>
+{
+    public static Max Empty => new(int.MinValue);
+    public Max Combine(Max rhs) => Value >= rhs.Value ? this : rhs;
+}
+```
+
+A type class can take more than one type parameter. A single-parameter class says something about one type, such as `Monoid<A>` or `Functor<F>`. A multi-parameter class describes how types relate: `Natural<F, G>` says an `F` can be turned into a `G` (a [natural transformation](#natural-transformation)), `Readable<M, Env>` says `M` can read an environment of type `Env`, and `Fallible<E, F>` says `F` can fail with an `E`.
+
+Separately, each parameter has a kind. `Monoid<A>`'s `A` is a plain type such as `int`, but `Functor<F>`'s `F` is a type constructor such as `Option`, which is why `Functor` needs [higher-kinded types](#higher-kinded-type).
+
+__Further reading__
+* [Type class](https://en.wikipedia.org/wiki/Type_class) on Wikipedia
+* [Explore static virtual members in interfaces](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/tutorials/static-virtual-interface-members) on Microsoft Learn
+
+## Higher-Kinded Type
+
+A type that is parameterised by a type constructor rather than by a plain type. `int` is a complete type, but `Option` is not: it needs an argument to become `Option<int>`. Kinds classify types the way types classify values:
+
+```
+int, string, Option<int>   :: *             a complete type
+Option, Seq, Task          :: * -> *        needs one type argument
+Either, Dictionary         :: * -> * -> *   needs two
+```
+
+A higher-kinded type abstracts over the `* -> *` part: "some container `F`, holding an `A`". That is what a [functor](#functor) needs, a single `Map` that works for every `F`. C# can't say this directly, because a type parameter can't itself take type arguments:
+
+```
+// Not valid C#
+F<B> Map<F, A, B>(F<A> fa, Func<A, B> f);
+```
+
+language-ext works around it with `K<F, A>`, an interface that stands for "`F` applied to `A`". A type takes part by implementing it, with a non-generic class (often called the brand) standing in for `F`: `Option<A>` implements `K<Option, A>`, and the class `Option` implements the traits. A cast, or language-ext's `.As()`, gets the concrete type back:
+
+```csharp
+// A tiny container that takes part in higher-kinded code
+record Box<A>(A Value) : K<Box, A>;
+
+// The brand: Box with its type argument left open, implementing Functor
+class Box : Functor<Box>
+{
+    public static K<Box, B> Map<A, B>(Func<A, B> f, K<Box, A> fa) =>
+        new Box<B>(f(((Box<A>)fa).Value));
+}
+```
+
+```csharp
+// Written once, for any F that is a Functor
+K<F, int> Double<F>(K<F, int> fa) where F : Functor<F> =>
+    fa.Map(x => x * 2);
+
+var boxed = ((Box<int>)Double(new Box<int>(21))).Value; // => 42
+Double(Some(21));     // => Some(42)
+Double(Seq(1, 2, 3)); // => [2, 4, 6]
+```
+
+This is what `K<F, A>` means throughout this document: [Functor](#functor), [Monad](#monad), [Foldable](#foldable) and the other traits are all written this way.
+
+__Further reading__
+* [Higher Kinds in C# with language-ext [Part 1]](https://paullouth.com/higher-kinds-in-c-with-language-ext/) by Paul Louth
+* [Kind (type theory)](https://en.wikipedia.org/wiki/Kind_(type_theory)) on Wikipedia
+
+## Expression Problem
+
+The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard.
+
+A [sum type](#sum-type) with pattern matching is closed over its cases. Adding an operation is just another function, but adding a case means changing every existing `switch`:
+
+```csharp
+int Eval(Expr e) => e switch
+{
+    Num n  => n.Value,
+    Plus p => Eval(p.Left) + Eval(p.Right),
+    _      => throw new ArgumentOutOfRangeException(nameof(e))
+};
+
+// A new operation leaves Eval untouched...
+string Show(Expr e) => e switch
+{
+    Num n  => n.Value.ToString(),
+    Plus p => $"({Show(p.Left)} + {Show(p.Right)})",
+    _      => throw new ArgumentOutOfRangeException(nameof(e))
+};
+
+var expr = new Plus(new Num(1), new Plus(new Num(2), new Num(3)));
+Eval(expr); // => 6
+Show(expr); // => "(1 + (2 + 3))"
+
+// ...but a new case, such as Times, means revisiting Eval, Show and every other switch
+abstract record Expr;
+record Num(int Value) : Expr;
+record Plus(Expr Left, Expr Right) : Expr;
+```
+
+Interfaces (and [type classes](#type-class)) are the reverse: open over cases. A new case is just a new class, but a new operation must be added to the interface and to every class that implements it:
+
+```csharp
+var tree = new PlusNode(new NumNode(1), new NumNode(2));
+tree.Eval(); // => 3
+
+interface INode { int Eval(); }
+record NumNode(int Value) : INode { public int Eval() => Value; }
+record PlusNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() + Right.Eval(); }
+// A new case is one new class, with no other changes:
+record TimesNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() * Right.Eval(); }
+```
+
+The choice is about which kind of change you expect more often. Functional code tends to fix the cases and add operations; object-oriented code tends to fix the operations and add cases. Techniques such as the visitor pattern and "tagless final" (operations as type classes over [higher-kinded types](#higher-kinded-type)) try to get both.
+
+__Further reading__
+* [Expression problem](https://en.wikipedia.org/wiki/Expression_problem) on Wikipedia
+* [The Expression Problem](https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt), Philip Wadler's original 1998 email
 
 ## Algebraic data type
 

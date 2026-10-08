@@ -2,8 +2,8 @@
   "meta": {
     "title": "FP Jargon",
     "subtitle": "The vocabulary of functional programming mapped into an interactive graph",
-    "totalTerms": 81,
-    "totalRelationships": 150,
+    "totalTerms": 85,
+    "totalRelationships": 164,
     "sourceRepo": "https://github.com/hemanth/functional-programming-jargon",
     "originalAuthor": "Hemanth HM"
   },
@@ -859,6 +859,8 @@
         "pointed-functor",
         "applicative-functor",
         "lift",
+        "type-class",
+        "higher-kinded-type",
         "traversable",
         "bifunctor",
         "contravariant-functor",
@@ -1181,6 +1183,7 @@
       "relatedIds": [
         "semigroup",
         "foldable",
+        "type-class",
         "writer-monad",
         "alternative",
         "homomorphism"
@@ -1223,6 +1226,7 @@
         "kleisli-composition",
         "comonad",
         "option",
+        "higher-kinded-type",
         "monad-comprehension",
         "reader-monad",
         "writer-monad",
@@ -2023,6 +2027,7 @@
         "functor"
       ],
       "relatedIds": [
+        "type-class",
         "functor",
         "morphism",
         "category"
@@ -2097,7 +2102,8 @@
       "relatedIds": [
         "catamorphism",
         "monoid",
-        "traversable"
+        "traversable",
+        "higher-kinded-type"
       ]
     },
     {
@@ -2326,7 +2332,209 @@
       ],
       "crossRefs": [],
       "relatedIds": [
+        "polymorphism",
         "contracts"
+      ]
+    },
+    {
+      "id": "polymorphism",
+      "title": "Polymorphism",
+      "depth": 2,
+      "category": "types-data",
+      "aliases": [
+        "parametric polymorphism",
+        "ad hoc polymorphism",
+        "subtype polymorphism",
+        "generics",
+        "dispatch",
+        "static dispatch",
+        "dynamic dispatch",
+        "overloading",
+        "parametricity"
+      ],
+      "summary": "Writing code once that works for values of many types. There are three main kinds.",
+      "body": "Writing code once that works for values of many types. There are three main kinds.\n\n**Parametric** polymorphism is the same code for every type. A generic function knows nothing about its type parameter, so it can only pass values of that type around:\n\n```csharp\nSeq<A> Twice<A>(A x) => Seq(x, x);\n\nTwice(1);    // => [1, 1]\nTwice(\"hi\"); // => [hi, hi]\n```\n\nBecause `Twice` can't look inside an `A`, its signature alone rules out a lot of possible behaviour, a property known as parametricity.\n\n**Ad hoc** polymorphism is one name with a different implementation for each type. Overloading is the simplest form; [type classes](#type-class) are the generic form:\n\n```csharp\nDescribe.Of(42);   // => \"the number 42\"\nDescribe.Of(true); // => \"yes\"\n\nstatic class Describe\n{\n    public static string Of(int n) => $\"the number {n}\";\n    public static string Of(bool b) => b ? \"yes\" : \"no\";\n}\n```\n\n**Subtype** polymorphism is the object-oriented kind: code written against a base type works with every derived type, each overriding behaviour in its own way:\n\n```csharp\nvar shapes = Seq<Shape>(new Square(2), new Circle(1));\nvar areas  = shapes.Map(s => Math.Round(s.Area, 2)); // => [4, 3.14]\n\nabstract record Shape { public abstract double Area { get; } }\nrecord Square(double Side) : Shape { public override double Area => Side * Side; }\nrecord Circle(double Radius) : Shape { public override double Area => Math.PI * Radius * Radius; }\n```\n\nThe kinds differ in when the code to run is chosen, called dispatch. With parametric and ad hoc polymorphism the compiler picks it (static dispatch). With subtyping it is picked at run time from the object's actual class, through a virtual call (dynamic dispatch). Pattern matching over a [sum type](#sum-type) is another form of run-time dispatch, over a closed set of cases; the [Expression Problem](#expression-problem) compares the two.\n\n__Further reading__\n* [Polymorphism](https://en.wikipedia.org/wiki/Polymorphism_(computer_science)) on Wikipedia\n* [Parametricity](https://en.wikipedia.org/wiki/Parametricity) on Wikipedia\n* [Ad hoc polymorphism](https://en.wikipedia.org/wiki/Ad_hoc_polymorphism) on Wikipedia",
+      "codeBlocks": [
+        {
+          "lang": "csharp",
+          "code": "Seq<A> Twice<A>(A x) => Seq(x, x);\n\nTwice(1);    // => [1, 1]\nTwice(\"hi\"); // => [hi, hi]"
+        },
+        {
+          "lang": "csharp",
+          "code": "Describe.Of(42);   // => \"the number 42\"\nDescribe.Of(true); // => \"yes\"\n\nstatic class Describe\n{\n    public static string Of(int n) => $\"the number {n}\";\n    public static string Of(bool b) => b ? \"yes\" : \"no\";\n}"
+        },
+        {
+          "lang": "csharp",
+          "code": "var shapes = Seq<Shape>(new Square(2), new Circle(1));\nvar areas  = shapes.Map(s => Math.Round(s.Area, 2)); // => [4, 3.14]\n\nabstract record Shape { public abstract double Area { get; } }\nrecord Square(double Side) : Shape { public override double Area => Side * Side; }\nrecord Circle(double Radius) : Shape { public override double Area => Math.PI * Radius * Radius; }"
+        }
+      ],
+      "furtherReading": [
+        {
+          "title": "Polymorphism",
+          "url": "https://en.wikipedia.org/wiki/Polymorphism_(computer_science"
+        },
+        {
+          "title": "Parametricity",
+          "url": "https://en.wikipedia.org/wiki/Parametricity"
+        },
+        {
+          "title": "Ad hoc polymorphism",
+          "url": "https://en.wikipedia.org/wiki/Ad_hoc_polymorphism"
+        }
+      ],
+      "crossRefs": [
+        "type-class",
+        "sum-type",
+        "expression-problem"
+      ],
+      "relatedIds": [
+        "type-class",
+        "expression-problem",
+        "type-signatures",
+        "sum-type"
+      ]
+    },
+    {
+      "id": "type-class",
+      "title": "Type Class",
+      "depth": 2,
+      "category": "algebraic-structures",
+      "aliases": [
+        "trait",
+        "traits",
+        "typeclass",
+        "instance",
+        "multi-parameter type class",
+        "static abstract"
+      ],
+      "summary": "An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time.",
+      "body": "An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time.\n\nC# 11's static abstract interface members make this possible. Here a constraint on `Monoid<A>` (see [Monoid](#monoid)) lets a generic function call `A.Empty`, which belongs to the type, not to any value:\n\n```csharp\nA ConcatAll<A>(Seq<A> xs) where A : Monoid<A> =>\n    xs.Aggregate(A.Empty, (acc, x) => acc + x);\n\nConcatAll(Seq(Seq(1, 2), Seq(3))); // => [1, 2, 3]\nConcatAll(Seq(new Max(3), new Max(9), new Max(4))); // => Max { Value = 9 }\n\n// An instance for our own type: Max combines by keeping the larger value\nrecord Max(int Value) : Monoid<Max>\n{\n    public static Max Empty => new(int.MinValue);\n    public Max Combine(Max rhs) => Value >= rhs.Value ? this : rhs;\n}\n```\n\nA type class can take more than one type parameter. A single-parameter class says something about one type, such as `Monoid<A>` or `Functor<F>`. A multi-parameter class describes how types relate: `Natural<F, G>` says an `F` can be turned into a `G` (a [natural transformation](#natural-transformation)), `Readable<M, Env>` says `M` can read an environment of type `Env`, and `Fallible<E, F>` says `F` can fail with an `E`.\n\nSeparately, each parameter has a kind. `Monoid<A>`'s `A` is a plain type such as `int`, but `Functor<F>`'s `F` is a type constructor such as `Option`, which is why `Functor` needs [higher-kinded types](#higher-kinded-type).\n\n__Further reading__\n* [Type class](https://en.wikipedia.org/wiki/Type_class) on Wikipedia\n* [Explore static virtual members in interfaces](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/tutorials/static-virtual-interface-members) on Microsoft Learn",
+      "codeBlocks": [
+        {
+          "lang": "csharp",
+          "code": "A ConcatAll<A>(Seq<A> xs) where A : Monoid<A> =>\n    xs.Aggregate(A.Empty, (acc, x) => acc + x);\n\nConcatAll(Seq(Seq(1, 2), Seq(3))); // => [1, 2, 3]\nConcatAll(Seq(new Max(3), new Max(9), new Max(4))); // => Max { Value = 9 }\n\n// An instance for our own type: Max combines by keeping the larger value\nrecord Max(int Value) : Monoid<Max>\n{\n    public static Max Empty => new(int.MinValue);\n    public Max Combine(Max rhs) => Value >= rhs.Value ? this : rhs;\n}"
+        }
+      ],
+      "furtherReading": [
+        {
+          "title": "Type class",
+          "url": "https://en.wikipedia.org/wiki/Type_class"
+        },
+        {
+          "title": "Explore static virtual members in interfaces",
+          "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/tutorials/static-virtual-interface-members"
+        }
+      ],
+      "crossRefs": [
+        "monoid",
+        "natural-transformation",
+        "higher-kinded-type"
+      ],
+      "relatedIds": [
+        "polymorphism",
+        "higher-kinded-type",
+        "monoid",
+        "functor",
+        "natural-transformation",
+        "expression-problem"
+      ]
+    },
+    {
+      "id": "higher-kinded-type",
+      "title": "Higher-Kinded Type",
+      "depth": 2,
+      "category": "types-data",
+      "aliases": [
+        "hkt",
+        "higher kinds",
+        "kind",
+        "type constructor",
+        "k<f, a>",
+        "brand"
+      ],
+      "summary": "A type that is parameterised by a type constructor rather than by a plain type. int is a complete type, but Option is not: it needs an argument to become Option<int>. Kinds classify types the way types classify values:",
+      "body": "A type that is parameterised by a type constructor rather than by a plain type. `int` is a complete type, but `Option` is not: it needs an argument to become `Option<int>`. Kinds classify types the way types classify values:\n\n```\nint, string, Option<int>   :: *             a complete type\nOption, Seq, Task          :: * -> *        needs one type argument\nEither, Dictionary         :: * -> * -> *   needs two\n```\n\nA higher-kinded type abstracts over the `* -> *` part: \"some container `F`, holding an `A`\". That is what a [functor](#functor) needs, a single `Map` that works for every `F`. C# can't say this directly, because a type parameter can't itself take type arguments:\n\n```\n// Not valid C#\nF<B> Map<F, A, B>(F<A> fa, Func<A, B> f);\n```\n\nlanguage-ext works around it with `K<F, A>`, an interface that stands for \"`F` applied to `A`\". A type takes part by implementing it, with a non-generic class (often called the brand) standing in for `F`: `Option<A>` implements `K<Option, A>`, and the class `Option` implements the traits. A cast, or language-ext's `.As()`, gets the concrete type back:\n\n```csharp\n// A tiny container that takes part in higher-kinded code\nrecord Box<A>(A Value) : K<Box, A>;\n\n// The brand: Box with its type argument left open, implementing Functor\nclass Box : Functor<Box>\n{\n    public static K<Box, B> Map<A, B>(Func<A, B> f, K<Box, A> fa) =>\n        new Box<B>(f(((Box<A>)fa).Value));\n}\n```\n\n```csharp\n// Written once, for any F that is a Functor\nK<F, int> Double<F>(K<F, int> fa) where F : Functor<F> =>\n    fa.Map(x => x * 2);\n\nvar boxed = ((Box<int>)Double(new Box<int>(21))).Value; // => 42\nDouble(Some(21));     // => Some(42)\nDouble(Seq(1, 2, 3)); // => [2, 4, 6]\n```\n\nThis is what `K<F, A>` means throughout this document: [Functor](#functor), [Monad](#monad), [Foldable](#foldable) and the other traits are all written this way.\n\n__Further reading__\n* [Higher Kinds in C# with language-ext [Part 1]](https://paullouth.com/higher-kinds-in-c-with-language-ext/) by Paul Louth\n* [Kind (type theory)](https://en.wikipedia.org/wiki/Kind_(type_theory)) on Wikipedia",
+      "codeBlocks": [
+        {
+          "lang": "csharp",
+          "code": "int, string, Option<int>   :: *             a complete type\nOption, Seq, Task          :: * -> *        needs one type argument\nEither, Dictionary         :: * -> * -> *   needs two"
+        },
+        {
+          "lang": "csharp",
+          "code": "// Not valid C#\nF<B> Map<F, A, B>(F<A> fa, Func<A, B> f);"
+        },
+        {
+          "lang": "csharp",
+          "code": "// A tiny container that takes part in higher-kinded code\nrecord Box<A>(A Value) : K<Box, A>;\n\n// The brand: Box with its type argument left open, implementing Functor\nclass Box : Functor<Box>\n{\n    public static K<Box, B> Map<A, B>(Func<A, B> f, K<Box, A> fa) =>\n        new Box<B>(f(((Box<A>)fa).Value));\n}"
+        },
+        {
+          "lang": "csharp",
+          "code": "// Written once, for any F that is a Functor\nK<F, int> Double<F>(K<F, int> fa) where F : Functor<F> =>\n    fa.Map(x => x * 2);\n\nvar boxed = ((Box<int>)Double(new Box<int>(21))).Value; // => 42\nDouble(Some(21));     // => Some(42)\nDouble(Seq(1, 2, 3)); // => [2, 4, 6]"
+        }
+      ],
+      "furtherReading": [
+        {
+          "title": "Kind (type theory)",
+          "url": "https://en.wikipedia.org/wiki/Kind_(type_theory"
+        }
+      ],
+      "crossRefs": [
+        "functor",
+        "monad",
+        "foldable"
+      ],
+      "relatedIds": [
+        "type-class",
+        "functor",
+        "monad",
+        "foldable",
+        "expression-problem"
+      ]
+    },
+    {
+      "id": "expression-problem",
+      "title": "Expression Problem",
+      "depth": 2,
+      "category": "types-data",
+      "aliases": [
+        "open closed",
+        "open/closed",
+        "visitor pattern",
+        "tagless final",
+        "extensibility"
+      ],
+      "summary": "The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard.",
+      "body": "The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard.\n\nA [sum type](#sum-type) with pattern matching is closed over its cases. Adding an operation is just another function, but adding a case means changing every existing `switch`:\n\n```csharp\nint Eval(Expr e) => e switch\n{\n    Num n  => n.Value,\n    Plus p => Eval(p.Left) + Eval(p.Right),\n    _      => throw new ArgumentOutOfRangeException(nameof(e))\n};\n\n// A new operation leaves Eval untouched...\nstring Show(Expr e) => e switch\n{\n    Num n  => n.Value.ToString(),\n    Plus p => $\"({Show(p.Left)} + {Show(p.Right)})\",\n    _      => throw new ArgumentOutOfRangeException(nameof(e))\n};\n\nvar expr = new Plus(new Num(1), new Plus(new Num(2), new Num(3)));\nEval(expr); // => 6\nShow(expr); // => \"(1 + (2 + 3))\"\n\n// ...but a new case, such as Times, means revisiting Eval, Show and every other switch\nabstract record Expr;\nrecord Num(int Value) : Expr;\nrecord Plus(Expr Left, Expr Right) : Expr;\n```\n\nInterfaces (and [type classes](#type-class)) are the reverse: open over cases. A new case is just a new class, but a new operation must be added to the interface and to every class that implements it:\n\n```csharp\nvar tree = new PlusNode(new NumNode(1), new NumNode(2));\ntree.Eval(); // => 3\n\ninterface INode { int Eval(); }\nrecord NumNode(int Value) : INode { public int Eval() => Value; }\nrecord PlusNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() + Right.Eval(); }\n// A new case is one new class, with no other changes:\nrecord TimesNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() * Right.Eval(); }\n```\n\nThe choice is about which kind of change you expect more often. Functional code tends to fix the cases and add operations; object-oriented code tends to fix the operations and add cases. Techniques such as the visitor pattern and \"tagless final\" (operations as type classes over [higher-kinded types](#higher-kinded-type)) try to get both.\n\n__Further reading__\n* [Expression problem](https://en.wikipedia.org/wiki/Expression_problem) on Wikipedia\n* [The Expression Problem](https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt), Philip Wadler's original 1998 email",
+      "codeBlocks": [
+        {
+          "lang": "csharp",
+          "code": "int Eval(Expr e) => e switch\n{\n    Num n  => n.Value,\n    Plus p => Eval(p.Left) + Eval(p.Right),\n    _      => throw new ArgumentOutOfRangeException(nameof(e))\n};\n\n// A new operation leaves Eval untouched...\nstring Show(Expr e) => e switch\n{\n    Num n  => n.Value.ToString(),\n    Plus p => $\"({Show(p.Left)} + {Show(p.Right)})\",\n    _      => throw new ArgumentOutOfRangeException(nameof(e))\n};\n\nvar expr = new Plus(new Num(1), new Plus(new Num(2), new Num(3)));\nEval(expr); // => 6\nShow(expr); // => \"(1 + (2 + 3))\"\n\n// ...but a new case, such as Times, means revisiting Eval, Show and every other switch\nabstract record Expr;\nrecord Num(int Value) : Expr;\nrecord Plus(Expr Left, Expr Right) : Expr;"
+        },
+        {
+          "lang": "csharp",
+          "code": "var tree = new PlusNode(new NumNode(1), new NumNode(2));\ntree.Eval(); // => 3\n\ninterface INode { int Eval(); }\nrecord NumNode(int Value) : INode { public int Eval() => Value; }\nrecord PlusNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() + Right.Eval(); }\n// A new case is one new class, with no other changes:\nrecord TimesNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() * Right.Eval(); }"
+        }
+      ],
+      "furtherReading": [
+        {
+          "title": "Expression problem",
+          "url": "https://en.wikipedia.org/wiki/Expression_problem"
+        },
+        {
+          "title": "The Expression Problem",
+          "url": "https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt"
+        }
+      ],
+      "crossRefs": [
+        "sum-type",
+        "type-class",
+        "higher-kinded-type"
+      ],
+      "relatedIds": [
+        "polymorphism",
+        "sum-type",
+        "type-class",
+        "higher-kinded-type"
       ]
     },
     {
@@ -2376,9 +2584,11 @@
       "relatedIds": [
         "algebraic-data-type",
         "never-type",
+        "expression-problem",
         "option",
         "either",
-        "prism"
+        "prism",
+        "polymorphism"
       ]
     },
     {
@@ -3040,7 +3250,7 @@
         "id": "functor",
         "name": "Functor",
         "category": "algebraic-structures",
-        "val": 16,
+        "val": 18,
         "summary": "An object that implements a map function that takes a function which is run on the contents of that object. A functor must adhere to two rules:"
       },
       {
@@ -3110,14 +3320,14 @@
         "id": "monoid",
         "name": "Monoid",
         "category": "algebraic-structures",
-        "val": 9,
+        "val": 10,
         "summary": "An object with a function that \"combines\" that object with another of the same type (semigroup) which has an \"identity\" value."
       },
       {
         "id": "monad",
         "name": "Monad",
         "category": "algebraic-structures",
-        "val": 20,
+        "val": 21,
         "summary": "A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object."
       },
       {
@@ -3278,7 +3488,7 @@
         "id": "natural-transformation",
         "name": "Natural Transformation",
         "category": "category-morphisms",
-        "val": 7,
+        "val": 8,
         "summary": "A structure-preserving mapping between two functors, transforming F<A> into G<A> without altering or inspecting the underlying value A."
       },
       {
@@ -3299,7 +3509,7 @@
         "id": "foldable",
         "name": "Foldable",
         "category": "algebraic-structures",
-        "val": 7,
+        "val": 8,
         "summary": "An object that has a reduce function that applies a function against an accumulator and each element in the array (from left to right) to reduce it to a single value."
       },
       {
@@ -3341,8 +3551,36 @@
         "id": "type-signatures",
         "name": "Type Signatures",
         "category": "types-data",
-        "val": 5,
+        "val": 6,
         "summary": "In C# the types of arguments and return values are part of every function's signature. Even so, functional programmers often describe functions with Haskell-style type signatures in comments, because they are short and easy to read."
+      },
+      {
+        "id": "polymorphism",
+        "name": "Polymorphism",
+        "category": "types-data",
+        "val": 8,
+        "summary": "Writing code once that works for values of many types. There are three main kinds."
+      },
+      {
+        "id": "type-class",
+        "name": "Type Class",
+        "category": "algebraic-structures",
+        "val": 10,
+        "summary": "An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time."
+      },
+      {
+        "id": "higher-kinded-type",
+        "name": "Higher-Kinded Type",
+        "category": "types-data",
+        "val": 9,
+        "summary": "A type that is parameterised by a type constructor rather than by a plain type. int is a complete type, but Option is not: it needs an argument to become Option<int>. Kinds classify types the way types classify values:"
+      },
+      {
+        "id": "expression-problem",
+        "name": "Expression Problem",
+        "category": "types-data",
+        "val": 8,
+        "summary": "The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard."
       },
       {
         "id": "algebraic-data-type",
@@ -3355,7 +3593,7 @@
         "id": "sum-type",
         "name": "Sum type",
         "category": "types-data",
-        "val": 7,
+        "val": 9,
         "summary": "A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types."
       },
       {
@@ -3738,6 +3976,61 @@
       {
         "source": "never-type",
         "target": "monad-comprehension",
+        "type": "core"
+      },
+      {
+        "source": "polymorphism",
+        "target": "type-class",
+        "type": "core"
+      },
+      {
+        "source": "polymorphism",
+        "target": "expression-problem",
+        "type": "core"
+      },
+      {
+        "source": "polymorphism",
+        "target": "type-signatures",
+        "type": "core"
+      },
+      {
+        "source": "type-class",
+        "target": "higher-kinded-type",
+        "type": "core"
+      },
+      {
+        "source": "type-class",
+        "target": "monoid",
+        "type": "core"
+      },
+      {
+        "source": "type-class",
+        "target": "functor",
+        "type": "core"
+      },
+      {
+        "source": "type-class",
+        "target": "natural-transformation",
+        "type": "core"
+      },
+      {
+        "source": "higher-kinded-type",
+        "target": "functor",
+        "type": "core"
+      },
+      {
+        "source": "higher-kinded-type",
+        "target": "monad",
+        "type": "core"
+      },
+      {
+        "source": "expression-problem",
+        "target": "sum-type",
+        "type": "core"
+      },
+      {
+        "source": "expression-problem",
+        "target": "type-class",
         "type": "core"
       },
       {
@@ -4148,6 +4441,21 @@
       {
         "source": "isomorphism",
         "target": "morphism",
+        "type": "reference"
+      },
+      {
+        "source": "polymorphism",
+        "target": "sum-type",
+        "type": "reference"
+      },
+      {
+        "source": "higher-kinded-type",
+        "target": "foldable",
+        "type": "reference"
+      },
+      {
+        "source": "expression-problem",
+        "target": "higher-kinded-type",
         "type": "reference"
       },
       {

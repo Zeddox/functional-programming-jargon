@@ -1,6 +1,6 @@
 # FP Jargon - Full Reference
 
-> Complete catalog of 81 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
+> Complete catalog of 85 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
 > Source: https://github.com/hemanth/functional-programming-jargon
 > Live app: https://hemanth.github.io/functional-programming-jargon/
 
@@ -688,7 +688,7 @@ record Constant<C, A>(C Value)
 - Category: Algebraic Structures
 - ID: #functor
 - Aliases: map, mappable
-- Related concepts: #pointed-functor, #applicative-functor, #lift, #traversable, #bifunctor, #contravariant-functor, #natural-transformation, #free-monad, #constant-functor, #option, #monad, #monad-transformer
+- Related concepts: #pointed-functor, #applicative-functor, #lift, #type-class, #higher-kinded-type, #traversable, #bifunctor, #contravariant-functor, #natural-transformation, #free-monad, #constant-functor, #option, #monad, #monad-transformer
 
 ### Definition
 An object that implements a map function that takes a function which is run on the contents of that object. A functor must adhere to two rules:
@@ -988,7 +988,7 @@ toSeq(Naturals()).Map(n => n * n).Take(4); // => [0, 1, 4, 9]
 - Category: Algebraic Structures
 - ID: #monoid
 - Aliases: empty, identity, semigroup with identity
-- Related concepts: #semigroup, #foldable, #writer-monad, #alternative, #homomorphism
+- Related concepts: #semigroup, #foldable, #type-class, #writer-monad, #alternative, #homomorphism
 
 ### Definition
 An object with a function that "combines" that object with another of the same type (semigroup) which has an "identity" value.
@@ -1043,7 +1043,7 @@ var commutes = 0 - 4 == 4 - 0; // => false
 - Category: Algebraic Structures
 - ID: #monad
 - Aliases: flatmap, bind, chain, return
-- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #monad-comprehension, #reader-monad, #writer-monad, #state-monad, #either, #io, #free-monad, #monad-transformer, #constant-monad, #pointed-functor, #functor, #never-type
+- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #higher-kinded-type, #monad-comprehension, #reader-monad, #writer-monad, #state-monad, #either, #io, #free-monad, #monad-transformer, #constant-monad, #pointed-functor, #functor, #never-type
 
 ### Definition
 A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object.
@@ -1763,7 +1763,7 @@ The opposite of paramorphism, just as anamorphism is the opposite of catamorphis
 - Category: Category & Morphisms
 - ID: #natural-transformation
 - Aliases: nat, functor transformation
-- Related concepts: #functor, #morphism, #category
+- Related concepts: #type-class, #functor, #morphism, #category
 
 ### Definition
 A structure-preserving mapping between two functors, transforming F<A> into G<A> without altering or inspecting the underlying value A.
@@ -1852,7 +1852,7 @@ Twice(Seq(1, 2)); // => [1, 2, 1, 2]
 
 - Category: Algebraic Structures
 - ID: #foldable
-- Related concepts: #catamorphism, #monoid, #traversable
+- Related concepts: #catamorphism, #monoid, #traversable, #higher-kinded-type
 
 ### Definition
 An object that has a reduce function that applies a function against an accumulator and each element in the array (from left to right) to reduce it to a single value.
@@ -2037,7 +2037,7 @@ record Traversal<S, A>(
 
 - Category: Types & Data Modeling
 - ID: #type-signatures
-- Related concepts: #contracts
+- Related concepts: #polymorphism, #contracts
 
 ### Definition
 In C# the types of arguments and return values are part of every function's signature. Even so, functional programmers often describe functions with Haskell-style type signatures in comments, because they are short and easy to read.
@@ -2071,6 +2071,174 @@ Map<int, int>(x => x + 1)(Seq(1, 2)); // => [2, 3]
 
 ---
 
+## Polymorphism
+
+- Category: Types & Data Modeling
+- ID: #polymorphism
+- Aliases: parametric polymorphism, ad hoc polymorphism, subtype polymorphism, generics, dispatch, static dispatch, dynamic dispatch, overloading, parametricity
+- Related concepts: #type-class, #expression-problem, #type-signatures, #sum-type
+
+### Definition
+Writing code once that works for values of many types. There are three main kinds.
+
+### Code Examples
+
+```csharp
+Seq<A> Twice<A>(A x) => Seq(x, x);
+
+Twice(1);    // => [1, 1]
+Twice("hi"); // => [hi, hi]
+```
+
+```csharp
+Describe.Of(42);   // => "the number 42"
+Describe.Of(true); // => "yes"
+
+static class Describe
+{
+    public static string Of(int n) => $"the number {n}";
+    public static string Of(bool b) => b ? "yes" : "no";
+}
+```
+
+```csharp
+var shapes = Seq<Shape>(new Square(2), new Circle(1));
+var areas  = shapes.Map(s => Math.Round(s.Area, 2)); // => [4, 3.14]
+
+abstract record Shape { public abstract double Area { get; } }
+record Square(double Side) : Shape { public override double Area => Side * Side; }
+record Circle(double Radius) : Shape { public override double Area => Math.PI * Radius * Radius; }
+```
+
+---
+
+## Type Class
+
+- Category: Algebraic Structures
+- ID: #type-class
+- Aliases: trait, traits, typeclass, instance, multi-parameter type class, static abstract
+- Related concepts: #polymorphism, #higher-kinded-type, #monoid, #functor, #natural-transformation, #expression-problem
+
+### Definition
+An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time.
+
+### Code Examples
+
+```csharp
+A ConcatAll<A>(Seq<A> xs) where A : Monoid<A> =>
+    xs.Aggregate(A.Empty, (acc, x) => acc + x);
+
+ConcatAll(Seq(Seq(1, 2), Seq(3))); // => [1, 2, 3]
+ConcatAll(Seq(new Max(3), new Max(9), new Max(4))); // => Max { Value = 9 }
+
+// An instance for our own type: Max combines by keeping the larger value
+record Max(int Value) : Monoid<Max>
+{
+    public static Max Empty => new(int.MinValue);
+    public Max Combine(Max rhs) => Value >= rhs.Value ? this : rhs;
+}
+```
+
+---
+
+## Higher-Kinded Type
+
+- Category: Types & Data Modeling
+- ID: #higher-kinded-type
+- Aliases: hkt, higher kinds, kind, type constructor, k<f, a>, brand
+- Related concepts: #type-class, #functor, #monad, #foldable, #expression-problem
+
+### Definition
+A type that is parameterised by a type constructor rather than by a plain type. int is a complete type, but Option is not: it needs an argument to become Option<int>. Kinds classify types the way types classify values:
+
+### Code Examples
+
+```csharp
+int, string, Option<int>   :: *             a complete type
+Option, Seq, Task          :: * -> *        needs one type argument
+Either, Dictionary         :: * -> * -> *   needs two
+```
+
+```csharp
+// Not valid C#
+F<B> Map<F, A, B>(F<A> fa, Func<A, B> f);
+```
+
+```csharp
+// A tiny container that takes part in higher-kinded code
+record Box<A>(A Value) : K<Box, A>;
+
+// The brand: Box with its type argument left open, implementing Functor
+class Box : Functor<Box>
+{
+    public static K<Box, B> Map<A, B>(Func<A, B> f, K<Box, A> fa) =>
+        new Box<B>(f(((Box<A>)fa).Value));
+}
+```
+
+```csharp
+// Written once, for any F that is a Functor
+K<F, int> Double<F>(K<F, int> fa) where F : Functor<F> =>
+    fa.Map(x => x * 2);
+
+var boxed = ((Box<int>)Double(new Box<int>(21))).Value; // => 42
+Double(Some(21));     // => Some(42)
+Double(Seq(1, 2, 3)); // => [2, 4, 6]
+```
+
+---
+
+## Expression Problem
+
+- Category: Types & Data Modeling
+- ID: #expression-problem
+- Aliases: open closed, open/closed, visitor pattern, tagless final, extensibility
+- Related concepts: #polymorphism, #sum-type, #type-class, #higher-kinded-type
+
+### Definition
+The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard.
+
+### Code Examples
+
+```csharp
+int Eval(Expr e) => e switch
+{
+    Num n  => n.Value,
+    Plus p => Eval(p.Left) + Eval(p.Right),
+    _      => throw new ArgumentOutOfRangeException(nameof(e))
+};
+
+// A new operation leaves Eval untouched...
+string Show(Expr e) => e switch
+{
+    Num n  => n.Value.ToString(),
+    Plus p => $"({Show(p.Left)} + {Show(p.Right)})",
+    _      => throw new ArgumentOutOfRangeException(nameof(e))
+};
+
+var expr = new Plus(new Num(1), new Plus(new Num(2), new Num(3)));
+Eval(expr); // => 6
+Show(expr); // => "(1 + (2 + 3))"
+
+// ...but a new case, such as Times, means revisiting Eval, Show and every other switch
+abstract record Expr;
+record Num(int Value) : Expr;
+record Plus(Expr Left, Expr Right) : Expr;
+```
+
+```csharp
+var tree = new PlusNode(new NumNode(1), new NumNode(2));
+tree.Eval(); // => 3
+
+interface INode { int Eval(); }
+record NumNode(int Value) : INode { public int Eval() => Value; }
+record PlusNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() + Right.Eval(); }
+// A new case is one new class, with no other changes:
+record TimesNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() * Right.Eval(); }
+```
+
+---
+
 ## Algebraic data type
 
 - Category: Types & Data Modeling
@@ -2088,7 +2256,7 @@ A composite type made from putting other types together. Two common classes of a
 - Category: Types & Data Modeling
 - ID: #sum-type
 - Aliases: union type, discriminated union, tagged union
-- Related concepts: #algebraic-data-type, #never-type, #option, #either, #prism
+- Related concepts: #algebraic-data-type, #never-type, #expression-problem, #option, #either, #prism, #polymorphism
 
 ### Definition
 A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types.
