@@ -1,6 +1,6 @@
 # FP Jargon - Full Reference
 
-> Complete catalog of 75 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
+> Complete catalog of 77 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
 > Source: https://github.com/hemanth/functional-programming-jargon
 > Live app: https://hemanth.github.io/functional-programming-jargon/
 
@@ -311,7 +311,7 @@ thunk(); // => 84
 
 - Category: Composition & Flow
 - ID: #algebraic-effects
-- Related concepts: #continuation, #side-effects, #free-monad
+- Related concepts: #never-type, #continuation, #side-effects, #free-monad, #unit-type
 
 ### Definition
 A computational effect system that separates the invocation of an effect from its handling. Rather than coupling a function directly to its runtime environment, the function "performs" an effect operation (such as reading state, requesting configuration, or logging). An enclosing "handler" intercepts the performed effect and supplies the result, with the ability to resume or abort the computation—generalizing exceptions, async/await, and generators without requiring complex monad transformer stacks.
@@ -1043,7 +1043,7 @@ var commutes = 0 - 4 == 4 - 0; // => false
 - Category: Algebraic Structures
 - ID: #monad
 - Aliases: flatmap, bind, chain, return
-- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #either, #io, #free-monad, #monad-transformer, #constant-monad, #pointed-functor, #functor
+- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #never-type, #either, #io, #free-monad, #monad-transformer, #constant-monad, #pointed-functor, #functor
 
 ### Definition
 A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object.
@@ -1951,7 +1951,7 @@ A composite type made from putting other types together. Two common classes of a
 - Category: Types & Data Modeling
 - ID: #sum-type
 - Aliases: union type, discriminated union, tagged union
-- Related concepts: #algebraic-data-type, #option, #either, #prism
+- Related concepts: #algebraic-data-type, #never-type, #option, #either, #prism
 
 ### Definition
 A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types.
@@ -1983,7 +1983,7 @@ record HalfTrue : WeakLogic;
 - Category: Types & Data Modeling
 - ID: #product-type
 - Aliases: tuple, pair, record, struct
-- Related concepts: #algebraic-data-type, #bifunctor
+- Related concepts: #algebraic-data-type, #unit-type, #bifunctor
 
 ### Definition
 A product type combines types together in a way you're probably more familiar with:
@@ -1995,6 +1995,106 @@ A product type combines types together in a way you're probably more familiar wi
 var p = new Point(1, 2); // => Point { X = 1, Y = 2 }
 
 record Point(int X, int Y);
+```
+
+---
+
+## Unit type
+
+- Category: Types & Data Modeling
+- ID: #unit-type
+- Aliases: unit, void, empty tuple
+- Related concepts: #product-type, #never-type, #algebraic-effects
+
+### Definition
+A type with exactly one value. Since there is only one, a Unit carries no information: it is what a function returns when it has nothing to say. It is the identity of product types: a pair (A, Unit) has exactly as many possible values as A alone.
+
+### Code Examples
+
+```csharp
+var saved = new List<string>();
+
+// Option<Unit>: "it worked, and there's nothing more to say", or None
+Option<Unit> Save(string name)
+{
+    if (name.Length == 0) return None;
+    saved.Add(name);
+    return Some(unit);
+}
+
+Save("report"); // => Some(())
+Save("");       // => None
+// There is only one Unit value, so all Units are equal
+var same = unit == unit; // => true
+```
+
+---
+
+## Never type
+
+- Category: Types & Data Modeling
+- ID: #never-type
+- Aliases: never, bottom type, empty type, nothing, absurd, fx
+- Related concepts: #sum-type, #unit-type, #either, #algebraic-effects, #monad
+
+### Definition
+A type with no values at all. Nothing can produce one, so a function that returns Never can only throw or run forever, and code that is handed a Never can never actually run. It is the identity of sum types: Either<A, Never> has exactly as many possible values as A, because the Never case can't happen.
+
+### Code Examples
+
+```csharp
+public sealed class Never
+{
+    private Never() { }
+
+    // Holding a Never is impossible, so claiming it is any type you like is safe:
+    // this line can never run. (Throwing rather than returning default means a
+    // null smuggled in as a Never fails loudly.)
+    public A Absurd<A>() => throw new System.Diagnostics.UnreachableException();
+}
+```
+
+```csharp
+public record Fx<R, E, A>(Func<R, Either<E, A>> Run)
+{
+    public Fx<R, E, B> Map<B>(Func<A, B> f) => new(r => Run(r).Map(f));
+    public Fx<R, E2, A> MapError<E2>(Func<E, E2> f) => new(r => Run(r).MapLeft(f));
+    public Fx<R, E, B> Bind<B>(Func<A, Fx<R, E, B>> f) => new(r => Run(r).Bind(a => f(a).Run(r)));
+
+    // Select and SelectMany let LINQ query syntax work with Fx
+    public Fx<R, E, B> Select<B>(Func<A, B> f) => Map(f);
+    public Fx<R, E, C> SelectMany<B, C>(Func<A, Fx<R, E, B>> bind, Func<A, B, C> project) =>
+        Bind(a => bind(a).Map(b => project(a, b)));
+}
+
+public static class Fx
+{
+    public static Fx<R, E, A> Pure<R, E, A>(A value) => new(_ => Right<E, A>(value));
+
+    // Failing never produces a value, so Fail doesn't have to pick an A
+    public static Fx<R, E, Never> Fail<R, E>(E error) => new(_ => Left<E, Never>(error));
+}
+```
+
+```csharp
+Fx<int, string, Unit> Guard(bool ok, string error) =>
+    ok ? Fx.Pure<int, string, Unit>(unit)
+       : Fx.Fail<int, string>(error).Map(n => n.Absurd<Unit>());
+
+// Reading the minimum age from the environment can't fail
+Fx<int, Never, int> minAge = new(r => Right<Never, int>(r));
+```
+
+```csharp
+Fx<int, string, int> Admit(int age) =>
+    from _1    in Guard(age >= 0, "negative age")
+    from limit in minAge.MapError(n => n.Absurd<string>())
+    from _2    in Guard(age >= limit, $"must be at least {limit}")
+    select age;
+
+Admit(20).Run(18); // => Right(20)
+Admit(16).Run(18); // => Left(must be at least 18)
+Admit(-1).Run(18); // => Left(negative age)
 ```
 
 ---
@@ -2042,7 +2142,7 @@ record Item(decimal? Price);
 - Category: Types & Data Modeling
 - ID: #either
 - Aliases: result, left and right, right is right
-- Related concepts: #option, #sum-type, #monad, #bifunctor, #monad-transformer, #pure-function
+- Related concepts: #never-type, #option, #sum-type, #monad, #bifunctor, #monad-transformer, #pure-function
 
 ### Definition
 A sum type with two cases, Left and Right. By convention, Right represents a successful computation and Left contains an error or failure reason ("right is right").

@@ -1,6 +1,6 @@
 # FP Jargon
 
-> Interactive functional programming knowledge graph and specification exploring 75 concepts, category theory morphisms, and algebraic structures with C# (language-ext) examples.
+> Interactive functional programming knowledge graph and specification exploring 77 concepts, category theory morphisms, and algebraic structures with C# (language-ext) examples.
 
 FP Jargon maps out the entire vocabulary of functional programming into an interconnected graph with deterministic explanations, formal properties, and executable C# (language-ext) examples.
 
@@ -97,6 +97,8 @@ FP Jargon maps out the entire vocabulary of functional programming into an inter
 - [Algebraic data type](https://hemanth.github.io/functional-programming-jargon/#algebraic-data-type): A composite type made from putting other types together. Two common classes of algebraic types are sum and product.
 - [Sum type](https://hemanth.github.io/functional-programming-jargon/#sum-type): A Sum type is the combination of two types together into another one. It is called sum because the number of possible va
 - [Product type](https://hemanth.github.io/functional-programming-jargon/#product-type): A product type combines types together in a way you're probably more familiar with:
+- [Unit type](https://hemanth.github.io/functional-programming-jargon/#unit-type): A type with exactly one value. Since there is only one, a Unit carries no information: it is what a function returns whe
+- [Never type](https://hemanth.github.io/functional-programming-jargon/#never-type): A type with no values at all. Nothing can produce one, so a function that returns Never can only throw or run forever, a
 - [Option](https://hemanth.github.io/functional-programming-jargon/#option): Option is a sum type with two cases often called Some and None.
 - [Either](https://hemanth.github.io/functional-programming-jargon/#either): A sum type with two cases, Left and Right. By convention, Right represents a successful computation and Left contains an
 - [Functional Programming Libraries for .NET](https://hemanth.github.io/functional-programming-jargon/#functional-programming-libraries-for-net): A curated catalog of functional programming libraries and toolkits for C# and .NET including language-ext, OneOf, MoreLI

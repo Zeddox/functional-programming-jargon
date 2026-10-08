@@ -12,7 +12,7 @@ using static LanguageExt.Prelude;
 
 All of the samples are compiled and run by [`samples/csharp`](samples/csharp), and a `// => value` comment marks a result that is checked when they run.
 
-Where applicable, this document uses terms defined in the [Fantasy Land spec](https://github.com/fantasyland/fantasy-land).
+Where applicable, names follow language-ext's traits (`Functor`, `Monad`, `Foldable` and so on), which in turn follow Haskell's type classes.
 
 **Interactive Graph**: [hemanth.github.io/functional-programming-jargon](https://hemanth.github.io/functional-programming-jargon)
 
@@ -102,6 +102,8 @@ __Table of Contents__
 * [Algebraic data type](#algebraic-data-type)
   * [Sum type](#sum-type)
   * [Product type](#product-type)
+  * [Unit type](#unit-type)
+  * [Never type](#never-type)
 * [Option](#option)
 * [Either](#either)
 * [Function](#function)
@@ -163,7 +165,7 @@ to get back the sum.
 
 __Further reading/Sources__
 * [Lambda Vs Closure](http://stackoverflow.com/questions/220658/what-is-the-difference-between-a-closure-and-a-lambda)
-* [JavaScript Closures highly voted discussion](http://stackoverflow.com/questions/111102/how-do-javascript-closures-work)
+* [Capture of outer variables and variable scope in lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/lambda-expressions#capture-of-outer-variables-and-variable-scope-in-lambda-expressions) on Microsoft Learn
 
 ## Partial Application
 
@@ -230,8 +232,9 @@ uncurry(curriedAdd)(1, 2);  // => 3
 ```
 
 __Further reading__
-* [Favoring Curry](http://fr.umio.us/favoring-curry/)
-* [Hey Underscore, You're Doing It Wrong!](https://www.youtube.com/watch?v=m3svKOdZijA)
+* [Currying](https://fsharpforfunandprofit.com/posts/currying/) on F# for fun and profit
+* [Partial application](https://fsharpforfunandprofit.com/posts/partial-application/) on F# for fun and profit
+* [Currying and Partial Application](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Prelude/Currying%20and%20Partial%20Application) in language-ext
 
 ## Function Composition
 
@@ -312,7 +315,9 @@ formatted.Run(); // => "tick 2"
 ```
 
 __Further reading__
-* [IO container](https://drboolean.gitbooks.io/mostly-adequate-guide/content/ch8.html#pure-functional-magic) in Mostly Adequate Guide
+* [The IO Container](https://blog.ploeh.dk/2020/06/08/the-io-container/) by Mark Seemann
+* [IO container in a parallel C# universe](https://blog.ploeh.dk/2020/06/15/io-container-in-a-parallel-c-universe/) by Mark Seemann
+* [IO](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Effects/IO) in language-ext
 
 ## Trampoline
 
@@ -334,8 +339,9 @@ SumBelow(1_000_000, 0).Run(); // => 500000500000
 ```
 
 __Further reading__
-* [Trampolining in JavaScript](https://raganwald.com/2013/03/28/trampolines-in-javascript.html)
+* [Trampoline (computing)](https://en.wikipedia.org/wiki/Trampoline_(computing)) on Wikipedia
 * [Stackless Scala With Free Monads](https://blog.higher-order.com/assets/trampolines.pdf) (the design language-ext's `Trampoline` is based on)
+* [Trampoline](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/Trampoline) in language-ext
 
 ## Thunk
 
@@ -396,9 +402,13 @@ var log = handler.Logged;
 // => ["Fetching user 42 from https://api.test.local"]
 ```
 
+`Eff` fixes its error type to language-ext's `Error`. Effect types such as ZIO (Scala) and Effect (TypeScript) make the error a type parameter too, giving the `<R, E, A>` shape: needs an `R`, fails with an `E`, succeeds with an `A`. The [Never type](#never-type) entry builds a small `Fx<R, E, A>` like that.
+
 __Further reading__
 * [Algebraic Effects for the Rest of Us](https://overreacted.io/algebraic-effects-for-the-rest-of-us/)
 * [What is Algebraic Effects?](https://koka-lang.github.io/koka/doc/book.html#why-effects)
+* [Eff](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Effects/Eff) in language-ext
+* [ZIO](https://zio.dev/reference/core/zio/), the `ZIO[R, E, A]` effect type in Scala
 
 ## Pure Function
 
@@ -569,7 +579,8 @@ loudGreeting("hello"); // => "HELLO!"
 ```
 
 __Further reading__
-* [Semigroupoid](https://github.com/fantasyland/fantasy-land#semigroupoid) in Fantasy Land
+* [Semigroupoid](https://en.wikipedia.org/wiki/Semigroupoid) on Wikipedia
+* [Data.Semigroupoid](https://hackage.haskell.org/package/semigroupoids/docs/Data-Semigroupoid.html) on Hackage
 
 ## Value
 
@@ -1141,7 +1152,9 @@ Interpret(program, []); // => (42, [Starting, Done])
 ```
 
 __Further reading__
-* [Free Monads in JavaScript](https://medium.com/@gcanti/free-monads-in-javascript-f5df234d3d2a)
+* [Song recommendations with C# free monads](https://blog.ploeh.dk/2025/09/01/song-recommendations-with-c-free-monads/) by Mark Seemann
+* [Why free monads matter](https://www.haskellforall.com/2012/06/you-could-have-invented-free-monads.html) by Gabriella Gonzalez
+* [Free](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/Free) in language-ext
 
 ## Monad Transformer
 
@@ -1254,7 +1267,9 @@ found.MapSecond(n => n + 1);      // => Right(11)
 ```
 
 __Further reading__
-* [Bifunctor](https://github.com/fantasyland/fantasy-land#bifunctor) in Fantasy Land
+* [Bifunctors](https://blog.ploeh.dk/2018/12/24/bifunctors/) by Mark Seemann
+* [Bifunctor](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Bifunctor) in language-ext
+* [Data.Bifunctor](https://hackage.haskell.org/package/base/docs/Data-Bifunctor.html) on Hackage
 
 ## Contravariant Functor
 
@@ -1291,7 +1306,9 @@ hasLongBio.Test(new User("Hi"));          // => false
 ```
 
 __Further reading__
-* [Contravariant Functor](https://github.com/fantasyland/fantasy-land#contravariant) in Fantasy Land
+* [Contravariant functors](https://blog.ploeh.dk/2021/09/02/contravariant-functors/) by Mark Seemann
+* [Cofunctor](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Cofunctor), language-ext's contravariant functor trait
+* [Data.Functor.Contravariant](https://hackage.haskell.org/package/base/docs/Data-Functor-Contravariant.html) on Hackage
 
 ## Profunctor
 
@@ -1324,7 +1341,8 @@ isTrimmedLengthEven(" hello ");    // => false
 ```
 
 __Further reading__
-* [Profunctor](https://github.com/fantasyland/fantasy-land#profunctor) in Fantasy Land
+* [Profunctors](https://blog.ploeh.dk/2021/11/01/profunctors/) by Mark Seemann
+* [Data.Profunctor](https://hackage.haskell.org/package/profunctors/docs/Data-Profunctor.html) on Hackage
 
 ## Alternative
 
@@ -1347,8 +1365,9 @@ record Config(int Port);
 ```
 
 __Further reading__
-* [Alt](https://github.com/fantasyland/fantasy-land#alt) in Fantasy Land
-* [Alternative](https://github.com/fantasyland/fantasy-land#alternative) in Fantasy Land
+* [Choice](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Choice) in language-ext (the "alt" operation, `|`)
+* [Alternative](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Alternative) in language-ext
+* [Alternative](https://hackage.haskell.org/package/base/docs/Control-Applicative.html#t:Alternative) on Hackage
 
 ## Morphism
 
@@ -1597,7 +1616,9 @@ Seq("1", "x", "3").Traverse(s => parseInt(s)).As(); // => None
 ```
 
 __Further reading__
-* [Traversable](https://github.com/fantasyland/fantasy-land#traversable) in Fantasy Land
+* [Higher Kinds in C# with language-ext: Traversables](https://paullouth.com/higher-kinds-in-csharp-part6-traversables/) by Paul Louth
+* [Traversals](https://blog.ploeh.dk/2024/11/11/traversals/) by Mark Seemann
+* [Traversable](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Traversable) in language-ext
 
 ## Lens
 
@@ -1676,7 +1697,8 @@ record Square(double Side) : Shape;
 ```
 
 __Further reading__
-* [Optics / Prism](https://github.com/flunc/optics) on GitHub
+* [Prism](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Prism) in language-ext
+* [Control.Lens.Prism](https://hackage.haskell.org/package/lens/docs/Control-Lens-Prism.html) on Hackage
 
 ## Iso
 
@@ -1700,7 +1722,8 @@ record Iso<S, A>(Func<S, A> To, Func<A, S> From);
 
 __Further reading__
 * [Isomorphism](https://en.wikipedia.org/wiki/Isomorphism) on Wikipedia
-* [Optics / Iso](https://github.com/flunc/optics) on GitHub
+* [Software design isomorphisms](https://blog.ploeh.dk/2018/01/08/software-design-isomorphisms/) by Mark Seemann
+* [Control.Lens.Iso](https://hackage.haskell.org/package/lens/docs/Control-Lens-Iso.html) on Hackage
 
 ## Traversal
 
@@ -1731,7 +1754,7 @@ record Traversal<S, A>(
 ```
 
 __Further reading__
-* [Optics - Traversals](https://github.com/calmm-js/partial.lenses#traversal)
+* [Control.Lens.Traversal](https://hackage.haskell.org/package/lens/docs/Control-Lens-Traversal.html) on Hackage
 
 ## Type Signatures
 
@@ -1769,8 +1792,8 @@ Map<int, int>(x => x + 1)(Seq(1, 2)); // => [2, 3]
 ```
 
 __Further reading__
-* [Ramda's type signatures](https://github.com/ramda/ramda/wiki/Type-Signatures)
-* [Mostly Adequate Guide](https://web.archive.org/web/20170602130913/https://drboolean.gitbooks.io/mostly-adequate-guide/content/ch7.html#whats-your-type)
+* [Function signatures](https://fsharpforfunandprofit.com/posts/function-signatures/) on F# for fun and profit
+* [Func delegate](https://learn.microsoft.com/en-us/dotnet/api/system.func-2) on Microsoft Learn
 * [What is Hindley-Milner?](http://stackoverflow.com/a/399392/22425) on Stack Overflow
 
 ## Algebraic data type
@@ -1819,6 +1842,109 @@ It's called a product because the total possible values of the data structure is
 
 __Further reading__
 * [Set theory](https://en.wikipedia.org/wiki/Set_theory) on Wikipedia
+
+### Unit type
+
+A type with exactly one value. Since there is only one, a `Unit` carries no information: it is what a function returns when it has nothing to say. It is the identity of [product types](#product-type): a pair `(A, Unit)` has exactly as many possible values as `A` alone.
+
+C#'s `void` is not a type you can use: there is no `Func<void>` or `Option<void>`, which is why .NET needs both `Func` and `Action`, and both `Task<T>` and `Task`. language-ext's `Unit` (whose one value is `unit`) fills the gap, so a single generic type also covers "returns nothing":
+
+```csharp
+var saved = new List<string>();
+
+// Option<Unit>: "it worked, and there's nothing more to say", or None
+Option<Unit> Save(string name)
+{
+    if (name.Length == 0) return None;
+    saved.Add(name);
+    return Some(unit);
+}
+
+Save("report"); // => Some(())
+Save("");       // => None
+// There is only one Unit value, so all Units are equal
+var same = unit == unit; // => true
+```
+
+A program that runs only for its effects returns `Unit` too, as in the `Eff<RT, Unit>` of [Algebraic Effects](#algebraic-effects).
+
+__Further reading__
+* [Unit type](https://en.wikipedia.org/wiki/Unit_type) on Wikipedia
+
+### Never type
+
+A type with no values at all. Nothing can produce one, so a function that returns `Never` can only throw or run forever, and code that is handed a `Never` can never actually run. It is the identity of [sum types](#sum-type): `Either<A, Never>` has exactly as many possible values as `A`, because the `Never` case can't happen.
+
+C# has no built-in Never type, but a class that nobody can construct gets close:
+
+```csharp
+public sealed class Never
+{
+    private Never() { }
+
+    // Holding a Never is impossible, so claiming it is any type you like is safe:
+    // this line can never run. (Throwing rather than returning default means a
+    // null smuggled in as a Never fails loudly.)
+    public A Absurd<A>() => throw new System.Diagnostics.UnreachableException();
+}
+```
+
+`Absurd` is named after the logic principle "from a falsehood, anything follows".
+
+Never earns its keep in effect types such as `Fx<R, E, A>`: a program that needs an environment `R`, can fail with an `E`, and succeeds with an `A` (the same shape as ZIO in Scala and Effect in TypeScript). Putting `Never` in a slot closes it off: `Fx<R, Never, A>` cannot fail, and `Fx<R, E, Never>` cannot succeed, so it only fails or runs forever.
+
+```csharp
+public record Fx<R, E, A>(Func<R, Either<E, A>> Run)
+{
+    public Fx<R, E, B> Map<B>(Func<A, B> f) => new(r => Run(r).Map(f));
+    public Fx<R, E2, A> MapError<E2>(Func<E, E2> f) => new(r => Run(r).MapLeft(f));
+    public Fx<R, E, B> Bind<B>(Func<A, Fx<R, E, B>> f) => new(r => Run(r).Bind(a => f(a).Run(r)));
+
+    // Select and SelectMany let LINQ query syntax work with Fx
+    public Fx<R, E, B> Select<B>(Func<A, B> f) => Map(f);
+    public Fx<R, E, C> SelectMany<B, C>(Func<A, Fx<R, E, B>> bind, Func<A, B, C> project) =>
+        Bind(a => bind(a).Map(b => project(a, b)));
+}
+
+public static class Fx
+{
+    public static Fx<R, E, A> Pure<R, E, A>(A value) => new(_ => Right<E, A>(value));
+
+    // Failing never produces a value, so Fail doesn't have to pick an A
+    public static Fx<R, E, Never> Fail<R, E>(E error) => new(_ => Left<E, Never>(error));
+}
+```
+
+The catch is that a `Fx<R, E, Never>` is not a `Fx<R, E, Unit>`, and the two branches of a `?:` must have the same type. `Absurd` converts one to the other, since mapping over a value that can never exist is free:
+
+```csharp
+Fx<int, string, Unit> Guard(bool ok, string error) =>
+    ok ? Fx.Pure<int, string, Unit>(unit)
+       : Fx.Fail<int, string>(error).Map(n => n.Absurd<Unit>());
+
+// Reading the minimum age from the environment can't fail
+Fx<int, Never, int> minAge = new(r => Right<Never, int>(r));
+```
+
+The same trick widens an error type of `Never` to whatever error the rest of a LINQ query (C#'s syntax for chaining [monads](#monad)) uses:
+
+```csharp
+Fx<int, string, int> Admit(int age) =>
+    from _1    in Guard(age >= 0, "negative age")
+    from limit in minAge.MapError(n => n.Absurd<string>())
+    from _2    in Guard(age >= limit, $"must be at least {limit}")
+    select age;
+
+Admit(20).Run(18); // => Right(20)
+Admit(16).Run(18); // => Left(must be at least 18)
+Admit(-1).Run(18); // => Left(negative age)
+```
+
+The Never type is also called the bottom type or the empty type; Haskell calls it `Void`, Scala `Nothing`, and TypeScript `never`.
+
+__Further reading__
+* [Bottom type](https://en.wikipedia.org/wiki/Bottom_type) on Wikipedia
+* [The algebra (and calculus!) of algebraic data types](https://codewords.recurse.com/issues/three/algebra-and-calculus-of-algebraic-data-types) by Joel Burget
 
 ## Option
 
@@ -1890,8 +2016,9 @@ ParseJson("invalid json").Match(
 ```
 
 __Further reading__
-* [Either](https://github.com/fantasyland/fantasy-land#either) in Fantasy Land
-* [Folktale Result](https://folktale.origamitower.com/api/v2.3.0/en/folktale.result.html)
+* [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/) by Scott Wlaschin
+* [An Either monad](https://blog.ploeh.dk/2022/05/09/an-either-monad/) by Mark Seemann
+* [Either](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/Alternative%20Monads/Either) in language-ext
 
 ## Function
 
