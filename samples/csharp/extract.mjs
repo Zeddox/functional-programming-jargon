@@ -5,8 +5,8 @@
 // Conventions for readme snippets:
 //  * All blocks within a section are concatenated (in order) and must form
 //    valid C# together.
-//  * Type declarations (record/class/interface/struct/enum/delegate) at column
-//    0 are hoisted to namespace level; everything else becomes the body of the
+//  * Type declarations (record/class/interface/struct/enum/delegate/union) at
+//    column 0, with any attribute lines just above them, are hoisted to namespace level; everything else becomes the body of the
 //    section's Run() method, so statements and local functions work as-is.
 //  * `using` lines at column 0 are hoisted to the top of the file.
 //  * A statement ending in `// => expected` is checked at runtime: its value's
@@ -24,7 +24,8 @@ const SOURCES = [
   { file: 'combinators.md', prefix: 'Combinators' }
 ]
 
-const DECL = /^(\[.*\]\s*)?((public|internal|file|static|abstract|sealed|partial|readonly|ref)\s+)*(record|class|interface|struct|enum|delegate)\b/
+const DECL = /^(\[.*\]\s*)?((public|internal|file|static|abstract|sealed|partial|readonly|ref)\s+)*(record|class|interface|struct|enum|delegate|union)\b/
+const ATTR = /^\[.*\]\s*$/
 const CHECK = /^(\s*)(?:var\s+(\w+)\s*=\s*)?(.+?);\s*\/\/\s*=>\s*(.+?)\s*$/
 
 const pascal = s => s.replace(/[^A-Za-z0-9]+/g, ' ').trim().split(' ')
@@ -102,7 +103,7 @@ for (const s of sections) {
     b.body.forEach((line, k) => {
       const ln = b.start + k
       if (!inDecl && /^using\s+[^(]+;\s*$/.test(line)) { usings.push(line); return }
-      if (!inDecl && DECL.test(line)) {
+      if (!inDecl && (DECL.test(line) || (ATTR.test(line) && DECL.test(b.body[k + 1] ?? '')))) {
         inDecl = true; depth = 0; opened = false
         target = decls
         target.push(`#line ${ln} "${rel}"`)

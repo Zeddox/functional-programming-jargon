@@ -1,6 +1,6 @@
 # FP Jargon - Full Reference
 
-> Complete catalog of 86 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
+> Complete catalog of 87 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
 > Source: https://github.com/hemanth/functional-programming-jargon
 > Live app: https://hemanth.github.io/functional-programming-jargon/
 
@@ -688,7 +688,7 @@ record Constant<C, A>(C Value)
 - Category: Algebraic Structures
 - ID: #functor
 - Aliases: map, mappable
-- Related concepts: #pointed-functor, #applicative-functor, #lift, #parametricity, #type-class, #higher-kinded-type, #traversable, #bifunctor, #contravariant-functor, #natural-transformation, #free-monad, #constant-functor, #option, #monad, #monad-transformer
+- Related concepts: #pointed-functor, #applicative-functor, #lift, #parametricity, #type-class, #higher-kinded-type, #traversable, #bifunctor, #contravariant-functor, #natural-transformation, #free-monad, #constant-functor, #option, #monad, #monad-transformer, #sum-type
 
 ### Definition
 An object that implements a map function that takes a function which is run on the contents of that object. A functor must adhere to two rules:
@@ -1043,7 +1043,7 @@ var commutes = 0 - 4 == 4 - 0; // => false
 - Category: Algebraic Structures
 - ID: #monad
 - Aliases: flatmap, bind, chain, return
-- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #fallible, #higher-kinded-type, #monad-comprehension, #reader-monad, #writer-monad, #state-monad, #either, #io, #free-monad, #monad-transformer, #constant-monad, #pointed-functor, #functor, #never-type
+- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #fallible, #higher-kinded-type, #monad-comprehension, #reader-monad, #writer-monad, #state-monad, #either, #io, #free-monad, #monad-transformer, #constant-monad, #pointed-functor, #functor, #sum-type, #never-type
 
 ### Definition
 A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object.
@@ -2075,7 +2075,7 @@ record Traversal<S, A>(
 
 - Category: Types & Data Modeling
 - ID: #type-signatures
-- Related concepts: #parametricity, #contracts
+- Related concepts: #parametricity, #dependent-type, #contracts
 
 ### Definition
 In C# the types of arguments and return values are part of every function's signature. Even so, functional programmers often describe functions with Haskell-style type signatures in comments, because they are short and easy to read.
@@ -2176,7 +2176,7 @@ record Max(int Value) : Monoid<Max>
 - Category: Types & Data Modeling
 - ID: #higher-kinded-type
 - Aliases: hkt, higher kinds, kind, type constructor, k<f, a>, brand
-- Related concepts: #type-class, #functor, #monad, #foldable, #expression-problem
+- Related concepts: #dependent-type, #type-class, #functor, #monad, #foldable, #expression-problem
 
 ### Definition
 A type that is parameterised by a type constructor rather than by a plain type. int is a complete type, but Option is not: it needs an argument to become Option<int>. Kinds classify types the way types classify values:
@@ -2214,6 +2214,47 @@ K<F, int> Double<F>(K<F, int> fa) where F : Functor<F> =>
 var boxed = ((Box<int>)Double(new Box<int>(21))).Value; // => 42
 Double(Some(21));     // => Some(42)
 Double(Seq(1, 2, 3)); // => [2, 4, 6]
+```
+
+---
+
+## Dependent Type
+
+- Category: Types & Data Modeling
+- ID: #dependent-type
+- Aliases: dependent types, dependently typed, idris, agda, lean, vect, pi type, non-empty, parse don't validate
+- Related concepts: #total-function, #higher-kinded-type, #option, #type-signatures
+
+### Definition
+A type that depends on a value. In C#, types can depend on other types (Seq<int>), but values can't appear in a type. With dependent types they can, so a type can say "a list of exactly 3 ints" or "an index less than the length of this array", and the compiler checks it.
+
+### Code Examples
+
+```csharp
+data Vect : Nat -> Type -> Type where
+  Nil  : Vect Z a
+  (::) : a -> Vect k a -> Vect (S k) a
+
+-- Only accepts vectors with at least one element, so it can't fail
+head : Vect (S n) a -> a
+
+-- The result's length is the sum of the inputs' lengths
+append : Vect n a -> Vect m a -> Vect (n + m) a
+```
+
+```csharp
+// A sequence that can't be empty, so Head needs no Option
+record NonEmpty<A>(A Head, Seq<A> Tail)
+{
+    public int Count => 1 + Tail.Count;
+}
+
+// The check happens once, where the value is made
+Option<NonEmpty<A>> FromSeq<A>(Seq<A> xs) =>
+    xs.Head.Map(h => new NonEmpty<A>(h, xs.Tail));
+
+var first = FromSeq(Seq(3, 1, 2)).Map(ne => ne.Head); // => Some(3)
+var none  = FromSeq(Seq<int>()).Map(ne => ne.Head);   // => None
 ```
 
 ---
@@ -2285,8 +2326,8 @@ A composite type made from putting other types together. Two common classes of a
 
 - Category: Types & Data Modeling
 - ID: #sum-type
-- Aliases: union type, discriminated union, tagged union
-- Related concepts: #algebraic-data-type, #never-type, #expression-problem, #option, #either, #prism
+- Aliases: union type, discriminated union, tagged union, union, oneof, c# 15 union, closed hierarchy
+- Related concepts: #algebraic-data-type, #never-type, #expression-problem, #option, #either, #prism, #functor, #monad
 
 ### Definition
 A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types.
@@ -2309,6 +2350,52 @@ Describe(new HalfTrue()); // => "half-true"
 abstract record WeakLogic;
 record Known(bool Value) : WeakLogic;
 record HalfTrue : WeakLogic;
+```
+
+```csharp
+// The cases are existing types; the union just says "one of these"
+string Rate(Logic l) => l switch
+{
+    Known(true)  => "true",
+    Known(false) => "false",
+    HalfTrue     => "half-true",
+};
+
+Rate(new HalfTrue()); // => "half-true"
+
+// Any type can be a case, including ones you don't own
+IntOrText id = 42;
+var shown = id switch { int n => $"#{n}", string s => s }; // => "#42"
+
+union Logic(Known, HalfTrue);
+union IntOrText(int, string);
+```
+
+```csharp
+using OneOf;
+using OneOf.Types;
+
+OneOf<int, string> userId = "ada";
+var label = userId.Match(n => $"#{n}", s => $"@{s}"); // => "@ada"
+
+// A named union, generated from OneOfBase
+Payment paid = new Cash(9.99m);
+var how = paid.Match(card => $"card {card.Last4}", cash => $"cash {cash.Amount}"); // => "cash 9.99"
+
+// Ready-made case types for common results
+OneOf<int, NotFound> Find(string name) => name == "ada" ? 1 : new NotFound();
+var found = Find("bob").Match(n => $"#{n}", _ => "not found"); // => "not found"
+
+// TryPick takes one case out and narrows the rest
+OneOf<int, string, bool> answer = true;
+var narrowed = answer.TryPickT0(out var number, out var others)
+    ? $"number {number}"
+    : others.Match(s => "text", b => $"bool {b}"); // => "bool True"
+
+record Card(string Last4);
+record Cash(decimal Amount);
+[GenerateOneOf]
+partial class Payment : OneOfBase<Card, Cash>;
 ```
 
 ---
@@ -2439,7 +2526,7 @@ Admit(-1).Run(18); // => Left(negative age)
 - Category: Types & Data Modeling
 - ID: #option
 - Aliases: maybe, some, none, just, nothing
-- Related concepts: #monad, #dealing-with-partial-functions, #sum-type, #either, #prism, #alternative, #functor, #kleisli-composition
+- Related concepts: #monad, #dealing-with-partial-functions, #dependent-type, #sum-type, #either, #prism, #alternative, #functor, #kleisli-composition
 
 ### Definition
 Option is a sum type with two cases often called Some and None.
@@ -2622,7 +2709,7 @@ Times(-1, Console.WriteLine);
 
 - Category: Core Functions
 - ID: #total-function
-- Related concepts: #partial-function
+- Related concepts: #partial-function, #dependent-type
 
 ### Definition
 A function which returns a valid result for all inputs defined in its type. This is as opposed to Partial Functions which may throw an error, return an unexpected result, or fail to terminate.

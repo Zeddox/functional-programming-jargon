@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <TargetFramework>net11.0</TargetFramework>
+    <!-- preview for C# 15 union types, used in the Sum type samples -->
+    <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Jargon</RootNamespace>
@@ -12,6 +13,8 @@
   <ItemGroup>
     <!-- Pinned on purpose: v5 is pre-release and its API still moves between betas. -->
     <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-77" />
+    <PackageReference Include="OneOf" Version="3.0.271" />
+    <PackageReference Include="OneOf.SourceGenerator" Version="3.0.271" />
   </ItemGroup>
 
 </Project>

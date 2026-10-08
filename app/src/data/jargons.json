@@ -2,8 +2,8 @@
   "meta": {
     "title": "FP Jargon",
     "subtitle": "The vocabulary of functional programming mapped into an interactive graph",
-    "totalTerms": 86,
-    "totalRelationships": 170,
+    "totalTerms": 87,
+    "totalRelationships": 176,
     "sourceRepo": "https://github.com/hemanth/functional-programming-jargon",
     "originalAuthor": "Hemanth HM"
   },
@@ -100,7 +100,7 @@
         "higher order function"
       ],
       "summary": "A function which takes a function as an argument and/or returns a function.",
-      "body": "A function which takes a function as an argument and/or returns a function.\n\n```csharp\nIEnumerable<A> Filter<A>(Func<A, bool> predicate, IEnumerable<A> xs) =>\n    xs.Where(predicate);\n```\n\n```csharp\nFunc<object?, bool> Is<T>() => x => x is T;\n```\n\n```csharp\nFilter(Is<int>(), new object?[] { 0, \"1\", 2, null }); // => [0, 2]\n```",
+      "body": "A function which takes a function as an argument and/or returns a function.\n\n```csharp\nIEnumerable<A> Filter<A>(Func<A, bool> predicate, IEnumerable<A> xs) =>\n    xs.Where(predicate);\n```\n\n```csharp\nFunc<object?, bool> Is<T>() => x => x is T;\n```\n\n```csharp\nFilter(Is<int>(), new object?[] { 0, \"1\", 2, null }); // => [0, 2]\n```\n\n__Further reading__\n* [C# Functional Programming In-Depth (8) Higher-order Function, Currying and First Class Function](https://codingonwheels.com/posts/csharp-functional-programming-higher-order-function-currying-and-first-class-function/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -115,7 +115,12 @@
           "code": "Filter(Is<int>(), new object?[] { 0, \"1\", 2, null }); // => [0, 2]"
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "C# Functional Programming In-Depth (8) Higher-order Function, Currying and First Class Function",
+          "url": "https://codingonwheels.com/posts/csharp-functional-programming-higher-order-function-currying-and-first-class-function/"
+        }
+      ],
       "crossRefs": [],
       "relatedIds": [
         "partial-application",
@@ -135,7 +140,7 @@
       "category": "core-functions",
       "aliases": [],
       "summary": "A closure is a scope which captures local variables of a function for access even after the execution has moved out of the block in which it is defined. This allows the values in the closure to be accessed by returned functions.",
-      "body": "A closure is a scope which captures local variables of a function for access even after the execution has moved out of the block in which it is defined.\nThis allows the values in the closure to be accessed by returned functions.\n\n```csharp\nFunc<int, int> AddTo(int x) => y => x + y;\nvar addToFive = AddTo(5);\naddToFive(3); // => 8\n```\n\nIn this case the `x` is retained in `addToFive`'s closure with the value `5`. `addToFive` can then be called with the `y`\nto get back the sum.\n\n__Further reading/Sources__\n* [Lambda Vs Closure](http://stackoverflow.com/questions/220658/what-is-the-difference-between-a-closure-and-a-lambda)\n* [Capture of outer variables and variable scope in lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/lambda-expressions#capture-of-outer-variables-and-variable-scope-in-lambda-expressions) on Microsoft Learn",
+      "body": "A closure is a scope which captures local variables of a function for access even after the execution has moved out of the block in which it is defined.\nThis allows the values in the closure to be accessed by returned functions.\n\n```csharp\nFunc<int, int> AddTo(int x) => y => x + y;\nvar addToFive = AddTo(5);\naddToFive(3); // => 8\n```\n\nIn this case the `x` is retained in `addToFive`'s closure with the value `5`. `addToFive` can then be called with the `y`\nto get back the sum.\n\n__Further reading/Sources__\n* [Lambda Vs Closure](http://stackoverflow.com/questions/220658/what-is-the-difference-between-a-closure-and-a-lambda)\n* [Capture of outer variables and variable scope in lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/lambda-expressions#capture-of-outer-variables-and-variable-scope-in-lambda-expressions) on Microsoft Learn\n* [C# Functional Programming In-Depth (3) Local Function and Closure](https://codingonwheels.com/posts/csharp-functional-programming-local-function-and-closure/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -150,6 +155,10 @@
         {
           "title": "Capture of outer variables and variable scope in lambda expressions",
           "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/lambda-expressions#capture-of-outer-variables-and-variable-scope-in-lambda-expressions"
+        },
+        {
+          "title": "C# Functional Programming In-Depth (3) Local Function and Closure",
+          "url": "https://codingonwheels.com/posts/csharp-functional-programming-local-function-and-closure/"
         }
       ],
       "crossRefs": [],
@@ -194,14 +203,19 @@
         "curried"
       ],
       "summary": "The process of converting a function that takes multiple arguments into a function that takes them one at a time.",
-      "body": "The process of converting a function that takes multiple arguments into a function that takes them one at a time.\n\nEach time the function is called it only accepts one argument and returns a function that takes one argument until all arguments are passed.\n\n```csharp\nFunc<int, int, int> sum = (a, b) => a + b;\n\nFunc<int, Func<int, int>> curriedSum = a => b => a + b;\n\ncurriedSum(40)(2); // => 42\n\nvar add2 = curriedSum(2); // (b) => 2 + b\n\nadd2(10); // => 12\n```",
+      "body": "The process of converting a function that takes multiple arguments into a function that takes them one at a time.\n\nEach time the function is called it only accepts one argument and returns a function that takes one argument until all arguments are passed.\n\n```csharp\nFunc<int, int, int> sum = (a, b) => a + b;\n\nFunc<int, Func<int, int>> curriedSum = a => b => a + b;\n\ncurriedSum(40)(2); // => 42\n\nvar add2 = curriedSum(2); // (b) => 2 + b\n\nadd2(10); // => 12\n```\n\n__Further reading__\n* [C# Functional Programming In-Depth (8) Higher-order Function, Currying and First Class Function](https://codingonwheels.com/posts/csharp-functional-programming-higher-order-function-currying-and-first-class-function/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
           "code": "Func<int, int, int> sum = (a, b) => a + b;\n\nFunc<int, Func<int, int>> curriedSum = a => b => a + b;\n\ncurriedSum(40)(2); // => 42\n\nvar add2 = curriedSum(2); // (b) => 2 + b\n\nadd2(10); // => 12"
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "C# Functional Programming In-Depth (8) Higher-order Function, Currying and First Class Function",
+          "url": "https://codingonwheels.com/posts/csharp-functional-programming-higher-order-function-currying-and-first-class-function/"
+        }
+      ],
       "crossRefs": [],
       "relatedIds": [
         "partial-application",
@@ -251,7 +265,7 @@
       "category": "composition",
       "aliases": [],
       "summary": "The act of putting two functions together to form a third function where the output of one function is the input of the other. This is one of the most important ideas of functional programming.",
-      "body": "The act of putting two functions together to form a third function where the output of one function is the input of the other. This is one of the most important ideas of functional programming.\n\n```csharp\n// Definition\nFunc<A, C> Compose<A, B, C>(Func<B, C> f, Func<A, B> g) => a => f(g(a));\n\n// Usage\nFunc<double, double> floor = Math.Floor;\nvar floorAndToString = Compose((double x) => x.ToString(), floor);\nfloorAndToString(121.212121); // => \"121\"\n```\n\nlanguage-ext's `compose` reads left-to-right instead: the first function runs first.\n\n```csharp\nvar floorThenToString = compose(floor, (double x) => x.ToString());\nfloorThenToString(121.212121); // => \"121\"\n```",
+      "body": "The act of putting two functions together to form a third function where the output of one function is the input of the other. This is one of the most important ideas of functional programming.\n\n```csharp\n// Definition\nFunc<A, C> Compose<A, B, C>(Func<B, C> f, Func<A, B> g) => a => f(g(a));\n\n// Usage\nFunc<double, double> floor = Math.Floor;\nvar floorAndToString = Compose((double x) => x.ToString(), floor);\nfloorAndToString(121.212121); // => \"121\"\n```\n\nlanguage-ext's `compose` reads left-to-right instead: the first function runs first.\n\n```csharp\nvar floorThenToString = compose(floor, (double x) => x.ToString());\nfloorThenToString(121.212121); // => \"121\"\n```\n\n__Further reading__\n* [C# Functional Programming In-Depth (9) Function Composition and Chaining](https://codingonwheels.com/posts/csharp-functional-programming-function-composition-and-method-chaining/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -262,7 +276,12 @@
           "code": "var floorThenToString = compose(floor, (double x) => x.ToString());\nfloorThenToString(121.212121); // => \"121\""
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "C# Functional Programming In-Depth (9) Function Composition and Chaining",
+          "url": "https://codingonwheels.com/posts/csharp-functional-programming-function-composition-and-method-chaining/"
+        }
+      ],
       "crossRefs": [],
       "relatedIds": [
         "point-free-style",
@@ -279,7 +298,7 @@
       "category": "composition",
       "aliases": [],
       "summary": "At any given point in a program, the part of the code that's yet to be executed is known as a continuation.",
-      "body": "At any given point in a program, the part of the code that's yet to be executed is known as a continuation.\n\n```csharp\nstring PrintAsString(int num) => $\"Given {num}\";\n\nR AddOneAndContinue<R>(int num, Func<int, R> cc)\n{\n    var result = num + 1;\n    return cc(result);\n}\n\nAddOneAndContinue(2, PrintAsString); // => \"Given 3\"\n```\n\nContinuations are often seen in asynchronous programming when the program needs to wait to receive data before it can continue. The response is often passed off to the rest of the program, which is the continuation, once it's been received. In C#, `await` does this for you: the compiler turns the rest of the method into the continuation of the awaited `Task`.\n\n```csharp\nvoid ContinueProgramWith(string data)\n{\n    // Continues program with data\n}\n\nasync Task ReadAndContinue(string path)\n{\n    try\n    {\n        var response = await File.ReadAllTextAsync(path);\n        // Everything after the `await` is the continuation:\n        ContinueProgramWith(response);\n    }\n    catch (IOException)\n    {\n        // handle error\n    }\n}\n```",
+      "body": "At any given point in a program, the part of the code that's yet to be executed is known as a continuation.\n\n```csharp\nstring PrintAsString(int num) => $\"Given {num}\";\n\nR AddOneAndContinue<R>(int num, Func<int, R> cc)\n{\n    var result = num + 1;\n    return cc(result);\n}\n\nAddOneAndContinue(2, PrintAsString); // => \"Given 3\"\n```\n\nContinuations are often seen in asynchronous programming when the program needs to wait to receive data before it can continue. The response is often passed off to the rest of the program, which is the continuation, once it's been received. In C#, `await` does this for you: the compiler turns the rest of the method into the continuation of the awaited `Task`.\n\n```csharp\nvoid ContinueProgramWith(string data)\n{\n    // Continues program with data\n}\n\nasync Task ReadAndContinue(string path)\n{\n    try\n    {\n        var response = await File.ReadAllTextAsync(path);\n        // Everything after the `await` is the continuation:\n        ContinueProgramWith(response);\n    }\n    catch (IOException)\n    {\n        // handle error\n    }\n}\n```\n\n__Further reading__\n* [Category Theory via C# (22) Continuation Monad](https://codingonwheels.com/posts/category-theory-via-csharp-22-more-monad-continuation-monad-2017/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -290,7 +309,12 @@
           "code": "void ContinueProgramWith(string data)\n{\n    // Continues program with data\n}\n\nasync Task ReadAndContinue(string path)\n{\n    try\n    {\n        var response = await File.ReadAllTextAsync(path);\n        // Everything after the `await` is the continuation:\n        ContinueProgramWith(response);\n    }\n    catch (IOException)\n    {\n        // handle error\n    }\n}"
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "Category Theory via C# (22) Continuation Monad",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-22-more-monad-continuation-monad-2017/"
+        }
+      ],
       "crossRefs": [],
       "relatedIds": [
         "higher-order-functions-hof",
@@ -309,7 +333,7 @@
         "side effect recipe"
       ],
       "summary": "A pure data structure that encapsulates a side effect. Instead of performing the effect immediately, IO wraps the action in a nullary function (thunk), allowing effectful operations to be transformed, chained, and composed as pure values without actually executing them until explicitly triggered.",
-      "body": "A pure data structure that encapsulates a side effect. Instead of performing the effect immediately, `IO` wraps the action in a nullary function ([thunk](#thunk)), allowing effectful operations to be transformed, chained, and composed as pure [values](#value) without actually executing them until explicitly triggered.\n\nlanguage-ext provides `IO<A>`:\n\n```csharp\nvar count = 0;\n\n// Pure description - nothing executes yet\nvar tick = IO.lift(() => ++count);\nvar formatted = tick.Map(n => $\"tick {n}\");\n\n// Side effect executes only when calling .Run()\nformatted.Run(); // => \"tick 1\"\nformatted.Run(); // => \"tick 2\"\n```\n\n__Further reading__\n* [The IO Container](https://blog.ploeh.dk/2020/06/08/the-io-container/) by Mark Seemann\n* [IO container in a parallel C# universe](https://blog.ploeh.dk/2020/06/15/io-container-in-a-parallel-c-universe/) by Mark Seemann\n* [IO](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Effects/IO) in language-ext",
+      "body": "A pure data structure that encapsulates a side effect. Instead of performing the effect immediately, `IO` wraps the action in a nullary function ([thunk](#thunk)), allowing effectful operations to be transformed, chained, and composed as pure [values](#value) without actually executing them until explicitly triggered.\n\nlanguage-ext provides `IO<A>`:\n\n```csharp\nvar count = 0;\n\n// Pure description - nothing executes yet\nvar tick = IO.lift(() => ++count);\nvar formatted = tick.Map(n => $\"tick {n}\");\n\n// Side effect executes only when calling .Run()\nformatted.Run(); // => \"tick 1\"\nformatted.Run(); // => \"tick 2\"\n```\n\n__Further reading__\n* [The IO Container](https://blog.ploeh.dk/2020/06/08/the-io-container/) by Mark Seemann\n* [IO container in a parallel C# universe](https://blog.ploeh.dk/2020/06/15/io-container-in-a-parallel-c-universe/) by Mark Seemann\n* [IO](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Effects/IO) in language-ext\n* [Category Theory via C# (8) Advanced LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -328,6 +352,10 @@
         {
           "title": "IO",
           "url": "https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Effects/IO"
+        },
+        {
+          "title": "Category Theory via C# (8) Advanced LINQ to Monads",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/"
         }
       ],
       "crossRefs": [
@@ -477,7 +505,7 @@
         "purity"
       ],
       "summary": "A function is pure if the return value is only determined by its input values, and does not produce side effects. The function must always return the same result when given the same input.",
-      "body": "A function is pure if the return value is only determined by its input values, and does not produce side effects. The function must always return the same result when given the same input.\n\n```csharp\nstring Greet(string name) => $\"Hi, {name}\";\n\nGreet(\"Brianne\"); // => \"Hi, Brianne\"\n```\n\nAs opposed to each of the following:\n\n```csharp\nGlobals.Name = \"Brianne\";\n\nstring GreetGlobal() => $\"Hi, {Globals.Name}\";\n\nGreetGlobal(); // => \"Hi, Brianne\"\n\nstatic class Globals { public static string Name = \"\"; }\n```\n\nThe above example's output is based on data stored outside of the function...\n\n```csharp\nvar greeting = \"\";\n\nvoid GreetInPlace(string name) => greeting = $\"Hi, {name}\";\n\nGreetInPlace(\"Brianne\");\nvar result = greeting; // => \"Hi, Brianne\"\n```\n\n... and this one modifies state outside of the function.",
+      "body": "A function is pure if the return value is only determined by its input values, and does not produce side effects. The function must always return the same result when given the same input.\n\n```csharp\nstring Greet(string name) => $\"Hi, {name}\";\n\nGreet(\"Brianne\"); // => \"Hi, Brianne\"\n```\n\nAs opposed to each of the following:\n\n```csharp\nGlobals.Name = \"Brianne\";\n\nstring GreetGlobal() => $\"Hi, {Globals.Name}\";\n\nGreetGlobal(); // => \"Hi, Brianne\"\n\nstatic class Globals { public static string Name = \"\"; }\n```\n\nThe above example's output is based on data stored outside of the function...\n\n```csharp\nvar greeting = \"\";\n\nvoid GreetInPlace(string name) => greeting = $\"Hi, {name}\";\n\nGreetInPlace(\"Brianne\");\nvar result = greeting; // => \"Hi, Brianne\"\n```\n\n... and this one modifies state outside of the function.\n\n__Further reading__\n* [C# Functional Programming In-Depth (13) Pure Function](https://codingonwheels.com/posts/csharp-functional-programming-pure-function/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -492,7 +520,12 @@
           "code": "var greeting = \"\";\n\nvoid GreetInPlace(string name) => greeting = $\"Hi, {name}\";\n\nGreetInPlace(\"Brianne\");\nvar result = greeting; // => \"Hi, Brianne\""
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "C# Functional Programming In-Depth (13) Pure Function",
+          "url": "https://codingonwheels.com/posts/csharp-functional-programming-pure-function/"
+        }
+      ],
       "crossRefs": [],
       "relatedIds": [
         "side-effects",
@@ -640,7 +673,7 @@
       "category": "category-morphisms",
       "aliases": [],
       "summary": "A category in category theory is a collection of objects and morphisms between them. In programming, typically types act as the objects and functions as morphisms.",
-      "body": "A category in category theory is a collection of objects and morphisms between them. In programming, typically types\nact as the objects and functions as morphisms.\n\nTo be a valid category, three rules must be met:\n\n1. There must be an identity morphism that maps an object to itself.\n    Where `a` is an object in some category,\n    there must be a function from `a -> a`.\n2. Morphisms must compose.\n    Where `a`, `b`, and `c` are objects in some category,\n    and `f` is a morphism from `a -> b`, and `g` is a morphism from `b -> c`;\n    `g(f(x))` must be equivalent to `(g • f)(x)`.\n3. Composition must be associative\n    `f • (g • h)` is the same as `(f • g) • h`.\n\nSince these rules govern composition at very abstract level, category theory is great at uncovering new ways of composing things.\n\nAs an example we can define a category Max as a record:\n\n```csharp\nnew Max(2).Compose(new Max(3)).Compose(new Max(5)).Id().Id();\n// => Max(5)\n\nrecord Max(int A)\n{\n    public Max Id() => this;\n    public Max Compose(Max b) => A > b.A ? this : b;\n    public override string ToString() => $\"Max({A})\";\n}\n```\n\n__Further reading__\n\n* [Category Theory for Programmers](https://bartoszmilewski.com/2014/10/28/category-theory-for-programmers-the-preface/)",
+      "body": "A category in category theory is a collection of objects and morphisms between them. In programming, typically types\nact as the objects and functions as morphisms.\n\nTo be a valid category, three rules must be met:\n\n1. There must be an identity morphism that maps an object to itself.\n    Where `a` is an object in some category,\n    there must be a function from `a -> a`.\n2. Morphisms must compose.\n    Where `a`, `b`, and `c` are objects in some category,\n    and `f` is a morphism from `a -> b`, and `g` is a morphism from `b -> c`;\n    `g(f(x))` must be equivalent to `(g • f)(x)`.\n3. Composition must be associative\n    `f • (g • h)` is the same as `(f • g) • h`.\n\nSince these rules govern composition at very abstract level, category theory is great at uncovering new ways of composing things.\n\nAs an example we can define a category Max as a record:\n\n```csharp\nnew Max(2).Compose(new Max(3)).Compose(new Max(5)).Id().Id();\n// => Max(5)\n\nrecord Max(int A)\n{\n    public Max Id() => this;\n    public Max Compose(Max b) => A > b.A ? this : b;\n    public override string ToString() => $\"Max({A})\";\n}\n```\n\n__Further reading__\n\n* [Category Theory for Programmers](https://bartoszmilewski.com/2014/10/28/category-theory-for-programmers-the-preface/)\n* [Category Theory via C# (1) Fundamentals](https://codingonwheels.com/posts/category-theory-via-csharp-1-fundamentals/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -651,6 +684,10 @@
         {
           "title": "Category Theory for Programmers",
           "url": "https://bartoszmilewski.com/2014/10/28/category-theory-for-programmers-the-preface/"
+        },
+        {
+          "title": "Category Theory via C# (1) Fundamentals",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-1-fundamentals/"
         }
       ],
       "crossRefs": [],
@@ -825,7 +862,7 @@
         "mappable"
       ],
       "summary": "An object that implements a map function that takes a function which is run on the contents of that object. A functor must adhere to two rules:",
-      "body": "An object that implements a `map` function that takes a function which is run on the contents of that object. A functor must adhere to two rules:\n\n__Preserves identity__\n\n```\nfa.Map(x => x)\n```\n\nis equivalent to just `fa`.\n\n__Composable__\n\n```\nfa.Map(x => g(f(x)))\n```\n\nis equivalent to\n\n```\nfa.Map(f).Map(g)\n```\n\n(`f`, `g` are arbitrary composable functions)\n\nIn language-ext, a functor is any type `F` that implements the `Functor<F>` trait, which means providing `Map` for values of type `K<F, A>` (read as \"an `F` of `A`\"). [Option](#option) is a functor as it satisfies the rules:\n\n```csharp\nSome(1).Map(x => x); // => Some(1)\n```\n\nand\n\n```csharp\nFunc<int, int> f = x => x + 1;\nFunc<int, int> g = x => x * 2;\n\nSome(1).Map(x => g(f(x))); // => Some(4)\nSome(1).Map(f).Map(g);     // => Some(4)\n```\n\nBecause `Functor<F>` is a trait, you can write code that works for *any* functor:\n\n```csharp\nK<F, string> Describe<F>(K<F, int> fa) where F : Functor<F> =>\n    fa.Map(x => $\"got {x}\");\n\nDescribe(Some(1));          // => Some(got 1)\nDescribe(Seq(1, 2));        // => [got 1, got 2]\n```",
+      "body": "An object that implements a `map` function that takes a function which is run on the contents of that object. A functor must adhere to two rules:\n\n__Preserves identity__\n\n```\nfa.Map(x => x)\n```\n\nis equivalent to just `fa`.\n\n__Composable__\n\n```\nfa.Map(x => g(f(x)))\n```\n\nis equivalent to\n\n```\nfa.Map(f).Map(g)\n```\n\n(`f`, `g` are arbitrary composable functions)\n\nIn language-ext, a functor is any type `F` that implements the `Functor<F>` trait, which means providing `Map` for values of type `K<F, A>` (read as \"an `F` of `A`\"). [Option](#option) is a functor as it satisfies the rules:\n\n```csharp\nSome(1).Map(x => x); // => Some(1)\n```\n\nand\n\n```csharp\nFunc<int, int> f = x => x + 1;\nFunc<int, int> g = x => x * 2;\n\nSome(1).Map(x => g(f(x))); // => Some(4)\nSome(1).Map(f).Map(g);     // => Some(4)\n```\n\nBecause `Functor<F>` is a trait, you can write code that works for *any* functor:\n\n```csharp\nK<F, string> Describe<F>(K<F, int> fa) where F : Functor<F> =>\n    fa.Map(x => $\"got {x}\");\n\nDescribe(Some(1));          // => Some(got 1)\nDescribe(Seq(1, 2));        // => [got 1, got 2]\n```\n\n__Further reading__\n* [Category Theory via C# (3) Functor and LINQ to Functors](https://codingonwheels.com/posts/category-theory-via-csharp-3-functor-and-linq-to-functors/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -852,7 +889,12 @@
           "code": "K<F, string> Describe<F>(K<F, int> fa) where F : Functor<F> =>\n    fa.Map(x => $\"got {x}\");\n\nDescribe(Some(1));          // => Some(got 1)\nDescribe(Seq(1, 2));        // => [got 1, got 2]"
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "Category Theory via C# (3) Functor and LINQ to Functors",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-3-functor-and-linq-to-functors/"
+        }
+      ],
       "crossRefs": [
         "option"
       ],
@@ -871,7 +913,8 @@
         "constant-functor",
         "option",
         "monad",
-        "monad-transformer"
+        "monad-transformer",
+        "sum-type"
       ]
     },
     {
@@ -1065,9 +1108,14 @@
       "category": "types-data",
       "aliases": [],
       "summary": "A branch of mathematics that uses functions to create a universal model of computation.",
-      "body": "A branch of mathematics that uses functions to create a [universal model of computation](https://en.wikipedia.org/wiki/Lambda_calculus).",
+      "body": "A branch of mathematics that uses functions to create a [universal model of computation](https://en.wikipedia.org/wiki/Lambda_calculus).\n\n__Further reading__\n* [Lambda Calculus via C# (1) Fundamentals](https://codingonwheels.com/posts/lambda-calculus-via-csharp-1-fundamentals/) on CodingOnWheels",
       "codeBlocks": [],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "Lambda Calculus via C# (1) Fundamentals",
+          "url": "https://codingonwheels.com/posts/lambda-calculus-via-csharp-1-fundamentals/"
+        }
+      ],
       "crossRefs": [],
       "relatedIds": [
         "lambda"
@@ -1080,7 +1128,7 @@
       "category": "composition",
       "aliases": [],
       "summary": "A higher-order function, usually curried, which returns a new function changed in some way. Functional combinators are often used in Point-Free Style to write especially terse programs.",
-      "body": "A higher-order function, usually curried, which returns a new function changed in some way. Functional combinators are often used in [Point-Free Style](#point-free-style) to write especially terse programs.\n\n```csharp\n// The \"C\" combinator takes a curried two-argument function and returns\n// one which calls the original function with the arguments reversed.\nFunc<A, Func<B, R>> C<A, B, R>(Func<B, Func<A, R>> f) =>\n    a => b => f(b)(a);\n\nFunc<double, Func<double, double>> divide = a => b => a / b;\n\nvar divideBy = C(divide);\n\nvar divBy10 = divideBy(10);\n\ndivBy10(30); // => 3\n```\n\nlanguage-ext ships the C combinator as `flip`:\n\n```csharp\nflip(divide)(10)(30); // => 3\n```\n\nSee also [Function Combinators in C#](combinators.md), a C# take on Avaq's [List of Functional Combinators in JavaScript](https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45), which includes links to more references.",
+      "body": "A higher-order function, usually curried, which returns a new function changed in some way. Functional combinators are often used in [Point-Free Style](#point-free-style) to write especially terse programs.\n\n```csharp\n// The \"C\" combinator takes a curried two-argument function and returns\n// one which calls the original function with the arguments reversed.\nFunc<A, Func<B, R>> C<A, B, R>(Func<B, Func<A, R>> f) =>\n    a => b => f(b)(a);\n\nFunc<double, Func<double, double>> divide = a => b => a / b;\n\nvar divideBy = C(divide);\n\nvar divBy10 = divideBy(10);\n\ndivBy10(30); // => 3\n```\n\nlanguage-ext ships the C combinator as `flip`:\n\n```csharp\nflip(divide)(10)(30); // => 3\n```\n\nSee also [Function Combinators in C#](combinators.md), a C# take on Avaq's [List of Functional Combinators in JavaScript](https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45), which includes links to more references.\n\n__Further reading__\n* [Lambda Calculus via C# (6) Combinatory Logic](https://codingonwheels.com/posts/lambda-calculus-via-csharp-6-combinatory-logic/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1091,7 +1139,12 @@
           "code": "flip(divide)(10)(30); // => 3"
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "Lambda Calculus via C# (6) Combinatory Logic",
+          "url": "https://codingonwheels.com/posts/lambda-calculus-via-csharp-6-combinatory-logic/"
+        }
+      ],
       "crossRefs": [
         "point-free-style"
       ],
@@ -1111,7 +1164,7 @@
         "generators"
       ],
       "summary": "Lazy evaluation is a call-by-need evaluation mechanism that delays the evaluation of an expression until its value is needed. In functional languages, this allows for structures like infinite lists, which would not normally be available in an imperative language where the sequencing of commands is significant.",
-      "body": "Lazy evaluation is a call-by-need evaluation mechanism that delays the evaluation of an expression until its value is needed. In functional languages, this allows for structures like infinite lists, which would not normally be available in an imperative language where the sequencing of commands is significant.\n\nIn C#, an iterator method (one that uses `yield return`) is evaluated lazily:\n\n```csharp\nIEnumerable<double> Rand()\n{\n    while (true) yield return Random.Shared.NextDouble();\n}\n```\n\n```csharp\nusing var randIter = Rand().GetEnumerator();\n// Each call computes a new random value, evaluated only on need.\nrandIter.MoveNext();\nvar r = randIter.Current;\n```\n\nBecause nothing is computed until it is asked for, an infinite sequence is fine as long as you only consume part of it. language-ext's `Seq` is lazy too, and caches each item once it has been evaluated:\n\n```csharp\nIEnumerable<int> Naturals()\n{\n    for (var n = 0; ; n++) yield return n;\n}\n\ntoSeq(Naturals()).Map(n => n * n).Take(4); // => [0, 1, 4, 9]\n```",
+      "body": "Lazy evaluation is a call-by-need evaluation mechanism that delays the evaluation of an expression until its value is needed. In functional languages, this allows for structures like infinite lists, which would not normally be available in an imperative language where the sequencing of commands is significant.\n\nIn C#, an iterator method (one that uses `yield return`) is evaluated lazily:\n\n```csharp\nIEnumerable<double> Rand()\n{\n    while (true) yield return Random.Shared.NextDouble();\n}\n```\n\n```csharp\nusing var randIter = Rand().GetEnumerator();\n// Each call computes a new random value, evaluated only on need.\nrandIter.MoveNext();\nvar r = randIter.Current;\n```\n\nBecause nothing is computed until it is asked for, an infinite sequence is fine as long as you only consume part of it. language-ext's `Seq` is lazy too, and caches each item once it has been evaluated:\n\n```csharp\nIEnumerable<int> Naturals()\n{\n    for (var n = 0; ; n++) yield return n;\n}\n\ntoSeq(Naturals()).Map(n => n * n).Take(4); // => [0, 1, 4, 9]\n```\n\n__Further reading__\n* [LINQ to Objects in Depth (4) Deferred Execution, Lazy Evaluation and Eager Evaluation](https://codingonwheels.com/posts/linq-to-objects-deferred-execution-lazy-evaluation-and-eager-evaluation/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1126,7 +1179,12 @@
           "code": "IEnumerable<int> Naturals()\n{\n    for (var n = 0; ; n++) yield return n;\n}\n\ntoSeq(Naturals()).Map(n => n * n).Take(4); // => [0, 1, 4, 9]"
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "LINQ to Objects in Depth (4) Deferred Execution, Lazy Evaluation and Eager Evaluation",
+          "url": "https://codingonwheels.com/posts/linq-to-objects-deferred-execution-lazy-evaluation-and-eager-evaluation/"
+        }
+      ],
       "crossRefs": [],
       "relatedIds": [
         "pure-function",
@@ -1145,7 +1203,7 @@
         "semigroup with identity"
       ],
       "summary": "An object with a function that \"combines\" that object with another of the same type (semigroup) which has an \"identity\" value.",
-      "body": "An object with a function that \"combines\" that object with another of the same type (semigroup) which has an \"identity\" value.\n\nOne simple monoid is the addition of numbers:\n\n```csharp\nvar two = 1 + 1; // => 2\n```\n\nIn this case `int` is the object and `+` is the function.\n\nWhen any value is combined with the \"identity\" value the result must be the original value. The identity must also be commutative.\n\nThe identity value for addition is `0`.\n\n```csharp\nvar right = 1 + 0;          // => 1\nvar left = 0 + 1;           // => 1\nvar same = 1 + 0 == 0 + 1;  // => true\n```\n\nIt's also required that the grouping of operations will not affect the result (associativity):\n\n```csharp\nvar assoc = 1 + (2 + 3) == (1 + 2) + 3; // => true\n```\n\nIn language-ext, a type is a monoid when it implements the `Monoid<A>` trait: a `Combine` method (from `Semigroup<A>`, which also gives you the `+` operator) and a static `Empty` identity. `Seq` concatenation is a monoid:\n\n```csharp\nvar xs = Seq(1, 2) + Seq(3, 4); // => [1, 2, 3, 4]\n```\n\nThe identity value is the empty sequence:\n\n```csharp\nvar ys = Seq(1, 2) + Monoid.empty<Seq<int>>(); // => [1, 2]\n```\n\nYou can make your own monoids. Wrapping `int` lets us say *which* monoid we mean, since numbers form one under addition and another under multiplication:\n\n```csharp\nrecord Sum(int Value) : Monoid<Sum>\n{\n    public Sum Combine(Sum rhs) => new(Value + rhs.Value);\n    public static Sum Empty { get; } = new(0);\n}\n```\n\nOnce you have a monoid, you can collapse any number of values (even none) into one:\n\n```csharp\nMonoid.combine(Seq(new Sum(1), new Sum(2), new Sum(3)));\n// => Sum { Value = 6 }\n\nMonoid.combine(Seq<Sum>()); // => Sum { Value = 0 }\n```\n\nAs a counterexample, subtraction does not form a monoid because there is no commutative identity value:\n\n```csharp\nvar commutes = 0 - 4 == 4 - 0; // => false\n```",
+      "body": "An object with a function that \"combines\" that object with another of the same type (semigroup) which has an \"identity\" value.\n\nOne simple monoid is the addition of numbers:\n\n```csharp\nvar two = 1 + 1; // => 2\n```\n\nIn this case `int` is the object and `+` is the function.\n\nWhen any value is combined with the \"identity\" value the result must be the original value. The identity must also be commutative.\n\nThe identity value for addition is `0`.\n\n```csharp\nvar right = 1 + 0;          // => 1\nvar left = 0 + 1;           // => 1\nvar same = 1 + 0 == 0 + 1;  // => true\n```\n\nIt's also required that the grouping of operations will not affect the result (associativity):\n\n```csharp\nvar assoc = 1 + (2 + 3) == (1 + 2) + 3; // => true\n```\n\nIn language-ext, a type is a monoid when it implements the `Monoid<A>` trait: a `Combine` method (from `Semigroup<A>`, which also gives you the `+` operator) and a static `Empty` identity. `Seq` concatenation is a monoid:\n\n```csharp\nvar xs = Seq(1, 2) + Seq(3, 4); // => [1, 2, 3, 4]\n```\n\nThe identity value is the empty sequence:\n\n```csharp\nvar ys = Seq(1, 2) + Monoid.empty<Seq<int>>(); // => [1, 2]\n```\n\nYou can make your own monoids. Wrapping `int` lets us say *which* monoid we mean, since numbers form one under addition and another under multiplication:\n\n```csharp\nrecord Sum(int Value) : Monoid<Sum>\n{\n    public Sum Combine(Sum rhs) => new(Value + rhs.Value);\n    public static Sum Empty { get; } = new(0);\n}\n```\n\nOnce you have a monoid, you can collapse any number of values (even none) into one:\n\n```csharp\nMonoid.combine(Seq(new Sum(1), new Sum(2), new Sum(3)));\n// => Sum { Value = 6 }\n\nMonoid.combine(Seq<Sum>()); // => Sum { Value = 0 }\n```\n\nAs a counterexample, subtraction does not form a monoid because there is no commutative identity value:\n\n```csharp\nvar commutes = 0 - 4 == 4 - 0; // => false\n```\n\n__Further reading__\n* [Category Theory via C# (2) Monoid](https://codingonwheels.com/posts/category-theory-via-csharp-2-monoid/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1180,7 +1238,12 @@
           "code": "var commutes = 0 - 4 == 4 - 0; // => false"
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "Category Theory via C# (2) Monoid",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-2-monoid/"
+        }
+      ],
       "crossRefs": [],
       "relatedIds": [
         "semigroup",
@@ -1203,7 +1266,7 @@
         "return"
       ],
       "summary": "A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object.",
-      "body": "A monad is an object with [`of`](#pointed-functor) and `chain` functions. `chain` is like [`map`](#functor) except it un-nests the resulting nested object.\n\nIn language-ext, `of` is `Pure` (from the `Applicative<M>` trait) and `chain` is `Bind` (from the `Monad<M>` trait). `Seq` is a monad:\n\n```csharp\nvar pets = Seq(\"cat,dog\", \"fish,bird\");\n\n// Usage\npets.Bind(a => toSeq(a.Split(','))); // => [cat, dog, fish, bird]\n\n// Contrast to map\npets.Map(a => toSeq(a.Split(','))); // => [[cat, dog], [fish, bird]]\n```\n\nC#'s LINQ query syntax is sugar for `Bind` (`SelectMany`), so it works with any language-ext monad:\n\n```csharp\nvar shouted = from pet  in pets\n              from name in toSeq(pet.Split(','))\n              select name.ToUpper();\n// => [CAT, DOG, FISH, BIRD]\n```\n\nAnd because `Monad<M>` is a trait, you can write code once for every monad:\n\n```csharp\nK<M, int> AddM<M>(K<M, int> mx, K<M, int> my) where M : Monad<M> =>\n    mx.Bind(x => my.Map(y => x + y));\n\nAddM(Some(1), Some(2));        // => Some(3)\nAddM(Some(1), Option<int>.None); // => None\nAddM(Seq(1, 2), Seq(10, 20));  // => [11, 21, 12, 22]\n```\n\n`of` is also known as `return` in other functional languages.\n`chain` is also known as `flatmap` and `bind` in other languages.",
+      "body": "A monad is an object with [`of`](#pointed-functor) and `chain` functions. `chain` is like [`map`](#functor) except it un-nests the resulting nested object.\n\nIn language-ext, `of` is `Pure` (from the `Applicative<M>` trait) and `chain` is `Bind` (from the `Monad<M>` trait). `Seq` is a monad:\n\n```csharp\nvar pets = Seq(\"cat,dog\", \"fish,bird\");\n\n// Usage\npets.Bind(a => toSeq(a.Split(','))); // => [cat, dog, fish, bird]\n\n// Contrast to map\npets.Map(a => toSeq(a.Split(','))); // => [[cat, dog], [fish, bird]]\n```\n\nC#'s LINQ query syntax is sugar for `Bind` (`SelectMany`), so it works with any language-ext monad:\n\n```csharp\nvar shouted = from pet  in pets\n              from name in toSeq(pet.Split(','))\n              select name.ToUpper();\n// => [CAT, DOG, FISH, BIRD]\n```\n\nAnd because `Monad<M>` is a trait, you can write code once for every monad:\n\n```csharp\nK<M, int> AddM<M>(K<M, int> mx, K<M, int> my) where M : Monad<M> =>\n    mx.Bind(x => my.Map(y => x + y));\n\nAddM(Some(1), Some(2));        // => Some(3)\nAddM(Some(1), Option<int>.None); // => None\nAddM(Seq(1, 2), Seq(10, 20));  // => [11, 21, 12, 22]\n```\n\n`of` is also known as `return` in other functional languages.\n`chain` is also known as `flatmap` and `bind` in other languages.\n\n__Further reading__\n* [Category Theory via C# (7) Monad and LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-7-monad-and-linq-to-monads/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1218,7 +1281,12 @@
           "code": "K<M, int> AddM<M>(K<M, int> mx, K<M, int> my) where M : Monad<M> =>\n    mx.Bind(x => my.Map(y => x + y));\n\nAddM(Some(1), Some(2));        // => Some(3)\nAddM(Some(1), Option<int>.None); // => None\nAddM(Seq(1, 2), Seq(10, 20));  // => [11, 21, 12, 22]"
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "Category Theory via C# (7) Monad and LINQ to Monads",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-7-monad-and-linq-to-monads/"
+        }
+      ],
       "crossRefs": [
         "pointed-functor",
         "functor"
@@ -1241,6 +1309,7 @@
         "constant-monad",
         "pointed-functor",
         "functor",
+        "sum-type",
         "never-type"
       ]
     },
@@ -1259,7 +1328,7 @@
         "selectmany"
       ],
       "summary": "Syntax for writing a chain of monadic binds as if it were a sequence of plain statements. Each step binds the value inside a monad to a name, the rest of the block runs \"inside\" it, and the compiler rewrites the whole thing into nested Bind calls. Haskell calls it do-notation, Scala a for-comprehension and F# a computation expression; in C# it is LINQ query syntax.",
-      "body": "Syntax for writing a chain of [monadic](#monad) binds as if it were a sequence of plain statements. Each step binds the value inside a monad to a name, the rest of the block runs \"inside\" it, and the compiler rewrites the whole thing into nested `Bind` calls. Haskell calls it do-notation, Scala a for-comprehension and F# a computation expression; in C# it is LINQ query syntax.\n\n```csharp\nOption<int> ParseInt(string s) => int.TryParse(s, out var n) ? Some(n) : None;\n\nvar sum = from x in ParseInt(\"3\")\n          from y in ParseInt(\"4\")\n          select x + y;\n// => Some(7)\n\n// The compiler turns the query above into SelectMany, which is Bind plus a projection:\nvar desugared = ParseInt(\"3\").SelectMany(x => ParseInt(\"4\"), (x, y) => x + y);\n// => Some(7)\n\n// As with Bind, one None short-circuits the rest\nvar failed = from x in ParseInt(\"3\")\n             from y in ParseInt(\"four\")\n             select x + y;\n// => None\n```\n\n`let` names an intermediate value, and `where` filters, for types that can be empty such as `Option` and `Seq`:\n\n```csharp\nvar area = from w in ParseInt(\"3\")\n           from h in ParseInt(\"4\")\n           let a = w * h\n           where a > 10\n           select a;\n// => Some(12)\n```\n\nC# finds `Select` and `SelectMany` by name rather than through an interface, so any type with the right methods can be used in a query, as the `Fx<R, E, A>` in [Never type](#never-type) is.\n\n__Further reading__\n* [Query expression basics](https://learn.microsoft.com/en-us/dotnet/csharp/linq/get-started/query-expression-basics) on Microsoft Learn\n* [Monads](https://blog.ploeh.dk/2022/03/28/monads/) by Mark Seemann, which covers query syntax for each monad\n* [do notation](https://en.wikibooks.org/wiki/Haskell/do_notation) in the Haskell Wikibook",
+      "body": "Syntax for writing a chain of [monadic](#monad) binds as if it were a sequence of plain statements. Each step binds the value inside a monad to a name, the rest of the block runs \"inside\" it, and the compiler rewrites the whole thing into nested `Bind` calls. Haskell calls it do-notation, Scala a for-comprehension and F# a computation expression; in C# it is LINQ query syntax.\n\n```csharp\nOption<int> ParseInt(string s) => int.TryParse(s, out var n) ? Some(n) : None;\n\nvar sum = from x in ParseInt(\"3\")\n          from y in ParseInt(\"4\")\n          select x + y;\n// => Some(7)\n\n// The compiler turns the query above into SelectMany, which is Bind plus a projection:\nvar desugared = ParseInt(\"3\").SelectMany(x => ParseInt(\"4\"), (x, y) => x + y);\n// => Some(7)\n\n// As with Bind, one None short-circuits the rest\nvar failed = from x in ParseInt(\"3\")\n             from y in ParseInt(\"four\")\n             select x + y;\n// => None\n```\n\n`let` names an intermediate value, and `where` filters, for types that can be empty such as `Option` and `Seq`:\n\n```csharp\nvar area = from w in ParseInt(\"3\")\n           from h in ParseInt(\"4\")\n           let a = w * h\n           where a > 10\n           select a;\n// => Some(12)\n```\n\nC# finds `Select` and `SelectMany` by name rather than through an interface, so any type with the right methods can be used in a query, as the `Fx<R, E, A>` in [Never type](#never-type) is.\n\n__Further reading__\n* [Query expression basics](https://learn.microsoft.com/en-us/dotnet/csharp/linq/get-started/query-expression-basics) on Microsoft Learn\n* [Monads](https://blog.ploeh.dk/2022/03/28/monads/) by Mark Seemann, which covers query syntax for each monad\n* [do notation](https://en.wikibooks.org/wiki/Haskell/do_notation) in the Haskell Wikibook\n* [Category Theory via C# (7) Monad and LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-7-monad-and-linq-to-monads/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1282,6 +1351,10 @@
         {
           "title": "do notation",
           "url": "https://en.wikibooks.org/wiki/Haskell/do_notation"
+        },
+        {
+          "title": "Category Theory via C# (7) Monad and LINQ to Monads",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-7-monad-and-linq-to-monads/"
         }
       ],
       "crossRefs": [
@@ -1453,7 +1526,7 @@
         "readable"
       ],
       "summary": "A computation that reads from a shared, read-only environment. Instead of passing configuration through every function by hand, each step asks for what it needs, and the environment is supplied once, when the whole computation is run. It is dependency injection done with a monad.",
-      "body": "A computation that reads from a shared, read-only environment. Instead of passing configuration through every function by hand, each step asks for what it needs, and the environment is supplied once, when the whole computation is run. It is dependency injection done with a [monad](#monad).\n\n```csharp\nReader<Config, string> Greet(string name) =>\n    from greeting in Reader.asks<Config, string>(c => c.Greeting)\n    select $\"{greeting}, {name}\";\n\nReader<Config, string> Shout(string name) =>\n    from line   in Greet(name)\n    from repeat in Reader.asks<Config, int>(c => c.Repeat)\n    select string.Join(\" \", Enumerable.Repeat(line + \"!\", repeat));\n\nShout(\"Ada\").Run(new Config(\"Hello\", 2)); // => \"Hello, Ada! Hello, Ada!\"\n\n// local runs a computation in a modified environment\nReader.local<Config, string>(c => c with { Repeat = 1 }, Shout(\"Ada\"))\n      .Run(new Config(\"Hello\", 2)); // => \"Hello, Ada!\"\n\nrecord Config(string Greeting, int Repeat);\n```\n\nlanguage-ext describes the ability to read an environment with the `Readable` trait, so the runtime of `Eff<RT, A>` in [Algebraic Effects](#algebraic-effects) and `ReaderT` (Reader stacked on another monad, see [Monad Transformer](#monad-transformer)) work the same way.\n\n__Further reading__\n* [The Reader monad](https://blog.ploeh.dk/2022/11/14/the-reader-monad/) by Mark Seemann\n* [Reader](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Reader) in language-ext\n* [Reader? Ugh, not this joke again](https://learnyouahaskell.github.io/for-a-few-monads-more.html#reader) in Learn You a Haskell",
+      "body": "A computation that reads from a shared, read-only environment. Instead of passing configuration through every function by hand, each step asks for what it needs, and the environment is supplied once, when the whole computation is run. It is dependency injection done with a [monad](#monad).\n\n```csharp\nReader<Config, string> Greet(string name) =>\n    from greeting in Reader.asks<Config, string>(c => c.Greeting)\n    select $\"{greeting}, {name}\";\n\nReader<Config, string> Shout(string name) =>\n    from line   in Greet(name)\n    from repeat in Reader.asks<Config, int>(c => c.Repeat)\n    select string.Join(\" \", Enumerable.Repeat(line + \"!\", repeat));\n\nShout(\"Ada\").Run(new Config(\"Hello\", 2)); // => \"Hello, Ada! Hello, Ada!\"\n\n// local runs a computation in a modified environment\nReader.local<Config, string>(c => c with { Repeat = 1 }, Shout(\"Ada\"))\n      .Run(new Config(\"Hello\", 2)); // => \"Hello, Ada!\"\n\nrecord Config(string Greeting, int Repeat);\n```\n\nlanguage-ext describes the ability to read an environment with the `Readable` trait, so the runtime of `Eff<RT, A>` in [Algebraic Effects](#algebraic-effects) and `ReaderT` (Reader stacked on another monad, see [Monad Transformer](#monad-transformer)) work the same way.\n\n__Further reading__\n* [The Reader monad](https://blog.ploeh.dk/2022/11/14/the-reader-monad/) by Mark Seemann\n* [Reader](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Reader) in language-ext\n* [Reader? Ugh, not this joke again](https://learnyouahaskell.github.io/for-a-few-monads-more.html#reader) in Learn You a Haskell\n* [Category Theory via C# (8) Advanced LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1472,6 +1545,10 @@
         {
           "title": "Reader? Ugh, not this joke again",
           "url": "https://learnyouahaskell.github.io/for-a-few-monads-more.html#reader"
+        },
+        {
+          "title": "Category Theory via C# (8) Advanced LINQ to Monads",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/"
         }
       ],
       "crossRefs": [
@@ -1499,7 +1576,7 @@
         "writable"
       ],
       "summary": "A computation that produces a value and, alongside it, accumulates output, typically a log. Each step adds to the output with tell, and the pieces are joined with a monoid, so steps never see or overwrite each other's output.",
-      "body": "A computation that produces a value and, alongside it, accumulates output, typically a log. Each step adds to the output with `tell`, and the pieces are joined with a [monoid](#monoid), so steps never see or overwrite each other's output.\n\n```csharp\nWriter<Seq<string>, int> Double(int x) =>\n    from _ in Writer.tell(Seq($\"doubled {x}\"))\n    select x * 2;\n\nWriter<Seq<string>, int> AddOne(int x) =>\n    from _ in Writer.tell(Seq($\"added one to {x}\"))\n    select x + 1;\n\nvar result = (from a in Double(5)\n              from b in AddOne(a)\n              select b).Run();\n\nvar value = result.Value;  // => 11\nvar log   = result.Output; // => [doubled 5, added one to 10]\n```\n\n__Further reading__\n* [Writer](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Writer) in language-ext\n* [Writer? I hardly know her!](https://learnyouahaskell.github.io/for-a-few-monads-more.html#writer) in Learn You a Haskell",
+      "body": "A computation that produces a value and, alongside it, accumulates output, typically a log. Each step adds to the output with `tell`, and the pieces are joined with a [monoid](#monoid), so steps never see or overwrite each other's output.\n\n```csharp\nWriter<Seq<string>, int> Double(int x) =>\n    from _ in Writer.tell(Seq($\"doubled {x}\"))\n    select x * 2;\n\nWriter<Seq<string>, int> AddOne(int x) =>\n    from _ in Writer.tell(Seq($\"added one to {x}\"))\n    select x + 1;\n\nvar result = (from a in Double(5)\n              from b in AddOne(a)\n              select b).Run();\n\nvar value = result.Value;  // => 11\nvar log   = result.Output; // => [doubled 5, added one to 10]\n```\n\n__Further reading__\n* [Writer](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Writer) in language-ext\n* [Writer? I hardly know her!](https://learnyouahaskell.github.io/for-a-few-monads-more.html#writer) in Learn You a Haskell\n* [Category Theory via C# (8) Advanced LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1514,6 +1591,10 @@
         {
           "title": "Writer? I hardly know her!",
           "url": "https://learnyouahaskell.github.io/for-a-few-monads-more.html#writer"
+        },
+        {
+          "title": "Category Theory via C# (8) Advanced LINQ to Monads",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/"
         }
       ],
       "crossRefs": [
@@ -1538,7 +1619,7 @@
         "stateful"
       ],
       "summary": "A computation that threads a piece of state from one step to the next. Each step can read the current state (get), replace it (put) or update it (modify), and the state is passed along behind the scenes, so pure code can describe a stateful algorithm without a mutable variable.",
-      "body": "A computation that threads a piece of state from one step to the next. Each step can read the current state (`get`), replace it (`put`) or update it (`modify`), and the state is passed along behind the scenes, so pure code can describe a stateful algorithm without a mutable variable.\n\n```csharp\n// Hand out sequential ids, threading the counter through\nState<int, int> NextId() =>\n    from id in State.get<int>()\n    from _  in State.put(id + 1)\n    select id;\n\nvar labels = from a in NextId()\n             from b in NextId()\n             from c in NextId()\n             select $\"#{a} #{b} #{c}\";\n\nvar run  = labels.Run(100);\nvar text = run.Value; // => \"#100 #101 #102\"\nvar next = run.State; // => 103\n```\n\nReader and Writer are State with restrictions: a Reader's state can only be read, and a Writer's can only be appended to.\n\n__Further reading__\n* [The State monad](https://blog.ploeh.dk/2022/06/20/the-state-monad/) by Mark Seemann\n* [State](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/State) in language-ext\n* [Tasteful stateful computations](https://learnyouahaskell.github.io/for-a-few-monads-more.html#state) in Learn You a Haskell",
+      "body": "A computation that threads a piece of state from one step to the next. Each step can read the current state (`get`), replace it (`put`) or update it (`modify`), and the state is passed along behind the scenes, so pure code can describe a stateful algorithm without a mutable variable.\n\n```csharp\n// Hand out sequential ids, threading the counter through\nState<int, int> NextId() =>\n    from id in State.get<int>()\n    from _  in State.put(id + 1)\n    select id;\n\nvar labels = from a in NextId()\n             from b in NextId()\n             from c in NextId()\n             select $\"#{a} #{b} #{c}\";\n\nvar run  = labels.Run(100);\nvar text = run.Value; // => \"#100 #101 #102\"\nvar next = run.State; // => 103\n```\n\nReader and Writer are State with restrictions: a Reader's state can only be read, and a Writer's can only be appended to.\n\n__Further reading__\n* [The State monad](https://blog.ploeh.dk/2022/06/20/the-state-monad/) by Mark Seemann\n* [State](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/State) in language-ext\n* [Tasteful stateful computations](https://learnyouahaskell.github.io/for-a-few-monads-more.html#state) in Learn You a Haskell\n* [Category Theory via C# (8) Advanced LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1557,6 +1638,10 @@
         {
           "title": "Tasteful stateful computations",
           "url": "https://learnyouahaskell.github.io/for-a-few-monads-more.html#state"
+        },
+        {
+          "title": "Category Theory via C# (8) Advanced LINQ to Monads",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/"
         }
       ],
       "crossRefs": [],
@@ -1584,7 +1669,7 @@
         "failure"
       ],
       "summary": "A type class for computations that can fail with an error and recover from it, so error handling can be written once for every type that supports it. It has two operations: Fail produces a failure, and Catch handles one, optionally only errors that match a predicate. Haskell calls it MonadError.",
-      "body": "A [type class](#type-class) for computations that can fail with an error and recover from it, so error handling can be written once for every type that supports it. It has two operations: `Fail` produces a failure, and `Catch` handles one, optionally only errors that match a predicate. Haskell calls it `MonadError`.\n\nIn language-ext it is `Fallible<E, F>`, where `E` is the error type. `Either<L, _>` fails with an `L`, `Option` with nothing at all (`Unit`), and `Fin`, `IO` and `Eff` with language-ext's `Error`; `Fallible<F>` is short for `Fallible<Error, F>`.\n\n```csharp\n// Written once, for any monad that can fail with a string\nK<M, int> ParseAge<M>(string s) where M : Monad<M>, Fallible<string, M> =>\n    int.TryParse(s, out var n) && n >= 0\n        ? M.Pure(n)\n        : M.Fail<int>($\"'{s}' is not an age\");\n\n// Catch recovers; here every failure becomes a default of 0\nK<M, int> AgeOrZero<M>(string s) where M : Monad<M>, Fallible<string, M> =>\n    M.Catch(ParseAge<M>(s), _ => true, _ => M.Pure(0));\n\nParseAge<Either<string>>(\"42\");   // => Right(42)\nParseAge<Either<string>>(\"old\");  // => Left('old' is not an age)\nAgeOrZero<Either<string>>(\"old\"); // => Right(0)\n```\n\nThe same code with `Error` as the error type runs in `Fin`, and just as well in `IO` or `Eff`:\n\n```csharp\nK<M, int> ParseAgeE<M>(string s) where M : Monad<M>, Fallible<M> =>\n    int.TryParse(s, out var n) ? M.Pure(n) : M.Fail<int>(Error.New($\"'{s}' is not an age\"));\n\nParseAgeE<Fin>(\"42\");  // => Succ(42)\nParseAgeE<Fin>(\"old\"); // => Fail('old' is not an age)\n```\n\nCompared with exceptions, the possibility of failure is part of the type, and the code that fails doesn't decide how the failure is handled: whoever runs it picks the monad, and so picks what failing means. It is the error-handling counterpart of [Reader](#reader-monad), which abstracts over where an environment comes from.\n\n__Further reading__\n* [Fallible](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Fallible) in language-ext\n* [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/) by Scott Wlaschin\n* [Control.Monad.Except](https://hackage.haskell.org/package/mtl/docs/Control-Monad-Except.html) (`MonadError`) on Hackage",
+      "body": "A [type class](#type-class) for computations that can fail with an error and recover from it, so error handling can be written once for every type that supports it. It has two operations: `Fail` produces a failure, and `Catch` handles one, optionally only errors that match a predicate. Haskell calls it `MonadError`.\n\nIn language-ext it is `Fallible<E, F>`, where `E` is the error type. `Either<L, _>` fails with an `L`, `Option` with nothing at all (`Unit`), and `Fin`, `IO` and `Eff` with language-ext's `Error`; `Fallible<F>` is short for `Fallible<Error, F>`.\n\n```csharp\n// Written once, for any monad that can fail with a string\nK<M, int> ParseAge<M>(string s) where M : Monad<M>, Fallible<string, M> =>\n    int.TryParse(s, out var n) && n >= 0\n        ? M.Pure(n)\n        : M.Fail<int>($\"'{s}' is not an age\");\n\n// Catch recovers; here every failure becomes a default of 0\nK<M, int> AgeOrZero<M>(string s) where M : Monad<M>, Fallible<string, M> =>\n    M.Catch(ParseAge<M>(s), _ => true, _ => M.Pure(0));\n\nParseAge<Either<string>>(\"42\");   // => Right(42)\nParseAge<Either<string>>(\"old\");  // => Left('old' is not an age)\nAgeOrZero<Either<string>>(\"old\"); // => Right(0)\n```\n\nThe same code with `Error` as the error type runs in `Fin`, and just as well in `IO` or `Eff`:\n\n```csharp\nK<M, int> ParseAgeE<M>(string s) where M : Monad<M>, Fallible<M> =>\n    int.TryParse(s, out var n) ? M.Pure(n) : M.Fail<int>(Error.New($\"'{s}' is not an age\"));\n\nParseAgeE<Fin>(\"42\");  // => Succ(42)\nParseAgeE<Fin>(\"old\"); // => Fail('old' is not an age)\n```\n\nCompared with exceptions, the possibility of failure is part of the type, and the code that fails doesn't decide how the failure is handled: whoever runs it picks the monad, and so picks what failing means. It is the error-handling counterpart of [Reader](#reader-monad), which abstracts over where an environment comes from.\n\n__Further reading__\n* [Fallible](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Fallible) in language-ext\n* [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/) by Scott Wlaschin\n* [Control.Monad.Except](https://hackage.haskell.org/package/mtl/docs/Control-Monad-Except.html) (`MonadError`) on Hackage\n* [Category Theory via C# (8) Advanced LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1607,6 +1692,10 @@
         {
           "title": "Control.Monad.Except",
           "url": "https://hackage.haskell.org/package/mtl/docs/Control-Monad-Except.html"
+        },
+        {
+          "title": "Category Theory via C# (8) Advanced LINQ to Monads",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/"
         }
       ],
       "crossRefs": [
@@ -1632,7 +1721,7 @@
         "ap"
       ],
       "summary": "An applicative functor is an object with an ap function. ap applies a function in the object to a value in another object of the same type.",
-      "body": "An applicative functor is an object with an `ap` function. `ap` applies a function in the object to a value in another object of the same type.\n\nIn language-ext this is the `Applicative<F>` trait, which provides `Pure` and `Apply`:\n\n```csharp\n// A sequence containing a function, applied to a sequence of values\nSeq<Func<int, int>>(a => a + 1).Apply(Seq(1)); // => [2]\n```\n\nThis is useful if you have two objects and you want to apply a binary function to their contents.\n\n```csharp\n// Sequences that you want to combine\nvar arg1 = Seq(1, 3);\nvar arg2 = Seq(4, 5);\n\n// combining function - must be curried for this to work\nFunc<int, Func<int, int>> add = x => y => x + y;\n\n// [y => 1 + y, y => 3 + y]\nvar partiallyAppliedAdds = Seq(add).Apply(arg1);\n```\n\nThis gives you a sequence of functions that you can call `Apply` on to get the result:\n\n```csharp\npartiallyAppliedAdds.Apply(arg2); // => [5, 6, 7, 8]\n```\n\nlanguage-ext curries for you, so a tuple of applicatives can be applied to an ordinary multi-argument function directly:\n\n```csharp\n(arg1, arg2).Apply((x, y) => x + y);      // => [5, 6, 7, 8]\n(Some(1), Some(2)).Apply((x, y) => x + y); // => Some(3)\n```",
+      "body": "An applicative functor is an object with an `ap` function. `ap` applies a function in the object to a value in another object of the same type.\n\nIn language-ext this is the `Applicative<F>` trait, which provides `Pure` and `Apply`:\n\n```csharp\n// A sequence containing a function, applied to a sequence of values\nSeq<Func<int, int>>(a => a + 1).Apply(Seq(1)); // => [2]\n```\n\nThis is useful if you have two objects and you want to apply a binary function to their contents.\n\n```csharp\n// Sequences that you want to combine\nvar arg1 = Seq(1, 3);\nvar arg2 = Seq(4, 5);\n\n// combining function - must be curried for this to work\nFunc<int, Func<int, int>> add = x => y => x + y;\n\n// [y => 1 + y, y => 3 + y]\nvar partiallyAppliedAdds = Seq(add).Apply(arg1);\n```\n\nThis gives you a sequence of functions that you can call `Apply` on to get the result:\n\n```csharp\npartiallyAppliedAdds.Apply(arg2); // => [5, 6, 7, 8]\n```\n\nlanguage-ext curries for you, so a tuple of applicatives can be applied to an ordinary multi-argument function directly:\n\n```csharp\n(arg1, arg2).Apply((x, y) => x + y);      // => [5, 6, 7, 8]\n(Some(1), Some(2)).Apply((x, y) => x + y); // => Some(3)\n```\n\n__Further reading__\n* [Category Theory via C# (6) Monoidal Functor and Applicative Functor](https://codingonwheels.com/posts/category-theory-via-csharp-6-monoidal-functor-and-applicative-functor/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1651,7 +1740,12 @@
           "code": "(arg1, arg2).Apply((x, y) => x + y);      // => [5, 6, 7, 8]\n(Some(1), Some(2)).Apply((x, y) => x + y); // => Some(3)"
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "Category Theory via C# (6) Monoidal Functor and Applicative Functor",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-6-monoidal-functor-and-applicative-functor/"
+        }
+      ],
       "crossRefs": [],
       "relatedIds": [
         "functor",
@@ -1673,7 +1767,7 @@
         "pair map"
       ],
       "summary": "A structure with two independent type parameters that can map over both of them simultaneously. A Bifunctor provides bimap, which takes two functions and maps the first over the first type parameter and the second over the second type parameter.",
-      "body": "A structure with two independent type parameters that can map over both of them simultaneously. A Bifunctor provides `bimap`, which takes two functions and maps the first over the first type parameter and the second over the second type parameter.\n\nIn language-ext this is the `Bifunctor<F>` trait, which provides `BiMap`, `MapFirst` and `MapSecond`. `Either<L, R>` is a bifunctor: `BiMap` maps whichever side is present.\n\n```csharp\nEither<string, int> found   = Right(10);\nEither<string, int> missing = Left(\"no score for alice\");\n\nfound.BiMap(Left: e => e.ToUpper(), Right: n => n * 2);\n// => Right(20)\nmissing.BiMap(Left: e => e.ToUpper(), Right: n => n * 2);\n// => Left(NO SCORE FOR ALICE)\n```\n\n`MapFirst` and `MapSecond` map just one side:\n\n```csharp\nmissing.MapFirst(e => e.Length);  // => Left(18)\nfound.MapSecond(n => n + 1);      // => Right(11)\n```\n\n__Further reading__\n* [Bifunctors](https://blog.ploeh.dk/2018/12/24/bifunctors/) by Mark Seemann\n* [Bifunctor](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Bifunctor) in language-ext\n* [Data.Bifunctor](https://hackage.haskell.org/package/base/docs/Data-Bifunctor.html) on Hackage",
+      "body": "A structure with two independent type parameters that can map over both of them simultaneously. A Bifunctor provides `bimap`, which takes two functions and maps the first over the first type parameter and the second over the second type parameter.\n\nIn language-ext this is the `Bifunctor<F>` trait, which provides `BiMap`, `MapFirst` and `MapSecond`. `Either<L, R>` is a bifunctor: `BiMap` maps whichever side is present.\n\n```csharp\nEither<string, int> found   = Right(10);\nEither<string, int> missing = Left(\"no score for alice\");\n\nfound.BiMap(Left: e => e.ToUpper(), Right: n => n * 2);\n// => Right(20)\nmissing.BiMap(Left: e => e.ToUpper(), Right: n => n * 2);\n// => Left(NO SCORE FOR ALICE)\n```\n\n`MapFirst` and `MapSecond` map just one side:\n\n```csharp\nmissing.MapFirst(e => e.Length);  // => Left(18)\nfound.MapSecond(n => n + 1);      // => Right(11)\n```\n\n__Further reading__\n* [Bifunctors](https://blog.ploeh.dk/2018/12/24/bifunctors/) by Mark Seemann\n* [Bifunctor](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Bifunctor) in language-ext\n* [Data.Bifunctor](https://hackage.haskell.org/package/base/docs/Data-Bifunctor.html) on Hackage\n* [Category Theory via C# (5) Bifunctor](https://codingonwheels.com/posts/category-theory-via-csharp-5-bifunctor/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1696,6 +1790,10 @@
         {
           "title": "Data.Bifunctor",
           "url": "https://hackage.haskell.org/package/base/docs/Data-Bifunctor.html"
+        },
+        {
+          "title": "Category Theory via C# (5) Bifunctor",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-5-bifunctor/"
         }
       ],
       "crossRefs": [],
@@ -1717,7 +1815,7 @@
         "contramap"
       ],
       "summary": "A structure similar to a functor, but whose transformation flows in the opposite direction. While a covariant functor transforms a producer F<A> into F<B> via (a -> b), a contravariant functor transforms a consumer F<A> into F<B> via (b -> a) using cmap (or contramap).",
-      "body": "A structure similar to a [functor](#functor), but whose transformation flows in the opposite direction. While a covariant functor transforms a producer `F<A>` into `F<B>` via `(a -> b)`, a contravariant functor transforms a consumer `F<A>` into `F<B>` via `(b -> a)` using `cmap` (or `contramap`).\n\nContravariant functors are commonly used to model predicates, validators, encoders, and sorting comparators by preprocessing inputs before feeding them to the consumer.\n\nIn language-ext the trait is `Cofunctor<F>`, and its operation is `Comap`:\n\n```csharp\n// A Validator wraps a test function A -> bool\nrecord Validator<A>(Func<A, bool> Test) : K<Validator, A>;\n\nclass Validator : Cofunctor<Validator>\n{\n    // Comap :: (A -> B) -> Validator<B> -> Validator<A>\n    public static K<Validator, A> Comap<A, B>(\n        Func<A, B> f, K<Validator, B> fb) =>\n        new Validator<A>(a => ((Validator<B>)fb).Test(f(a)));\n}\n\nrecord User(string Bio);\n```\n\n```csharp\n// An existing validator checking if a string is long\nvar isLongString = new Validator<string>(s => s.Length > 5);\n\n// Comap pre-processes a User into a string (its Bio)\nvar hasLongBio = (Validator<User>)isLongString.Comap((User u) => u.Bio);\n\nhasLongBio.Test(new User(\"Hello World\")); // => true\nhasLongBio.Test(new User(\"Hi\"));          // => false\n```\n\n__Further reading__\n* [Contravariant functors](https://blog.ploeh.dk/2021/09/02/contravariant-functors/) by Mark Seemann\n* [Cofunctor](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Cofunctor), language-ext's contravariant functor trait\n* [Data.Functor.Contravariant](https://hackage.haskell.org/package/base/docs/Data-Functor-Contravariant.html) on Hackage",
+      "body": "A structure similar to a [functor](#functor), but whose transformation flows in the opposite direction. While a covariant functor transforms a producer `F<A>` into `F<B>` via `(a -> b)`, a contravariant functor transforms a consumer `F<A>` into `F<B>` via `(b -> a)` using `cmap` (or `contramap`).\n\nContravariant functors are commonly used to model predicates, validators, encoders, and sorting comparators by preprocessing inputs before feeding them to the consumer.\n\nIn language-ext the trait is `Cofunctor<F>`, and its operation is `Comap`:\n\n```csharp\n// A Validator wraps a test function A -> bool\nrecord Validator<A>(Func<A, bool> Test) : K<Validator, A>;\n\nclass Validator : Cofunctor<Validator>\n{\n    // Comap :: (A -> B) -> Validator<B> -> Validator<A>\n    public static K<Validator, A> Comap<A, B>(\n        Func<A, B> f, K<Validator, B> fb) =>\n        new Validator<A>(a => ((Validator<B>)fb).Test(f(a)));\n}\n\nrecord User(string Bio);\n```\n\n```csharp\n// An existing validator checking if a string is long\nvar isLongString = new Validator<string>(s => s.Length > 5);\n\n// Comap pre-processes a User into a string (its Bio)\nvar hasLongBio = (Validator<User>)isLongString.Comap((User u) => u.Bio);\n\nhasLongBio.Test(new User(\"Hello World\")); // => true\nhasLongBio.Test(new User(\"Hi\"));          // => false\n```\n\n__Further reading__\n* [Contravariant functors](https://blog.ploeh.dk/2021/09/02/contravariant-functors/) by Mark Seemann\n* [Cofunctor](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Cofunctor), language-ext's contravariant functor trait\n* [Data.Functor.Contravariant](https://hackage.haskell.org/package/base/docs/Data-Functor-Contravariant.html) on Hackage\n* [C# Functional Programming In-Depth (11) Covariance and Contravariance](https://codingonwheels.com/posts/csharp-functional-programming-covariance-and-contravariance/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -1740,6 +1838,10 @@
         {
           "title": "Data.Functor.Contravariant",
           "url": "https://hackage.haskell.org/package/base/docs/Data-Functor-Contravariant.html"
+        },
+        {
+          "title": "C# Functional Programming In-Depth (11) Covariance and Contravariance",
+          "url": "https://codingonwheels.com/posts/csharp-functional-programming-covariance-and-contravariance/"
         }
       ],
       "crossRefs": [
@@ -1833,9 +1935,14 @@
       "category": "category-morphisms",
       "aliases": [],
       "summary": "A relationship between objects within a category. In the context of functional programming all functions are morphisms.",
-      "body": "A relationship between objects within a [category](#category). In the context of functional programming all functions are morphisms.",
+      "body": "A relationship between objects within a [category](#category). In the context of functional programming all functions are morphisms.\n\n__Further reading__\n* [Category Theory via C# (1) Fundamentals](https://codingonwheels.com/posts/category-theory-via-csharp-1-fundamentals/) on CodingOnWheels",
       "codeBlocks": [],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "Category Theory via C# (1) Fundamentals",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-1-fundamentals/"
+        }
+      ],
       "crossRefs": [
         "category"
       ],
@@ -2065,7 +2172,7 @@
         "functor transformation"
       ],
       "summary": "A structure-preserving mapping between two functors, transforming F<A> into G<A> without altering or inspecting the underlying value A.",
-      "body": "A structure-preserving mapping between two [functors](#functor), transforming `F<A>` into `G<A>` without altering or inspecting the underlying value `A`.\n\nIn functional programming, a natural transformation is a function that changes the container type while preserving the contents and obeying the naturality law: `nat(fa.Map(f)) == nat(fa).Map(f)`.\n\n```csharp\n// nat :: Seq<A> -> Option<A>  (taking the head element)\nOption<A> SeqToOption<A>(Seq<A> xs) => xs.Head;\n\nFunc<int, int> twice = x => x * 2;\n\n// Naturality law: transforming after map equals mapping after transform\nSeqToOption(Seq(1, 2, 3).Map(twice)); // => Some(2)\nSeqToOption(Seq(1, 2, 3)).Map(twice); // => Some(2)\n```\n\nlanguage-ext models these with the `Natural<F, G>` trait. For example, `Option` implements `Natural<Option, Seq>`, turning `None` into `[]` and `Some(x)` into `[x]`:\n\n```csharp\nK<Seq, A> OptionToSeq<A>(K<Option, A> fa) =>\n    Natural.transform<Option, Seq, A>(fa);\n\nOptionToSeq(Some(1).Map(twice)); // => [2]\nOptionToSeq(Some(1)).Map(twice); // => [2]\n```\n\n__Further reading__\n* [Natural transformation](https://en.wikipedia.org/wiki/Natural_transformation) on Wikipedia",
+      "body": "A structure-preserving mapping between two [functors](#functor), transforming `F<A>` into `G<A>` without altering or inspecting the underlying value `A`.\n\nIn functional programming, a natural transformation is a function that changes the container type while preserving the contents and obeying the naturality law: `nat(fa.Map(f)) == nat(fa).Map(f)`.\n\n```csharp\n// nat :: Seq<A> -> Option<A>  (taking the head element)\nOption<A> SeqToOption<A>(Seq<A> xs) => xs.Head;\n\nFunc<int, int> twice = x => x * 2;\n\n// Naturality law: transforming after map equals mapping after transform\nSeqToOption(Seq(1, 2, 3).Map(twice)); // => Some(2)\nSeqToOption(Seq(1, 2, 3)).Map(twice); // => Some(2)\n```\n\nlanguage-ext models these with the `Natural<F, G>` trait. For example, `Option` implements `Natural<Option, Seq>`, turning `None` into `[]` and `Some(x)` into `[x]`:\n\n```csharp\nK<Seq, A> OptionToSeq<A>(K<Option, A> fa) =>\n    Natural.transform<Option, Seq, A>(fa);\n\nOptionToSeq(Some(1).Map(twice)); // => [2]\nOptionToSeq(Some(1)).Map(twice); // => [2]\n```\n\n__Further reading__\n* [Natural transformation](https://en.wikipedia.org/wiki/Natural_transformation) on Wikipedia\n* [Category Theory via C# (4) Natural Transformation](https://codingonwheels.com/posts/category-theory-via-csharp-4-natural-transformation/) on CodingOnWheels",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -2080,6 +2187,10 @@
         {
           "title": "Natural transformation",
           "url": "https://en.wikipedia.org/wiki/Natural_transformation"
+        },
+        {
+          "title": "Category Theory via C# (4) Natural Transformation",
+          "url": "https://codingonwheels.com/posts/category-theory-via-csharp-4-natural-transformation/"
         }
       ],
       "crossRefs": [
@@ -2393,6 +2504,7 @@
       "crossRefs": [],
       "relatedIds": [
         "parametricity",
+        "dependent-type",
         "contracts"
       ]
     },
@@ -2541,11 +2653,65 @@
         "foldable"
       ],
       "relatedIds": [
+        "dependent-type",
         "type-class",
         "functor",
         "monad",
         "foldable",
         "expression-problem"
+      ]
+    },
+    {
+      "id": "dependent-type",
+      "title": "Dependent Type",
+      "depth": 2,
+      "category": "types-data",
+      "aliases": [
+        "dependent types",
+        "dependently typed",
+        "idris",
+        "agda",
+        "lean",
+        "vect",
+        "pi type",
+        "non-empty",
+        "parse don't validate"
+      ],
+      "summary": "A type that depends on a value. In C#, types can depend on other types (Seq<int>), but values can't appear in a type. With dependent types they can, so a type can say \"a list of exactly 3 ints\" or \"an index less than the length of this array\", and the compiler checks it.",
+      "body": "A type that depends on a value. In C#, types can depend on other types (`Seq<int>`), but values can't appear in a type. With dependent types they can, so a type can say \"a list of exactly 3 ints\" or \"an index less than the length of this array\", and the compiler checks it.\n\nLanguages such as Idris, Agda and Lean have them. Here is a vector in Idris whose length is part of its type:\n\n```\ndata Vect : Nat -> Type -> Type where\n  Nil  : Vect Z a\n  (::) : a -> Vect k a -> Vect (S k) a\n\n-- Only accepts vectors with at least one element, so it can't fail\nhead : Vect (S n) a -> a\n\n-- The result's length is the sum of the inputs' lengths\nappend : Vect n a -> Vect m a -> Vect (n + m) a\n```\n\n`head` is a [total function](#total-function) without returning an [Option](#option): calling it on an empty vector is a type error, not a run-time one. A wrong `append` that dropped an element wouldn't compile, because its result wouldn't have length `n + m`.\n\nC# can't express this, but the same idea guides everyday design: when a rule matters, make a type that can only hold values that follow it. The type can't carry a length, but it can guarantee \"at least one\":\n\n```csharp\n// A sequence that can't be empty, so Head needs no Option\nrecord NonEmpty<A>(A Head, Seq<A> Tail)\n{\n    public int Count => 1 + Tail.Count;\n}\n\n// The check happens once, where the value is made\nOption<NonEmpty<A>> FromSeq<A>(Seq<A> xs) =>\n    xs.Head.Map(h => new NonEmpty<A>(h, xs.Tail));\n\nvar first = FromSeq(Seq(3, 1, 2)).Map(ne => ne.Head); // => Some(3)\nvar none  = FromSeq(Seq<int>()).Map(ne => ne.Head);   // => None\n```\n\nThe difference is where the proof lives. Here the check runs once when the value is built, and the type remembers the result. With dependent types, the compiler proves it, even for values that are only known at run time.\n\n__Further reading__\n* [Dependent type](https://en.wikipedia.org/wiki/Dependent_type) on Wikipedia\n* [Types and Functions](https://idris2.readthedocs.io/en/latest/tutorial/typesfuns.html) in the Idris 2 tutorial\n* [Parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/) by Alexis King",
+      "codeBlocks": [
+        {
+          "lang": "csharp",
+          "code": "data Vect : Nat -> Type -> Type where\n  Nil  : Vect Z a\n  (::) : a -> Vect k a -> Vect (S k) a\n\n-- Only accepts vectors with at least one element, so it can't fail\nhead : Vect (S n) a -> a\n\n-- The result's length is the sum of the inputs' lengths\nappend : Vect n a -> Vect m a -> Vect (n + m) a"
+        },
+        {
+          "lang": "csharp",
+          "code": "// A sequence that can't be empty, so Head needs no Option\nrecord NonEmpty<A>(A Head, Seq<A> Tail)\n{\n    public int Count => 1 + Tail.Count;\n}\n\n// The check happens once, where the value is made\nOption<NonEmpty<A>> FromSeq<A>(Seq<A> xs) =>\n    xs.Head.Map(h => new NonEmpty<A>(h, xs.Tail));\n\nvar first = FromSeq(Seq(3, 1, 2)).Map(ne => ne.Head); // => Some(3)\nvar none  = FromSeq(Seq<int>()).Map(ne => ne.Head);   // => None"
+        }
+      ],
+      "furtherReading": [
+        {
+          "title": "Dependent type",
+          "url": "https://en.wikipedia.org/wiki/Dependent_type"
+        },
+        {
+          "title": "Types and Functions",
+          "url": "https://idris2.readthedocs.io/en/latest/tutorial/typesfuns.html"
+        },
+        {
+          "title": "Parse, don't validate",
+          "url": "https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/"
+        }
+      ],
+      "crossRefs": [
+        "total-function",
+        "option"
+      ],
+      "relatedIds": [
+        "total-function",
+        "higher-kinded-type",
+        "option",
+        "type-signatures"
       ]
     },
     {
@@ -2626,20 +2792,47 @@
       "aliases": [
         "union type",
         "discriminated union",
-        "tagged union"
+        "tagged union",
+        "union",
+        "oneof",
+        "c# 15 union",
+        "closed hierarchy"
       ],
       "summary": "A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types.",
-      "body": "A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types.\n\nC# has no built-in closed union types, but an abstract record with one derived record per case models them well:\n\n```csharp\n// Known has 2 possible values (true, false) and HalfTrue has 1,\n// so WeakLogic has 2 + 1 = 3 possible values.\nstring Describe(WeakLogic w) => w switch\n{\n    Known(true)  => \"true\",\n    Known(false) => \"false\",\n    HalfTrue     => \"half-true\",\n    _            => throw new ArgumentOutOfRangeException(nameof(w))\n};\n\nDescribe(new HalfTrue()); // => \"half-true\"\n\nabstract record WeakLogic;\nrecord Known(bool Value) : WeakLogic;\nrecord HalfTrue : WeakLogic;\n```\n\nSum types are sometimes called union types, discriminated unions, or tagged unions.\n\nlanguage-ext's [Option](#option) and [Either](#either) are ready-made sum types.",
+      "body": "A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types.\n\nBefore C# 15, the usual model is an abstract record with one derived record per case:\n\n```csharp\n// Known has 2 possible values (true, false) and HalfTrue has 1,\n// so WeakLogic has 2 + 1 = 3 possible values.\nstring Describe(WeakLogic w) => w switch\n{\n    Known(true)  => \"true\",\n    Known(false) => \"false\",\n    HalfTrue     => \"half-true\",\n    _            => throw new ArgumentOutOfRangeException(nameof(w))\n};\n\nDescribe(new HalfTrue()); // => \"half-true\"\n\nabstract record WeakLogic;\nrecord Known(bool Value) : WeakLogic;\nrecord HalfTrue : WeakLogic;\n```\n\nThe `_` arm is there because the compiler can't know the hierarchy is closed: anyone could add another record that derives from `WeakLogic`.\n\nSum types are sometimes called union types, discriminated unions, or tagged unions.\n\n**Union types in C# 15.** C# 15 (.NET 11) adds the `union` keyword. A union lists the types a value can be, and the compiler knows that list is complete, so a `switch` needs no `_` arm, and leaving out a case is a warning:\n\n```csharp\n// The cases are existing types; the union just says \"one of these\"\nstring Rate(Logic l) => l switch\n{\n    Known(true)  => \"true\",\n    Known(false) => \"false\",\n    HalfTrue     => \"half-true\",\n};\n\nRate(new HalfTrue()); // => \"half-true\"\n\n// Any type can be a case, including ones you don't own\nIntOrText id = 42;\nvar shown = id switch { int n => $\"#{n}\", string s => s }; // => \"#42\"\n\nunion Logic(Known, HalfTrue);\nunion IntOrText(int, string);\n```\n\nEach case converts to the union implicitly, and patterns look inside it, so `HalfTrue` matches a `Logic` holding a `HalfTrue`. Two things follow from the cases being types rather than names. A union can't tell apart two cases that hold the same type, so each case needs its own type, as with `Known` and `HalfTrue`. And the generated union is a struct that keeps its value in an `object?` property, so a value type such as `int` is boxed, and `default(IntOrText)` holds `null`.\n\n**OneOf.** Before C# 15, the [OneOf](https://github.com/mcintyre321/OneOf) library was the usual way to get union types in C#. `OneOf<T0, T1, ...>` is a struct with one case per type parameter, and `Match` takes one function per case:\n\n```csharp\nusing OneOf;\nusing OneOf.Types;\n\nOneOf<int, string> userId = \"ada\";\nvar label = userId.Match(n => $\"#{n}\", s => $\"@{s}\"); // => \"@ada\"\n\n// A named union, generated from OneOfBase\nPayment paid = new Cash(9.99m);\nvar how = paid.Match(card => $\"card {card.Last4}\", cash => $\"cash {cash.Amount}\"); // => \"cash 9.99\"\n\n// Ready-made case types for common results\nOneOf<int, NotFound> Find(string name) => name == \"ada\" ? 1 : new NotFound();\nvar found = Find(\"bob\").Match(n => $\"#{n}\", _ => \"not found\"); // => \"not found\"\n\n// TryPick takes one case out and narrows the rest\nOneOf<int, string, bool> answer = true;\nvar narrowed = answer.TryPickT0(out var number, out var others)\n    ? $\"number {number}\"\n    : others.Match(s => \"text\", b => $\"bool {b}\"); // => \"bool True\"\n\nrecord Card(string Last4);\nrecord Cash(decimal Amount);\n[GenerateOneOf]\npartial class Payment : OneOfBase<Card, Cash>;\n```\n\nNow that unions are built in, these are the things OneOf still offers:\n\n* It runs on any .NET version, back to .NET Framework 3.5, so it suits libraries that can't require .NET 11.\n* `Match` and `Switch` take one function per case, so a missing case is a compile error, where a `switch` on a union only warns.\n* Cases are distinguished by position, not type. `OneOf<string, string>` is valid (built with `FromT0` and `FromT1`), which a union can't express.\n* `TryPickT0` and the other `TryPick` methods split one case off and narrow the rest, as above, and `MapT0`, `MapT1` and so on change one case and leave the others alone.\n* Each case is stored in its own field, so value types aren't boxed.\n* `OneOf.Types` has ready-made case types (`None`, `NotFound`, `Success`, `Error<T>`, `Unknown` and others).\n\nThe built-in union has the language on its side: full pattern matching with nested and positional patterns (`Known(true)`), no lambdas, any number of cases (`OneOf` goes up to 9, with more in the OneOf.Extended package), and no package to depend on.\n\nNeither gives you composition. language-ext's [Option](#option) and [Either](#either) are ready-made sum types that are also [functors](#functor) and [monads](#monad), so a chain of steps that can each fail is written with `Map`, `Bind` or LINQ, rather than a `switch` after every step.\n\n__Further reading__\n* [Union types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/union) in the C# language reference\n* [Explore union types in C# 15](https://devblogs.microsoft.com/dotnet/csharp-15-union-types/) on the .NET Blog\n* [OneOf](https://github.com/mcintyre321/OneOf) on GitHub",
       "codeBlocks": [
         {
           "lang": "csharp",
           "code": "// Known has 2 possible values (true, false) and HalfTrue has 1,\n// so WeakLogic has 2 + 1 = 3 possible values.\nstring Describe(WeakLogic w) => w switch\n{\n    Known(true)  => \"true\",\n    Known(false) => \"false\",\n    HalfTrue     => \"half-true\",\n    _            => throw new ArgumentOutOfRangeException(nameof(w))\n};\n\nDescribe(new HalfTrue()); // => \"half-true\"\n\nabstract record WeakLogic;\nrecord Known(bool Value) : WeakLogic;\nrecord HalfTrue : WeakLogic;"
+        },
+        {
+          "lang": "csharp",
+          "code": "// The cases are existing types; the union just says \"one of these\"\nstring Rate(Logic l) => l switch\n{\n    Known(true)  => \"true\",\n    Known(false) => \"false\",\n    HalfTrue     => \"half-true\",\n};\n\nRate(new HalfTrue()); // => \"half-true\"\n\n// Any type can be a case, including ones you don't own\nIntOrText id = 42;\nvar shown = id switch { int n => $\"#{n}\", string s => s }; // => \"#42\"\n\nunion Logic(Known, HalfTrue);\nunion IntOrText(int, string);"
+        },
+        {
+          "lang": "csharp",
+          "code": "using OneOf;\nusing OneOf.Types;\n\nOneOf<int, string> userId = \"ada\";\nvar label = userId.Match(n => $\"#{n}\", s => $\"@{s}\"); // => \"@ada\"\n\n// A named union, generated from OneOfBase\nPayment paid = new Cash(9.99m);\nvar how = paid.Match(card => $\"card {card.Last4}\", cash => $\"cash {cash.Amount}\"); // => \"cash 9.99\"\n\n// Ready-made case types for common results\nOneOf<int, NotFound> Find(string name) => name == \"ada\" ? 1 : new NotFound();\nvar found = Find(\"bob\").Match(n => $\"#{n}\", _ => \"not found\"); // => \"not found\"\n\n// TryPick takes one case out and narrows the rest\nOneOf<int, string, bool> answer = true;\nvar narrowed = answer.TryPickT0(out var number, out var others)\n    ? $\"number {number}\"\n    : others.Match(s => \"text\", b => $\"bool {b}\"); // => \"bool True\"\n\nrecord Card(string Last4);\nrecord Cash(decimal Amount);\n[GenerateOneOf]\npartial class Payment : OneOfBase<Card, Cash>;"
         }
       ],
-      "furtherReading": [],
+      "furtherReading": [
+        {
+          "title": "Union types",
+          "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/union"
+        },
+        {
+          "title": "Explore union types in C# 15",
+          "url": "https://devblogs.microsoft.com/dotnet/csharp-15-union-types/"
+        },
+        {
+          "title": "OneOf",
+          "url": "https://github.com/mcintyre321/OneOf"
+        }
+      ],
       "crossRefs": [
         "option",
-        "either"
+        "either",
+        "functor",
+        "monad"
       ],
       "relatedIds": [
         "algebraic-data-type",
@@ -2647,7 +2840,9 @@
         "expression-problem",
         "option",
         "either",
-        "prism"
+        "prism",
+        "functor",
+        "monad"
       ]
     },
     {
@@ -2803,6 +2998,7 @@
       "relatedIds": [
         "monad",
         "dealing-with-partial-functions",
+        "dependent-type",
         "sum-type",
         "either",
         "prism",
@@ -2951,7 +3147,8 @@
         "partial-function"
       ],
       "relatedIds": [
-        "partial-function"
+        "partial-function",
+        "dependent-type"
       ]
     },
     {
@@ -3310,7 +3507,7 @@
         "id": "functor",
         "name": "Functor",
         "category": "algebraic-structures",
-        "val": 19,
+        "val": 20,
         "summary": "An object that implements a map function that takes a function which is run on the contents of that object. A functor must adhere to two rules:"
       },
       {
@@ -3387,7 +3584,7 @@
         "id": "monad",
         "name": "Monad",
         "category": "algebraic-structures",
-        "val": 22,
+        "val": 23,
         "summary": "A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object."
       },
       {
@@ -3618,7 +3815,7 @@
         "id": "type-signatures",
         "name": "Type Signatures",
         "category": "types-data",
-        "val": 6,
+        "val": 7,
         "summary": "In C# the types of arguments and return values are part of every function's signature. Even so, functional programmers often describe functions with Haskell-style type signatures in comments, because they are short and easy to read."
       },
       {
@@ -3639,8 +3836,15 @@
         "id": "higher-kinded-type",
         "name": "Higher-Kinded Type",
         "category": "types-data",
-        "val": 9,
+        "val": 10,
         "summary": "A type that is parameterised by a type constructor rather than by a plain type. int is a complete type, but Option is not: it needs an argument to become Option<int>. Kinds classify types the way types classify values:"
+      },
+      {
+        "id": "dependent-type",
+        "name": "Dependent Type",
+        "category": "types-data",
+        "val": 8,
+        "summary": "A type that depends on a value. In C#, types can depend on other types (Seq<int>), but values can't appear in a type. With dependent types they can, so a type can say \"a list of exactly 3 ints\" or \"an index less than the length of this array\", and the compiler checks it."
       },
       {
         "id": "expression-problem",
@@ -3660,7 +3864,7 @@
         "id": "sum-type",
         "name": "Sum type",
         "category": "types-data",
-        "val": 8,
+        "val": 10,
         "summary": "A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types."
       },
       {
@@ -3688,7 +3892,7 @@
         "id": "option",
         "name": "Option",
         "category": "types-data",
-        "val": 12,
+        "val": 13,
         "summary": "Option is a sum type with two cases often called Some and None."
       },
       {
@@ -3723,7 +3927,7 @@
         "id": "total-function",
         "name": "Total Function",
         "category": "core-functions",
-        "val": 5,
+        "val": 6,
         "summary": "A function which returns a valid result for all inputs defined in its type. This is as opposed to Partial Functions which may throw an error, return an unexpected result, or fail to terminate."
       },
       {
@@ -4047,6 +4251,26 @@
       },
       {
         "source": "parametricity",
+        "target": "type-signatures",
+        "type": "core"
+      },
+      {
+        "source": "dependent-type",
+        "target": "total-function",
+        "type": "core"
+      },
+      {
+        "source": "dependent-type",
+        "target": "higher-kinded-type",
+        "type": "core"
+      },
+      {
+        "source": "dependent-type",
+        "target": "option",
+        "type": "core"
+      },
+      {
+        "source": "dependent-type",
         "target": "type-signatures",
         "type": "core"
       },
@@ -4553,6 +4777,16 @@
       {
         "source": "expression-problem",
         "target": "higher-kinded-type",
+        "type": "reference"
+      },
+      {
+        "source": "sum-type",
+        "target": "functor",
+        "type": "reference"
+      },
+      {
+        "source": "sum-type",
+        "target": "monad",
         "type": "reference"
       },
       {

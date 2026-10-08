@@ -7,7 +7,7 @@ There is a pre-commit hook that runs:  `npm run test && npm run roadmarks` for l
 Now that the samples are C#, `npm run test` (eslint) no longer checks any code.
 
 Every C# sample in the readme must build and run. Check them with `npm run test:csharp` (or `samples/csharp/run.sh [section filter]`),
-which needs the .NET 10 SDK.
+which needs the .NET 11 SDK (the Sum type samples use C# 15 union types). Set `DOTNET` to use a dotnet other than the one on your PATH.
 
 That said, we'd like to maintain some consistency across the document.
 

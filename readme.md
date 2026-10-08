@@ -108,6 +108,7 @@ __Table of Contents__
 * [Parametricity](#parametricity)
 * [Type Class](#type-class)
 * [Higher-Kinded Type](#higher-kinded-type)
+* [Dependent Type](#dependent-type)
 * [Expression Problem](#expression-problem)
 * [Algebraic data type](#algebraic-data-type)
   * [Sum type](#sum-type)
@@ -159,6 +160,9 @@ Func<object?, bool> Is<T>() => x => x is T;
 Filter(Is<int>(), new object?[] { 0, "1", 2, null }); // => [0, 2]
 ```
 
+__Further reading__
+* [C# Functional Programming In-Depth (8) Higher-order Function, Currying and First Class Function](https://codingonwheels.com/posts/csharp-functional-programming-higher-order-function-currying-and-first-class-function/) on CodingOnWheels
+
 ## Closure
 
 A closure is a scope which captures local variables of a function for access even after the execution has moved out of the block in which it is defined.
@@ -176,6 +180,7 @@ to get back the sum.
 __Further reading/Sources__
 * [Lambda Vs Closure](http://stackoverflow.com/questions/220658/what-is-the-difference-between-a-closure-and-a-lambda)
 * [Capture of outer variables and variable scope in lambda expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/lambda-expressions#capture-of-outer-variables-and-variable-scope-in-lambda-expressions) on Microsoft Learn
+* [C# Functional Programming In-Depth (3) Local Function and Closure](https://codingonwheels.com/posts/csharp-functional-programming-local-function-and-closure/) on CodingOnWheels
 
 ## Partial Application
 
@@ -225,6 +230,9 @@ var add2 = curriedSum(2); // (b) => 2 + b
 add2(10); // => 12
 ```
 
+__Further reading__
+* [C# Functional Programming In-Depth (8) Higher-order Function, Currying and First Class Function](https://codingonwheels.com/posts/csharp-functional-programming-higher-order-function-currying-and-first-class-function/) on CodingOnWheels
+
 ## Auto Currying
 
 Transforming a function that takes multiple arguments into one that if given less than its correct number of arguments returns a function that takes the rest. When the function gets the correct number of arguments it is then evaluated.
@@ -267,6 +275,9 @@ var floorThenToString = compose(floor, (double x) => x.ToString());
 floorThenToString(121.212121); // => "121"
 ```
 
+__Further reading__
+* [C# Functional Programming In-Depth (9) Function Composition and Chaining](https://codingonwheels.com/posts/csharp-functional-programming-function-composition-and-method-chaining/) on CodingOnWheels
+
 ## Continuation
 
 At any given point in a program, the part of the code that's yet to be executed is known as a continuation.
@@ -306,6 +317,9 @@ async Task ReadAndContinue(string path)
 }
 ```
 
+__Further reading__
+* [Category Theory via C# (22) Continuation Monad](https://codingonwheels.com/posts/category-theory-via-csharp-22-more-monad-continuation-monad-2017/) on CodingOnWheels
+
 ## IO
 
 A pure data structure that encapsulates a side effect. Instead of performing the effect immediately, `IO` wraps the action in a nullary function ([thunk](#thunk)), allowing effectful operations to be transformed, chained, and composed as pure [values](#value) without actually executing them until explicitly triggered.
@@ -328,6 +342,7 @@ __Further reading__
 * [The IO Container](https://blog.ploeh.dk/2020/06/08/the-io-container/) by Mark Seemann
 * [IO container in a parallel C# universe](https://blog.ploeh.dk/2020/06/15/io-container-in-a-parallel-c-universe/) by Mark Seemann
 * [IO](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Effects/IO) in language-ext
+* [Category Theory via C# (8) Advanced LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/) on CodingOnWheels
 
 ## Trampoline
 
@@ -455,6 +470,9 @@ var result = greeting; // => "Hi, Brianne"
 
 ... and this one modifies state outside of the function.
 
+__Further reading__
+* [C# Functional Programming In-Depth (13) Pure Function](https://codingonwheels.com/posts/csharp-functional-programming-pure-function/) on CodingOnWheels
+
 ## Side effects
 
 A function or expression is said to have a side effect if apart from returning a value, it interacts with (reads from or writes to) external mutable state.
@@ -571,6 +589,7 @@ record Max(int A)
 __Further reading__
 
 * [Category Theory for Programmers](https://bartoszmilewski.com/2014/10/28/category-theory-for-programmers-the-preface/)
+* [Category Theory via C# (1) Fundamentals](https://codingonwheels.com/posts/category-theory-via-csharp-1-fundamentals/) on CodingOnWheels
 
 ## Semigroupoid
 
@@ -724,6 +743,9 @@ Describe(Some(1));          // => Some(got 1)
 Describe(Seq(1, 2));        // => [got 1, got 2]
 ```
 
+__Further reading__
+* [Category Theory via C# (3) Functor and LINQ to Functors](https://codingonwheels.com/posts/category-theory-via-csharp-3-functor-and-linq-to-functors/) on CodingOnWheels
+
 ## Pointed Functor
 
 An object with an `of` function that puts _any_ single value into it.
@@ -876,6 +898,9 @@ add1(2); // => 3
 
 A branch of mathematics that uses functions to create a [universal model of computation](https://en.wikipedia.org/wiki/Lambda_calculus).
 
+__Further reading__
+* [Lambda Calculus via C# (1) Fundamentals](https://codingonwheels.com/posts/lambda-calculus-via-csharp-1-fundamentals/) on CodingOnWheels
+
 ## Functional Combinator
 
 A higher-order function, usually curried, which returns a new function changed in some way. Functional combinators are often used in [Point-Free Style](#point-free-style) to write especially terse programs.
@@ -902,6 +927,9 @@ flip(divide)(10)(30); // => 3
 ```
 
 See also [Function Combinators in C#](combinators.md), a C# take on Avaq's [List of Functional Combinators in JavaScript](https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45), which includes links to more references.
+
+__Further reading__
+* [Lambda Calculus via C# (6) Combinatory Logic](https://codingonwheels.com/posts/lambda-calculus-via-csharp-6-combinatory-logic/) on CodingOnWheels
 
 ## Lazy evaluation
 
@@ -933,6 +961,9 @@ IEnumerable<int> Naturals()
 
 toSeq(Naturals()).Map(n => n * n).Take(4); // => [0, 1, 4, 9]
 ```
+
+__Further reading__
+* [LINQ to Objects in Depth (4) Deferred Execution, Lazy Evaluation and Eager Evaluation](https://codingonwheels.com/posts/linq-to-objects-deferred-execution-lazy-evaluation-and-eager-evaluation/) on CodingOnWheels
 
 ## Monoid
 
@@ -999,6 +1030,9 @@ As a counterexample, subtraction does not form a monoid because there is no comm
 var commutes = 0 - 4 == 4 - 0; // => false
 ```
 
+__Further reading__
+* [Category Theory via C# (2) Monoid](https://codingonwheels.com/posts/category-theory-via-csharp-2-monoid/) on CodingOnWheels
+
 ## Monad
 
 A monad is an object with [`of`](#pointed-functor) and `chain` functions. `chain` is like [`map`](#functor) except it un-nests the resulting nested object.
@@ -1037,6 +1071,9 @@ AddM(Seq(1, 2), Seq(10, 20));  // => [11, 21, 12, 22]
 
 `of` is also known as `return` in other functional languages.
 `chain` is also known as `flatmap` and `bind` in other languages.
+
+__Further reading__
+* [Category Theory via C# (7) Monad and LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-7-monad-and-linq-to-monads/) on CodingOnWheels
 
 ## Monad Comprehension
 
@@ -1078,6 +1115,7 @@ __Further reading__
 * [Query expression basics](https://learn.microsoft.com/en-us/dotnet/csharp/linq/get-started/query-expression-basics) on Microsoft Learn
 * [Monads](https://blog.ploeh.dk/2022/03/28/monads/) by Mark Seemann, which covers query syntax for each monad
 * [do notation](https://en.wikibooks.org/wiki/Haskell/do_notation) in the Haskell Wikibook
+* [Category Theory via C# (7) Monad and LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-7-monad-and-linq-to-monads/) on CodingOnWheels
 
 ## Comonad
 
@@ -1285,6 +1323,7 @@ __Further reading__
 * [The Reader monad](https://blog.ploeh.dk/2022/11/14/the-reader-monad/) by Mark Seemann
 * [Reader](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Reader) in language-ext
 * [Reader? Ugh, not this joke again](https://learnyouahaskell.github.io/for-a-few-monads-more.html#reader) in Learn You a Haskell
+* [Category Theory via C# (8) Advanced LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/) on CodingOnWheels
 
 ## Writer Monad
 
@@ -1310,6 +1349,7 @@ var log   = result.Output; // => [doubled 5, added one to 10]
 __Further reading__
 * [Writer](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/Writer) in language-ext
 * [Writer? I hardly know her!](https://learnyouahaskell.github.io/for-a-few-monads-more.html#writer) in Learn You a Haskell
+* [Category Theory via C# (8) Advanced LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/) on CodingOnWheels
 
 ## State Monad
 
@@ -1338,6 +1378,7 @@ __Further reading__
 * [The State monad](https://blog.ploeh.dk/2022/06/20/the-state-monad/) by Mark Seemann
 * [State](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/State) in language-ext
 * [Tasteful stateful computations](https://learnyouahaskell.github.io/for-a-few-monads-more.html#state) in Learn You a Haskell
+* [Category Theory via C# (8) Advanced LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/) on CodingOnWheels
 
 ## Fallible
 
@@ -1377,6 +1418,7 @@ __Further reading__
 * [Fallible](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Fallible) in language-ext
 * [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/) by Scott Wlaschin
 * [Control.Monad.Except](https://hackage.haskell.org/package/mtl/docs/Control-Monad-Except.html) (`MonadError`) on Hackage
+* [Category Theory via C# (8) Advanced LINQ to Monads](https://codingonwheels.com/posts/category-theory-via-csharp-8-more-linq-to-monads/) on CodingOnWheels
 
 ## Applicative Functor
 
@@ -1416,6 +1458,9 @@ language-ext curries for you, so a tuple of applicatives can be applied to an or
 (Some(1), Some(2)).Apply((x, y) => x + y); // => Some(3)
 ```
 
+__Further reading__
+* [Category Theory via C# (6) Monoidal Functor and Applicative Functor](https://codingonwheels.com/posts/category-theory-via-csharp-6-monoidal-functor-and-applicative-functor/) on CodingOnWheels
+
 ## Bifunctor
 
 A structure with two independent type parameters that can map over both of them simultaneously. A Bifunctor provides `bimap`, which takes two functions and maps the first over the first type parameter and the second over the second type parameter.
@@ -1443,6 +1488,7 @@ __Further reading__
 * [Bifunctors](https://blog.ploeh.dk/2018/12/24/bifunctors/) by Mark Seemann
 * [Bifunctor](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Bifunctor) in language-ext
 * [Data.Bifunctor](https://hackage.haskell.org/package/base/docs/Data-Bifunctor.html) on Hackage
+* [Category Theory via C# (5) Bifunctor](https://codingonwheels.com/posts/category-theory-via-csharp-5-bifunctor/) on CodingOnWheels
 
 ## Contravariant Functor
 
@@ -1482,6 +1528,7 @@ __Further reading__
 * [Contravariant functors](https://blog.ploeh.dk/2021/09/02/contravariant-functors/) by Mark Seemann
 * [Cofunctor](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Cofunctor), language-ext's contravariant functor trait
 * [Data.Functor.Contravariant](https://hackage.haskell.org/package/base/docs/Data-Functor-Contravariant.html) on Hackage
+* [C# Functional Programming In-Depth (11) Covariance and Contravariance](https://codingonwheels.com/posts/csharp-functional-programming-covariance-and-contravariance/) on CodingOnWheels
 
 ## Profunctor
 
@@ -1545,6 +1592,9 @@ __Further reading__
 ## Morphism
 
 A relationship between objects within a [category](#category). In the context of functional programming all functions are morphisms.
+
+__Further reading__
+* [Category Theory via C# (1) Fundamentals](https://codingonwheels.com/posts/category-theory-via-csharp-1-fundamentals/) on CodingOnWheels
 
 ### Homomorphism
 
@@ -1712,6 +1762,7 @@ OptionToSeq(Some(1)).Map(twice); // => [2]
 
 __Further reading__
 * [Natural transformation](https://en.wikipedia.org/wiki/Natural_transformation) on Wikipedia
+* [Category Theory via C# (4) Natural Transformation](https://codingonwheels.com/posts/category-theory-via-csharp-4-natural-transformation/) on CodingOnWheels
 
 ## Setoid
 
@@ -2081,6 +2132,50 @@ __Further reading__
 * [Higher Kinds in C# with language-ext [Part 1]](https://paullouth.com/higher-kinds-in-c-with-language-ext/) by Paul Louth
 * [Kind (type theory)](https://en.wikipedia.org/wiki/Kind_(type_theory)) on Wikipedia
 
+## Dependent Type
+
+A type that depends on a value. In C#, types can depend on other types (`Seq<int>`), but values can't appear in a type. With dependent types they can, so a type can say "a list of exactly 3 ints" or "an index less than the length of this array", and the compiler checks it.
+
+Languages such as Idris, Agda and Lean have them. Here is a vector in Idris whose length is part of its type:
+
+```
+data Vect : Nat -> Type -> Type where
+  Nil  : Vect Z a
+  (::) : a -> Vect k a -> Vect (S k) a
+
+-- Only accepts vectors with at least one element, so it can't fail
+head : Vect (S n) a -> a
+
+-- The result's length is the sum of the inputs' lengths
+append : Vect n a -> Vect m a -> Vect (n + m) a
+```
+
+`head` is a [total function](#total-function) without returning an [Option](#option): calling it on an empty vector is a type error, not a run-time one. A wrong `append` that dropped an element wouldn't compile, because its result wouldn't have length `n + m`.
+
+C# can't express this, but the same idea guides everyday design: when a rule matters, make a type that can only hold values that follow it. The type can't carry a length, but it can guarantee "at least one":
+
+```csharp
+// A sequence that can't be empty, so Head needs no Option
+record NonEmpty<A>(A Head, Seq<A> Tail)
+{
+    public int Count => 1 + Tail.Count;
+}
+
+// The check happens once, where the value is made
+Option<NonEmpty<A>> FromSeq<A>(Seq<A> xs) =>
+    xs.Head.Map(h => new NonEmpty<A>(h, xs.Tail));
+
+var first = FromSeq(Seq(3, 1, 2)).Map(ne => ne.Head); // => Some(3)
+var none  = FromSeq(Seq<int>()).Map(ne => ne.Head);   // => None
+```
+
+The difference is where the proof lives. Here the check runs once when the value is built, and the type remembers the result. With dependent types, the compiler proves it, even for values that are only known at run time.
+
+__Further reading__
+* [Dependent type](https://en.wikipedia.org/wiki/Dependent_type) on Wikipedia
+* [Types and Functions](https://idris2.readthedocs.io/en/latest/tutorial/typesfuns.html) in the Idris 2 tutorial
+* [Parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/) by Alexis King
+
 ## Expression Problem
 
 The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard.
@@ -2140,7 +2235,7 @@ A composite type made from putting other types together. Two common classes of a
 
 A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types.
 
-C# has no built-in closed union types, but an abstract record with one derived record per case models them well:
+Before C# 15, the usual model is an abstract record with one derived record per case:
 
 ```csharp
 // Known has 2 possible values (true, false) and HalfTrue has 1,
@@ -2160,9 +2255,79 @@ record Known(bool Value) : WeakLogic;
 record HalfTrue : WeakLogic;
 ```
 
+The `_` arm is there because the compiler can't know the hierarchy is closed: anyone could add another record that derives from `WeakLogic`.
+
 Sum types are sometimes called union types, discriminated unions, or tagged unions.
 
-language-ext's [Option](#option) and [Either](#either) are ready-made sum types.
+**Union types in C# 15.** C# 15 (.NET 11) adds the `union` keyword. A union lists the types a value can be, and the compiler knows that list is complete, so a `switch` needs no `_` arm, and leaving out a case is a warning:
+
+```csharp
+// The cases are existing types; the union just says "one of these"
+string Rate(Logic l) => l switch
+{
+    Known(true)  => "true",
+    Known(false) => "false",
+    HalfTrue     => "half-true",
+};
+
+Rate(new HalfTrue()); // => "half-true"
+
+// Any type can be a case, including ones you don't own
+IntOrText id = 42;
+var shown = id switch { int n => $"#{n}", string s => s }; // => "#42"
+
+union Logic(Known, HalfTrue);
+union IntOrText(int, string);
+```
+
+Each case converts to the union implicitly, and patterns look inside it, so `HalfTrue` matches a `Logic` holding a `HalfTrue`. Two things follow from the cases being types rather than names. A union can't tell apart two cases that hold the same type, so each case needs its own type, as with `Known` and `HalfTrue`. And the generated union is a struct that keeps its value in an `object?` property, so a value type such as `int` is boxed, and `default(IntOrText)` holds `null`.
+
+**OneOf.** Before C# 15, the [OneOf](https://github.com/mcintyre321/OneOf) library was the usual way to get union types in C#. `OneOf<T0, T1, ...>` is a struct with one case per type parameter, and `Match` takes one function per case:
+
+```csharp
+using OneOf;
+using OneOf.Types;
+
+OneOf<int, string> userId = "ada";
+var label = userId.Match(n => $"#{n}", s => $"@{s}"); // => "@ada"
+
+// A named union, generated from OneOfBase
+Payment paid = new Cash(9.99m);
+var how = paid.Match(card => $"card {card.Last4}", cash => $"cash {cash.Amount}"); // => "cash 9.99"
+
+// Ready-made case types for common results
+OneOf<int, NotFound> Find(string name) => name == "ada" ? 1 : new NotFound();
+var found = Find("bob").Match(n => $"#{n}", _ => "not found"); // => "not found"
+
+// TryPick takes one case out and narrows the rest
+OneOf<int, string, bool> answer = true;
+var narrowed = answer.TryPickT0(out var number, out var others)
+    ? $"number {number}"
+    : others.Match(s => "text", b => $"bool {b}"); // => "bool True"
+
+record Card(string Last4);
+record Cash(decimal Amount);
+[GenerateOneOf]
+partial class Payment : OneOfBase<Card, Cash>;
+```
+
+Now that unions are built in, these are the things OneOf still offers:
+
+* It runs on any .NET version, back to .NET Framework 3.5, so it suits libraries that can't require .NET 11.
+* `Match` and `Switch` take one function per case, so a missing case is a compile error, where a `switch` on a union only warns.
+* Cases are distinguished by position, not type. `OneOf<string, string>` is valid (built with `FromT0` and `FromT1`), which a union can't express.
+* `TryPickT0` and the other `TryPick` methods split one case off and narrow the rest, as above, and `MapT0`, `MapT1` and so on change one case and leave the others alone.
+* Each case is stored in its own field, so value types aren't boxed.
+* `OneOf.Types` has ready-made case types (`None`, `NotFound`, `Success`, `Error<T>`, `Unknown` and others).
+
+The built-in union has the language on its side: full pattern matching with nested and positional patterns (`Known(true)`), no lambdas, any number of cases (`OneOf` goes up to 9, with more in the OneOf.Extended package), and no package to depend on.
+
+Neither gives you composition. language-ext's [Option](#option) and [Either](#either) are ready-made sum types that are also [functors](#functor) and [monads](#monad), so a chain of steps that can each fail is written with `Map`, `Bind` or LINQ, rather than a `switch` after every step.
+
+__Further reading__
+* [Union types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/union) in the C# language reference
+* [Explore union types in C# 15](https://devblogs.microsoft.com/dotnet/csharp-15-union-types/) on the .NET Blog
+* [OneOf](https://github.com/mcintyre321/OneOf) on GitHub
 
 ### Product type
 
