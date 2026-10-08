@@ -1,6 +1,6 @@
 # FP Jargon
 
-> Interactive functional programming knowledge graph and specification exploring 85 concepts, category theory morphisms, and algebraic structures with C# (language-ext) examples.
+> Interactive functional programming knowledge graph and specification exploring 86 concepts, category theory morphisms, and algebraic structures with C# (language-ext) examples.
 
 FP Jargon maps out the entire vocabulary of functional programming into an interconnected graph with deterministic explanations, formal properties, and executable C# (language-ext) examples.
 
@@ -93,6 +93,7 @@ FP Jargon maps out the entire vocabulary of functional programming into an inter
 - [Reader Monad](https://hemanth.github.io/functional-programming-jargon/#reader-monad): A computation that reads from a shared, read-only environment. Instead of passing configuration through every function b
 - [Writer Monad](https://hemanth.github.io/functional-programming-jargon/#writer-monad): A computation that produces a value and, alongside it, accumulates output, typically a log. Each step adds to the output
 - [State Monad](https://hemanth.github.io/functional-programming-jargon/#state-monad): A computation that threads a piece of state from one step to the next. Each step can read the current state (get), repla
+- [Fallible](https://hemanth.github.io/functional-programming-jargon/#fallible): A type class for computations that can fail with an error and recover from it, so error handling can be written once for
 
 ### Types & Data Modeling
 - [Lambda Calculus](https://hemanth.github.io/functional-programming-jargon/#lambda-calculus): A branch of mathematics that uses functions to create a universal model of computation.
@@ -101,7 +102,7 @@ FP Jargon maps out the entire vocabulary of functional programming into an inter
 - [Iso](https://hemanth.github.io/functional-programming-jargon/#iso): An optic that defines a lossless, reversible two-way mapping between two representations of the same information (s and 
 - [Traversal](https://hemanth.github.io/functional-programming-jargon/#traversal): An optic that focuses on zero, one, or multiple values (0..*) inside a data structure simultaneously.
 - [Type Signatures](https://hemanth.github.io/functional-programming-jargon/#type-signatures): In C# the types of arguments and return values are part of every function's signature. Even so, functional programmers o
-- [Polymorphism](https://hemanth.github.io/functional-programming-jargon/#polymorphism): Writing code once that works for values of many types. There are three main kinds.
+- [Parametricity](https://hemanth.github.io/functional-programming-jargon/#parametricity): The property that a generic function behaves the same way for every type it is given, because it can't inspect values of
 - [Higher-Kinded Type](https://hemanth.github.io/functional-programming-jargon/#higher-kinded-type): A type that is parameterised by a type constructor rather than by a plain type. int is a complete type, but Option is no
 - [Expression Problem](https://hemanth.github.io/functional-programming-jargon/#expression-problem): The difficulty of designing data so that both new cases and new operations can be added without editing existing code. E
 - [Algebraic data type](https://hemanth.github.io/functional-programming-jargon/#algebraic-data-type): A composite type made from putting other types together. Two common classes of algebraic types are sum and product.

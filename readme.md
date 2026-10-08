@@ -6,6 +6,7 @@ Examples are presented in C# using [language-ext](https://github.com/louthy/lang
 
 ```
 using LanguageExt;
+using LanguageExt.Common;
 using LanguageExt.Traits;
 using static LanguageExt.Prelude;
 ```
@@ -79,6 +80,7 @@ __Table of Contents__
 * [Reader Monad](#reader-monad)
 * [Writer Monad](#writer-monad)
 * [State Monad](#state-monad)
+* [Fallible](#fallible)
 * [Applicative Functor](#applicative-functor)
 * [Bifunctor](#bifunctor)
 * [Contravariant Functor](#contravariant-functor)
@@ -103,7 +105,7 @@ __Table of Contents__
 * [Iso](#iso)
 * [Traversal](#traversal)
 * [Type Signatures](#type-signatures)
-* [Polymorphism](#polymorphism)
+* [Parametricity](#parametricity)
 * [Type Class](#type-class)
 * [Higher-Kinded Type](#higher-kinded-type)
 * [Expression Problem](#expression-problem)
@@ -1337,6 +1339,45 @@ __Further reading__
 * [State](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Monads/State%20and%20Environment%20Monads/State) in language-ext
 * [Tasteful stateful computations](https://learnyouahaskell.github.io/for-a-few-monads-more.html#state) in Learn You a Haskell
 
+## Fallible
+
+A [type class](#type-class) for computations that can fail with an error and recover from it, so error handling can be written once for every type that supports it. It has two operations: `Fail` produces a failure, and `Catch` handles one, optionally only errors that match a predicate. Haskell calls it `MonadError`.
+
+In language-ext it is `Fallible<E, F>`, where `E` is the error type. `Either<L, _>` fails with an `L`, `Option` with nothing at all (`Unit`), and `Fin`, `IO` and `Eff` with language-ext's `Error`; `Fallible<F>` is short for `Fallible<Error, F>`.
+
+```csharp
+// Written once, for any monad that can fail with a string
+K<M, int> ParseAge<M>(string s) where M : Monad<M>, Fallible<string, M> =>
+    int.TryParse(s, out var n) && n >= 0
+        ? M.Pure(n)
+        : M.Fail<int>($"'{s}' is not an age");
+
+// Catch recovers; here every failure becomes a default of 0
+K<M, int> AgeOrZero<M>(string s) where M : Monad<M>, Fallible<string, M> =>
+    M.Catch(ParseAge<M>(s), _ => true, _ => M.Pure(0));
+
+ParseAge<Either<string>>("42");   // => Right(42)
+ParseAge<Either<string>>("old");  // => Left('old' is not an age)
+AgeOrZero<Either<string>>("old"); // => Right(0)
+```
+
+The same code with `Error` as the error type runs in `Fin`, and just as well in `IO` or `Eff`:
+
+```csharp
+K<M, int> ParseAgeE<M>(string s) where M : Monad<M>, Fallible<M> =>
+    int.TryParse(s, out var n) ? M.Pure(n) : M.Fail<int>(Error.New($"'{s}' is not an age"));
+
+ParseAgeE<Fin>("42");  // => Succ(42)
+ParseAgeE<Fin>("old"); // => Fail('old' is not an age)
+```
+
+Compared with exceptions, the possibility of failure is part of the type, and the code that fails doesn't decide how the failure is handled: whoever runs it picks the monad, and so picks what failing means. It is the error-handling counterpart of [Reader](#reader-monad), which abstracts over where an environment comes from.
+
+__Further reading__
+* [Fallible](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Fallible) in language-ext
+* [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/) by Scott Wlaschin
+* [Control.Monad.Except](https://hackage.haskell.org/package/mtl/docs/Control-Monad-Except.html) (`MonadError`) on Hackage
+
 ## Applicative Functor
 
 An applicative functor is an object with an `ap` function. `ap` applies a function in the object to a value in another object of the same type.
@@ -1928,55 +1969,44 @@ __Further reading__
 * [Func delegate](https://learn.microsoft.com/en-us/dotnet/api/system.func-2) on Microsoft Learn
 * [What is Hindley-Milner?](http://stackoverflow.com/a/399392/22425) on Stack Overflow
 
-## Polymorphism
+## Parametricity
 
-Writing code once that works for values of many types. There are three main kinds.
+The property that a generic function behaves the same way for every type it is given, because it can't inspect values of a type it knows nothing about. Generic code of this kind is called parametric polymorphism: one piece of code that works for every type. The useful consequence is that a generic signature alone limits what a function can do, often enough to prove things about it without reading its body (Philip Wadler called these "theorems for free").
 
-**Parametric** polymorphism is the same code for every type. A generic function knows nothing about its type parameter, so it can only pass values of that type around:
-
-```csharp
-Seq<A> Twice<A>(A x) => Seq(x, x);
-
-Twice(1);    // => [1, 1]
-Twice("hi"); // => [hi, hi]
-```
-
-Because `Twice` can't look inside an `A`, its signature alone rules out a lot of possible behaviour, a property known as parametricity.
-
-**Ad hoc** polymorphism is one name with a different implementation for each type. Overloading is the simplest form; [type classes](#type-class) are the generic form:
+A function `A F<A>(A x)` has no way to make a new `A` or change the one it got, so the only thing it can return is `x`: it must be the identity function. A function `Seq<A> F<A>(Seq<A> xs)` can only drop, repeat or reorder the elements it is given. So whatever it does, applying it before or after a `Map` gives the same result:
 
 ```csharp
-Describe.Of(42);   // => "the number 42"
-Describe.Of(true); // => "yes"
+// Parametric: it can only pick from the elements it is given
+Seq<A> FirstTwo<A>(Seq<A> xs) => xs.Take(2);
 
-static class Describe
-{
-    public static string Of(int n) => $"the number {n}";
-    public static string Of(bool b) => b ? "yes" : "no";
-}
+Func<int, int> tenfold = x => x * 10;
+var xs = Seq(1, 2, 3);
+
+var mapThenTake = FirstTwo(xs.Map(tenfold)); // => [10, 20]
+var takeThenMap = FirstTwo(xs).Map(tenfold); // => [10, 20]
 ```
 
-**Subtype** polymorphism is the object-oriented kind: code written against a base type works with every derived type, each overriding behaviour in its own way:
+That equation holds for any `Seq<A> -> Seq<A>` function and any `tenfold`, without looking at either. It is what lets you trust that a generic library function treats your type the same way it treats every other.
+
+C# only offers parametricity by convention. A generic method can test the type at run time with `is`, `typeof` or a cast, call `ToString` or `GetHashCode` (every value has them), return `default` or `null`, or use reflection, and each one breaks the guarantee:
 
 ```csharp
-var shapes = Seq<Shape>(new Square(2), new Circle(1));
-var areas  = shapes.Map(s => Math.Round(s.Area, 2)); // => [4, 3.14]
+// Not parametric: it inspects A, so the free theorems no longer hold
+A Sneaky<A>(A x) => x is int n ? (A)(object)(n + 1) : x;
 
-abstract record Shape { public abstract double Area { get; } }
-record Square(double Side) : Shape { public override double Area => Side * Side; }
-record Circle(double Radius) : Shape { public override double Area => Math.PI * Radius * Radius; }
+Sneaky("hi"); // => "hi"
+Sneaky(41);   // => 42
 ```
 
-The kinds differ in when the code to run is chosen, called dispatch. With parametric and ad hoc polymorphism the compiler picks it (static dispatch). With subtyping it is picked at run time from the object's actual class, through a virtual call (dynamic dispatch). Pattern matching over a [sum type](#sum-type) is another form of run-time dispatch, over a closed set of cases; the [Expression Problem](#expression-problem) compares the two.
+Keeping generic code free of those tricks keeps it parametric, and [type class](#type-class) constraints are the honest way to say "this function needs to know something about `A`".
 
 __Further reading__
-* [Polymorphism](https://en.wikipedia.org/wiki/Polymorphism_(computer_science)) on Wikipedia
 * [Parametricity](https://en.wikipedia.org/wiki/Parametricity) on Wikipedia
-* [Ad hoc polymorphism](https://en.wikipedia.org/wiki/Ad_hoc_polymorphism) on Wikipedia
+* [Theorems for free!](https://people.mpi-sws.org/~dreyer/tor/papers/wadler.pdf) by Philip Wadler
 
 ## Type Class
 
-An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time.
+An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time. This is called ad hoc polymorphism: one name with a different implementation for each type, picked at compile time (static dispatch), where an overridden method is picked at run time from the object's actual class (dynamic dispatch).
 
 C# 11's static abstract interface members make this possible. Here a constraint on `Monoid<A>` (see [Monoid](#monoid)) lets a generic function call `A.Empty`, which belongs to the type, not to any value:
 
@@ -2001,6 +2031,7 @@ Separately, each parameter has a kind. `Monoid<A>`'s `A` is a plain type such as
 
 __Further reading__
 * [Type class](https://en.wikipedia.org/wiki/Type_class) on Wikipedia
+* [Ad hoc polymorphism](https://en.wikipedia.org/wiki/Ad_hoc_polymorphism) on Wikipedia
 * [Explore static virtual members in interfaces](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/tutorials/static-virtual-interface-members) on Microsoft Learn
 
 ## Higher-Kinded Type
@@ -2095,7 +2126,7 @@ record PlusNode(INode Left, INode Right) : INode { public int Eval() => Left.Eva
 record TimesNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() * Right.Eval(); }
 ```
 
-The choice is about which kind of change you expect more often. Functional code tends to fix the cases and add operations; object-oriented code tends to fix the operations and add cases. Techniques such as the visitor pattern and "tagless final" (operations as type classes over [higher-kinded types](#higher-kinded-type)) try to get both.
+The two designs also dispatch differently: the `switch` picks a branch by testing the value's case, while `tree.Eval()` is a virtual call that runs whichever `Eval` the object's class overrides. The choice between them is about which kind of change you expect more often. Functional code tends to fix the cases and add operations; object-oriented code tends to fix the operations and add cases. Techniques such as the visitor pattern and "tagless final" (operations as type classes over [higher-kinded types](#higher-kinded-type)) try to get both.
 
 __Further reading__
 * [Expression problem](https://en.wikipedia.org/wiki/Expression_problem) on Wikipedia

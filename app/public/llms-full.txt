@@ -1,6 +1,6 @@
 # FP Jargon - Full Reference
 
-> Complete catalog of 85 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
+> Complete catalog of 86 functional programming concepts, morphisms, algebraic structures, and category theory terms with C# (language-ext) examples.
 > Source: https://github.com/hemanth/functional-programming-jargon
 > Live app: https://hemanth.github.io/functional-programming-jargon/
 
@@ -398,7 +398,7 @@ var result = greeting; // => "Hi, Brianne"
 
 - Category: Purity & Reasoning
 - ID: #side-effects
-- Related concepts: #pure-function, #state-monad, #io, #algebraic-effects, #memoization, #function
+- Related concepts: #pure-function, #fallible, #state-monad, #io, #algebraic-effects, #memoization, #function
 
 ### Definition
 A function or expression is said to have a side effect if apart from returning a value, it interacts with (reads from or writes to) external mutable state.
@@ -688,7 +688,7 @@ record Constant<C, A>(C Value)
 - Category: Algebraic Structures
 - ID: #functor
 - Aliases: map, mappable
-- Related concepts: #pointed-functor, #applicative-functor, #lift, #type-class, #higher-kinded-type, #traversable, #bifunctor, #contravariant-functor, #natural-transformation, #free-monad, #constant-functor, #option, #monad, #monad-transformer
+- Related concepts: #pointed-functor, #applicative-functor, #lift, #parametricity, #type-class, #higher-kinded-type, #traversable, #bifunctor, #contravariant-functor, #natural-transformation, #free-monad, #constant-functor, #option, #monad, #monad-transformer
 
 ### Definition
 An object that implements a map function that takes a function which is run on the contents of that object. A functor must adhere to two rules:
@@ -1043,7 +1043,7 @@ var commutes = 0 - 4 == 4 - 0; // => false
 - Category: Algebraic Structures
 - ID: #monad
 - Aliases: flatmap, bind, chain, return
-- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #higher-kinded-type, #monad-comprehension, #reader-monad, #writer-monad, #state-monad, #either, #io, #free-monad, #monad-transformer, #constant-monad, #pointed-functor, #functor, #never-type
+- Related concepts: #applicative-functor, #kleisli-composition, #comonad, #option, #fallible, #higher-kinded-type, #monad-comprehension, #reader-monad, #writer-monad, #state-monad, #either, #io, #free-monad, #monad-transformer, #constant-monad, #pointed-functor, #functor, #never-type
 
 ### Definition
 A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object.
@@ -1250,7 +1250,7 @@ Interpret(program, []); // => (42, [Starting, Done])
 
 - Category: Effects
 - ID: #monad-transformer
-- Related concepts: #reader-monad, #state-monad, #monad, #kleisli-composition, #either, #functor, #applicative-functor
+- Related concepts: #fallible, #reader-monad, #state-monad, #monad, #kleisli-composition, #either, #functor, #applicative-functor
 
 ### Definition
 While functors and applicative functors compose naturally, monads do not compose generally without knowing their specific types. A Monad Transformer is a type constructor that takes an existing monad and produces a new monad with combined capabilities (such as combining error handling, asynchronous tasks, and state).
@@ -1300,7 +1300,7 @@ string.Join(", ", log); // => "looking up 1, looking up 2"
 - Category: Effects
 - ID: #reader-monad
 - Aliases: reader, environment, dependency injection, ask, readable
-- Related concepts: #monad, #state-monad, #algebraic-effects, #monad-transformer
+- Related concepts: #fallible, #monad, #state-monad, #algebraic-effects, #monad-transformer
 
 ### Definition
 A computation that reads from a shared, read-only environment. Instead of passing configuration through every function by hand, each step asks for what it needs, and the environment is supplied once, when the whole computation is run. It is dependency injection done with a monad.
@@ -1386,6 +1386,44 @@ var labels = from a in NextId()
 var run  = labels.Run(100);
 var text = run.Value; // => "#100 #101 #102"
 var next = run.State; // => 103
+```
+
+---
+
+## Fallible
+
+- Category: Effects
+- ID: #fallible
+- Aliases: monaderror, monad error, error handling, fail, catch, fin, exceptions, failure
+- Related concepts: #either, #monad, #type-class, #side-effects, #reader-monad, #monad-transformer
+
+### Definition
+A type class for computations that can fail with an error and recover from it, so error handling can be written once for every type that supports it. It has two operations: Fail produces a failure, and Catch handles one, optionally only errors that match a predicate. Haskell calls it MonadError.
+
+### Code Examples
+
+```csharp
+// Written once, for any monad that can fail with a string
+K<M, int> ParseAge<M>(string s) where M : Monad<M>, Fallible<string, M> =>
+    int.TryParse(s, out var n) && n >= 0
+        ? M.Pure(n)
+        : M.Fail<int>($"'{s}' is not an age");
+
+// Catch recovers; here every failure becomes a default of 0
+K<M, int> AgeOrZero<M>(string s) where M : Monad<M>, Fallible<string, M> =>
+    M.Catch(ParseAge<M>(s), _ => true, _ => M.Pure(0));
+
+ParseAge<Either<string>>("42");   // => Right(42)
+ParseAge<Either<string>>("old");  // => Left('old' is not an age)
+AgeOrZero<Either<string>>("old"); // => Right(0)
+```
+
+```csharp
+K<M, int> ParseAgeE<M>(string s) where M : Monad<M>, Fallible<M> =>
+    int.TryParse(s, out var n) ? M.Pure(n) : M.Fail<int>(Error.New($"'{s}' is not an age"));
+
+ParseAgeE<Fin>("42");  // => Succ(42)
+ParseAgeE<Fin>("old"); // => Fail('old' is not an age)
 ```
 
 ---
@@ -1763,7 +1801,7 @@ The opposite of paramorphism, just as anamorphism is the opposite of catamorphis
 - Category: Category & Morphisms
 - ID: #natural-transformation
 - Aliases: nat, functor transformation
-- Related concepts: #type-class, #functor, #morphism, #category
+- Related concepts: #parametricity, #type-class, #functor, #morphism, #category
 
 ### Definition
 A structure-preserving mapping between two functors, transforming F<A> into G<A> without altering or inspecting the underlying value A.
@@ -2037,7 +2075,7 @@ record Traversal<S, A>(
 
 - Category: Types & Data Modeling
 - ID: #type-signatures
-- Related concepts: #polymorphism, #contracts
+- Related concepts: #parametricity, #contracts
 
 ### Definition
 In C# the types of arguments and return values are part of every function's signature. Even so, functional programmers often describe functions with Haskell-style type signatures in comments, because they are short and easy to read.
@@ -2071,43 +2109,35 @@ Map<int, int>(x => x + 1)(Seq(1, 2)); // => [2, 3]
 
 ---
 
-## Polymorphism
+## Parametricity
 
 - Category: Types & Data Modeling
-- ID: #polymorphism
-- Aliases: parametric polymorphism, ad hoc polymorphism, subtype polymorphism, generics, dispatch, static dispatch, dynamic dispatch, overloading, parametricity
-- Related concepts: #type-class, #expression-problem, #type-signatures, #sum-type
+- ID: #parametricity
+- Aliases: free theorems, theorems for free, parametric, generic, generics, free theorem, parametric polymorphism
+- Related concepts: #type-signatures, #type-class, #functor, #natural-transformation
 
 ### Definition
-Writing code once that works for values of many types. There are three main kinds.
+The property that a generic function behaves the same way for every type it is given, because it can't inspect values of a type it knows nothing about. Generic code of this kind is called parametric polymorphism: one piece of code that works for every type. The useful consequence is that a generic signature alone limits what a function can do, often enough to prove things about it without reading its body (Philip Wadler called these "theorems for free").
 
 ### Code Examples
 
 ```csharp
-Seq<A> Twice<A>(A x) => Seq(x, x);
+// Parametric: it can only pick from the elements it is given
+Seq<A> FirstTwo<A>(Seq<A> xs) => xs.Take(2);
 
-Twice(1);    // => [1, 1]
-Twice("hi"); // => [hi, hi]
+Func<int, int> tenfold = x => x * 10;
+var xs = Seq(1, 2, 3);
+
+var mapThenTake = FirstTwo(xs.Map(tenfold)); // => [10, 20]
+var takeThenMap = FirstTwo(xs).Map(tenfold); // => [10, 20]
 ```
 
 ```csharp
-Describe.Of(42);   // => "the number 42"
-Describe.Of(true); // => "yes"
+// Not parametric: it inspects A, so the free theorems no longer hold
+A Sneaky<A>(A x) => x is int n ? (A)(object)(n + 1) : x;
 
-static class Describe
-{
-    public static string Of(int n) => $"the number {n}";
-    public static string Of(bool b) => b ? "yes" : "no";
-}
-```
-
-```csharp
-var shapes = Seq<Shape>(new Square(2), new Circle(1));
-var areas  = shapes.Map(s => Math.Round(s.Area, 2)); // => [4, 3.14]
-
-abstract record Shape { public abstract double Area { get; } }
-record Square(double Side) : Shape { public override double Area => Side * Side; }
-record Circle(double Radius) : Shape { public override double Area => Math.PI * Radius * Radius; }
+Sneaky("hi"); // => "hi"
+Sneaky(41);   // => 42
 ```
 
 ---
@@ -2116,11 +2146,11 @@ record Circle(double Radius) : Shape { public override double Area => Math.PI * 
 
 - Category: Algebraic Structures
 - ID: #type-class
-- Aliases: trait, traits, typeclass, instance, multi-parameter type class, static abstract
-- Related concepts: #polymorphism, #higher-kinded-type, #monoid, #functor, #natural-transformation, #expression-problem
+- Aliases: trait, traits, typeclass, instance, multi-parameter type class, static abstract, ad hoc polymorphism, overloading, static dispatch, polymorphism
+- Related concepts: #parametricity, #fallible, #higher-kinded-type, #monoid, #functor, #natural-transformation, #expression-problem
 
 ### Definition
-An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time.
+An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time. This is called ad hoc polymorphism: one name with a different implementation for each type, picked at compile time (static dispatch), where an overridden method is picked at run time from the object's actual class (dynamic dispatch).
 
 ### Code Examples
 
@@ -2192,8 +2222,8 @@ Double(Seq(1, 2, 3)); // => [2, 4, 6]
 
 - Category: Types & Data Modeling
 - ID: #expression-problem
-- Aliases: open closed, open/closed, visitor pattern, tagless final, extensibility
-- Related concepts: #polymorphism, #sum-type, #type-class, #higher-kinded-type
+- Aliases: open closed, open/closed, visitor pattern, tagless final, extensibility, dispatch, dynamic dispatch, virtual call, subtype polymorphism
+- Related concepts: #sum-type, #type-class, #higher-kinded-type
 
 ### Definition
 The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard.
@@ -2256,7 +2286,7 @@ A composite type made from putting other types together. Two common classes of a
 - Category: Types & Data Modeling
 - ID: #sum-type
 - Aliases: union type, discriminated union, tagged union
-- Related concepts: #algebraic-data-type, #never-type, #expression-problem, #option, #either, #prism, #polymorphism
+- Related concepts: #algebraic-data-type, #never-type, #expression-problem, #option, #either, #prism
 
 ### Definition
 A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types.
@@ -2447,7 +2477,7 @@ record Item(decimal? Price);
 - Category: Types & Data Modeling
 - ID: #either
 - Aliases: result, left and right, right is right
-- Related concepts: #never-type, #option, #sum-type, #monad, #bifunctor, #monad-transformer, #pure-function
+- Related concepts: #never-type, #fallible, #option, #sum-type, #monad, #bifunctor, #monad-transformer, #pure-function
 
 ### Definition
 A sum type with two cases, Left and Right. By convention, Right represents a successful computation and Left contains an error or failure reason ("right is right").

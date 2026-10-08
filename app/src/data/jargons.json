@@ -2,8 +2,8 @@
   "meta": {
     "title": "FP Jargon",
     "subtitle": "The vocabulary of functional programming mapped into an interactive graph",
-    "totalTerms": 85,
-    "totalRelationships": 164,
+    "totalTerms": 86,
+    "totalRelationships": 170,
     "sourceRepo": "https://github.com/hemanth/functional-programming-jargon",
     "originalAuthor": "Hemanth HM"
   },
@@ -528,6 +528,7 @@
       "crossRefs": [],
       "relatedIds": [
         "pure-function",
+        "fallible",
         "state-monad",
         "io",
         "algebraic-effects",
@@ -859,6 +860,7 @@
         "pointed-functor",
         "applicative-functor",
         "lift",
+        "parametricity",
         "type-class",
         "higher-kinded-type",
         "traversable",
@@ -1226,6 +1228,7 @@
         "kleisli-composition",
         "comonad",
         "option",
+        "fallible",
         "higher-kinded-type",
         "monad-comprehension",
         "reader-monad",
@@ -1427,6 +1430,7 @@
         "monad"
       ],
       "relatedIds": [
+        "fallible",
         "reader-monad",
         "state-monad",
         "monad",
@@ -1476,6 +1480,7 @@
         "monad-transformer"
       ],
       "relatedIds": [
+        "fallible",
         "monad",
         "state-monad",
         "algebraic-effects",
@@ -1560,6 +1565,60 @@
         "reader-monad",
         "writer-monad",
         "side-effects",
+        "monad-transformer"
+      ]
+    },
+    {
+      "id": "fallible",
+      "title": "Fallible",
+      "depth": 2,
+      "category": "effects",
+      "aliases": [
+        "monaderror",
+        "monad error",
+        "error handling",
+        "fail",
+        "catch",
+        "fin",
+        "exceptions",
+        "failure"
+      ],
+      "summary": "A type class for computations that can fail with an error and recover from it, so error handling can be written once for every type that supports it. It has two operations: Fail produces a failure, and Catch handles one, optionally only errors that match a predicate. Haskell calls it MonadError.",
+      "body": "A [type class](#type-class) for computations that can fail with an error and recover from it, so error handling can be written once for every type that supports it. It has two operations: `Fail` produces a failure, and `Catch` handles one, optionally only errors that match a predicate. Haskell calls it `MonadError`.\n\nIn language-ext it is `Fallible<E, F>`, where `E` is the error type. `Either<L, _>` fails with an `L`, `Option` with nothing at all (`Unit`), and `Fin`, `IO` and `Eff` with language-ext's `Error`; `Fallible<F>` is short for `Fallible<Error, F>`.\n\n```csharp\n// Written once, for any monad that can fail with a string\nK<M, int> ParseAge<M>(string s) where M : Monad<M>, Fallible<string, M> =>\n    int.TryParse(s, out var n) && n >= 0\n        ? M.Pure(n)\n        : M.Fail<int>($\"'{s}' is not an age\");\n\n// Catch recovers; here every failure becomes a default of 0\nK<M, int> AgeOrZero<M>(string s) where M : Monad<M>, Fallible<string, M> =>\n    M.Catch(ParseAge<M>(s), _ => true, _ => M.Pure(0));\n\nParseAge<Either<string>>(\"42\");   // => Right(42)\nParseAge<Either<string>>(\"old\");  // => Left('old' is not an age)\nAgeOrZero<Either<string>>(\"old\"); // => Right(0)\n```\n\nThe same code with `Error` as the error type runs in `Fin`, and just as well in `IO` or `Eff`:\n\n```csharp\nK<M, int> ParseAgeE<M>(string s) where M : Monad<M>, Fallible<M> =>\n    int.TryParse(s, out var n) ? M.Pure(n) : M.Fail<int>(Error.New($\"'{s}' is not an age\"));\n\nParseAgeE<Fin>(\"42\");  // => Succ(42)\nParseAgeE<Fin>(\"old\"); // => Fail('old' is not an age)\n```\n\nCompared with exceptions, the possibility of failure is part of the type, and the code that fails doesn't decide how the failure is handled: whoever runs it picks the monad, and so picks what failing means. It is the error-handling counterpart of [Reader](#reader-monad), which abstracts over where an environment comes from.\n\n__Further reading__\n* [Fallible](https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Fallible) in language-ext\n* [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/) by Scott Wlaschin\n* [Control.Monad.Except](https://hackage.haskell.org/package/mtl/docs/Control-Monad-Except.html) (`MonadError`) on Hackage",
+      "codeBlocks": [
+        {
+          "lang": "csharp",
+          "code": "// Written once, for any monad that can fail with a string\nK<M, int> ParseAge<M>(string s) where M : Monad<M>, Fallible<string, M> =>\n    int.TryParse(s, out var n) && n >= 0\n        ? M.Pure(n)\n        : M.Fail<int>($\"'{s}' is not an age\");\n\n// Catch recovers; here every failure becomes a default of 0\nK<M, int> AgeOrZero<M>(string s) where M : Monad<M>, Fallible<string, M> =>\n    M.Catch(ParseAge<M>(s), _ => true, _ => M.Pure(0));\n\nParseAge<Either<string>>(\"42\");   // => Right(42)\nParseAge<Either<string>>(\"old\");  // => Left('old' is not an age)\nAgeOrZero<Either<string>>(\"old\"); // => Right(0)"
+        },
+        {
+          "lang": "csharp",
+          "code": "K<M, int> ParseAgeE<M>(string s) where M : Monad<M>, Fallible<M> =>\n    int.TryParse(s, out var n) ? M.Pure(n) : M.Fail<int>(Error.New($\"'{s}' is not an age\"));\n\nParseAgeE<Fin>(\"42\");  // => Succ(42)\nParseAgeE<Fin>(\"old\"); // => Fail('old' is not an age)"
+        }
+      ],
+      "furtherReading": [
+        {
+          "title": "Fallible",
+          "url": "https://github.com/louthy/language-ext/tree/v5.0.0-beta-77/LanguageExt.Core/Traits/Fallible"
+        },
+        {
+          "title": "Railway Oriented Programming",
+          "url": "https://fsharpforfunandprofit.com/rop/"
+        },
+        {
+          "title": "Control.Monad.Except",
+          "url": "https://hackage.haskell.org/package/mtl/docs/Control-Monad-Except.html"
+        }
+      ],
+      "crossRefs": [
+        "type-class",
+        "reader-monad"
+      ],
+      "relatedIds": [
+        "either",
+        "monad",
+        "type-class",
+        "side-effects",
+        "reader-monad",
         "monad-transformer"
       ]
     },
@@ -2027,6 +2086,7 @@
         "functor"
       ],
       "relatedIds": [
+        "parametricity",
         "type-class",
         "functor",
         "morphism",
@@ -2332,66 +2392,54 @@
       ],
       "crossRefs": [],
       "relatedIds": [
-        "polymorphism",
+        "parametricity",
         "contracts"
       ]
     },
     {
-      "id": "polymorphism",
-      "title": "Polymorphism",
+      "id": "parametricity",
+      "title": "Parametricity",
       "depth": 2,
       "category": "types-data",
       "aliases": [
-        "parametric polymorphism",
-        "ad hoc polymorphism",
-        "subtype polymorphism",
+        "free theorems",
+        "theorems for free",
+        "parametric",
+        "generic",
         "generics",
-        "dispatch",
-        "static dispatch",
-        "dynamic dispatch",
-        "overloading",
-        "parametricity"
+        "free theorem",
+        "parametric polymorphism"
       ],
-      "summary": "Writing code once that works for values of many types. There are three main kinds.",
-      "body": "Writing code once that works for values of many types. There are three main kinds.\n\n**Parametric** polymorphism is the same code for every type. A generic function knows nothing about its type parameter, so it can only pass values of that type around:\n\n```csharp\nSeq<A> Twice<A>(A x) => Seq(x, x);\n\nTwice(1);    // => [1, 1]\nTwice(\"hi\"); // => [hi, hi]\n```\n\nBecause `Twice` can't look inside an `A`, its signature alone rules out a lot of possible behaviour, a property known as parametricity.\n\n**Ad hoc** polymorphism is one name with a different implementation for each type. Overloading is the simplest form; [type classes](#type-class) are the generic form:\n\n```csharp\nDescribe.Of(42);   // => \"the number 42\"\nDescribe.Of(true); // => \"yes\"\n\nstatic class Describe\n{\n    public static string Of(int n) => $\"the number {n}\";\n    public static string Of(bool b) => b ? \"yes\" : \"no\";\n}\n```\n\n**Subtype** polymorphism is the object-oriented kind: code written against a base type works with every derived type, each overriding behaviour in its own way:\n\n```csharp\nvar shapes = Seq<Shape>(new Square(2), new Circle(1));\nvar areas  = shapes.Map(s => Math.Round(s.Area, 2)); // => [4, 3.14]\n\nabstract record Shape { public abstract double Area { get; } }\nrecord Square(double Side) : Shape { public override double Area => Side * Side; }\nrecord Circle(double Radius) : Shape { public override double Area => Math.PI * Radius * Radius; }\n```\n\nThe kinds differ in when the code to run is chosen, called dispatch. With parametric and ad hoc polymorphism the compiler picks it (static dispatch). With subtyping it is picked at run time from the object's actual class, through a virtual call (dynamic dispatch). Pattern matching over a [sum type](#sum-type) is another form of run-time dispatch, over a closed set of cases; the [Expression Problem](#expression-problem) compares the two.\n\n__Further reading__\n* [Polymorphism](https://en.wikipedia.org/wiki/Polymorphism_(computer_science)) on Wikipedia\n* [Parametricity](https://en.wikipedia.org/wiki/Parametricity) on Wikipedia\n* [Ad hoc polymorphism](https://en.wikipedia.org/wiki/Ad_hoc_polymorphism) on Wikipedia",
+      "summary": "The property that a generic function behaves the same way for every type it is given, because it can't inspect values of a type it knows nothing about. Generic code of this kind is called parametric polymorphism: one piece of code that works for every type. The useful consequence is that a generic signature alone limits what a function can do, often enough to prove things about it without reading its body (Philip Wadler called these \"theorems for free\").",
+      "body": "The property that a generic function behaves the same way for every type it is given, because it can't inspect values of a type it knows nothing about. Generic code of this kind is called parametric polymorphism: one piece of code that works for every type. The useful consequence is that a generic signature alone limits what a function can do, often enough to prove things about it without reading its body (Philip Wadler called these \"theorems for free\").\n\nA function `A F<A>(A x)` has no way to make a new `A` or change the one it got, so the only thing it can return is `x`: it must be the identity function. A function `Seq<A> F<A>(Seq<A> xs)` can only drop, repeat or reorder the elements it is given. So whatever it does, applying it before or after a `Map` gives the same result:\n\n```csharp\n// Parametric: it can only pick from the elements it is given\nSeq<A> FirstTwo<A>(Seq<A> xs) => xs.Take(2);\n\nFunc<int, int> tenfold = x => x * 10;\nvar xs = Seq(1, 2, 3);\n\nvar mapThenTake = FirstTwo(xs.Map(tenfold)); // => [10, 20]\nvar takeThenMap = FirstTwo(xs).Map(tenfold); // => [10, 20]\n```\n\nThat equation holds for any `Seq<A> -> Seq<A>` function and any `tenfold`, without looking at either. It is what lets you trust that a generic library function treats your type the same way it treats every other.\n\nC# only offers parametricity by convention. A generic method can test the type at run time with `is`, `typeof` or a cast, call `ToString` or `GetHashCode` (every value has them), return `default` or `null`, or use reflection, and each one breaks the guarantee:\n\n```csharp\n// Not parametric: it inspects A, so the free theorems no longer hold\nA Sneaky<A>(A x) => x is int n ? (A)(object)(n + 1) : x;\n\nSneaky(\"hi\"); // => \"hi\"\nSneaky(41);   // => 42\n```\n\nKeeping generic code free of those tricks keeps it parametric, and [type class](#type-class) constraints are the honest way to say \"this function needs to know something about `A`\".\n\n__Further reading__\n* [Parametricity](https://en.wikipedia.org/wiki/Parametricity) on Wikipedia\n* [Theorems for free!](https://people.mpi-sws.org/~dreyer/tor/papers/wadler.pdf) by Philip Wadler",
       "codeBlocks": [
         {
           "lang": "csharp",
-          "code": "Seq<A> Twice<A>(A x) => Seq(x, x);\n\nTwice(1);    // => [1, 1]\nTwice(\"hi\"); // => [hi, hi]"
+          "code": "// Parametric: it can only pick from the elements it is given\nSeq<A> FirstTwo<A>(Seq<A> xs) => xs.Take(2);\n\nFunc<int, int> tenfold = x => x * 10;\nvar xs = Seq(1, 2, 3);\n\nvar mapThenTake = FirstTwo(xs.Map(tenfold)); // => [10, 20]\nvar takeThenMap = FirstTwo(xs).Map(tenfold); // => [10, 20]"
         },
         {
           "lang": "csharp",
-          "code": "Describe.Of(42);   // => \"the number 42\"\nDescribe.Of(true); // => \"yes\"\n\nstatic class Describe\n{\n    public static string Of(int n) => $\"the number {n}\";\n    public static string Of(bool b) => b ? \"yes\" : \"no\";\n}"
-        },
-        {
-          "lang": "csharp",
-          "code": "var shapes = Seq<Shape>(new Square(2), new Circle(1));\nvar areas  = shapes.Map(s => Math.Round(s.Area, 2)); // => [4, 3.14]\n\nabstract record Shape { public abstract double Area { get; } }\nrecord Square(double Side) : Shape { public override double Area => Side * Side; }\nrecord Circle(double Radius) : Shape { public override double Area => Math.PI * Radius * Radius; }"
+          "code": "// Not parametric: it inspects A, so the free theorems no longer hold\nA Sneaky<A>(A x) => x is int n ? (A)(object)(n + 1) : x;\n\nSneaky(\"hi\"); // => \"hi\"\nSneaky(41);   // => 42"
         }
       ],
       "furtherReading": [
-        {
-          "title": "Polymorphism",
-          "url": "https://en.wikipedia.org/wiki/Polymorphism_(computer_science"
-        },
         {
           "title": "Parametricity",
           "url": "https://en.wikipedia.org/wiki/Parametricity"
         },
         {
-          "title": "Ad hoc polymorphism",
-          "url": "https://en.wikipedia.org/wiki/Ad_hoc_polymorphism"
+          "title": "Theorems for free!",
+          "url": "https://people.mpi-sws.org/~dreyer/tor/papers/wadler.pdf"
         }
       ],
       "crossRefs": [
-        "type-class",
-        "sum-type",
-        "expression-problem"
+        "type-class"
       ],
       "relatedIds": [
-        "type-class",
-        "expression-problem",
         "type-signatures",
-        "sum-type"
+        "type-class",
+        "functor",
+        "natural-transformation"
       ]
     },
     {
@@ -2405,10 +2453,14 @@
         "typeclass",
         "instance",
         "multi-parameter type class",
-        "static abstract"
+        "static abstract",
+        "ad hoc polymorphism",
+        "overloading",
+        "static dispatch",
+        "polymorphism"
       ],
-      "summary": "An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time.",
-      "body": "An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time.\n\nC# 11's static abstract interface members make this possible. Here a constraint on `Monoid<A>` (see [Monoid](#monoid)) lets a generic function call `A.Empty`, which belongs to the type, not to any value:\n\n```csharp\nA ConcatAll<A>(Seq<A> xs) where A : Monoid<A> =>\n    xs.Aggregate(A.Empty, (acc, x) => acc + x);\n\nConcatAll(Seq(Seq(1, 2), Seq(3))); // => [1, 2, 3]\nConcatAll(Seq(new Max(3), new Max(9), new Max(4))); // => Max { Value = 9 }\n\n// An instance for our own type: Max combines by keeping the larger value\nrecord Max(int Value) : Monoid<Max>\n{\n    public static Max Empty => new(int.MinValue);\n    public Max Combine(Max rhs) => Value >= rhs.Value ? this : rhs;\n}\n```\n\nA type class can take more than one type parameter. A single-parameter class says something about one type, such as `Monoid<A>` or `Functor<F>`. A multi-parameter class describes how types relate: `Natural<F, G>` says an `F` can be turned into a `G` (a [natural transformation](#natural-transformation)), `Readable<M, Env>` says `M` can read an environment of type `Env`, and `Fallible<E, F>` says `F` can fail with an `E`.\n\nSeparately, each parameter has a kind. `Monoid<A>`'s `A` is a plain type such as `int`, but `Functor<F>`'s `F` is a type constructor such as `Option`, which is why `Functor` needs [higher-kinded types](#higher-kinded-type).\n\n__Further reading__\n* [Type class](https://en.wikipedia.org/wiki/Type_class) on Wikipedia\n* [Explore static virtual members in interfaces](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/tutorials/static-virtual-interface-members) on Microsoft Learn",
+      "summary": "An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time. This is called ad hoc polymorphism: one name with a different implementation for each type, picked at compile time (static dispatch), where an overridden method is picked at run time from the object's actual class (dynamic dispatch).",
+      "body": "An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time. This is called ad hoc polymorphism: one name with a different implementation for each type, picked at compile time (static dispatch), where an overridden method is picked at run time from the object's actual class (dynamic dispatch).\n\nC# 11's static abstract interface members make this possible. Here a constraint on `Monoid<A>` (see [Monoid](#monoid)) lets a generic function call `A.Empty`, which belongs to the type, not to any value:\n\n```csharp\nA ConcatAll<A>(Seq<A> xs) where A : Monoid<A> =>\n    xs.Aggregate(A.Empty, (acc, x) => acc + x);\n\nConcatAll(Seq(Seq(1, 2), Seq(3))); // => [1, 2, 3]\nConcatAll(Seq(new Max(3), new Max(9), new Max(4))); // => Max { Value = 9 }\n\n// An instance for our own type: Max combines by keeping the larger value\nrecord Max(int Value) : Monoid<Max>\n{\n    public static Max Empty => new(int.MinValue);\n    public Max Combine(Max rhs) => Value >= rhs.Value ? this : rhs;\n}\n```\n\nA type class can take more than one type parameter. A single-parameter class says something about one type, such as `Monoid<A>` or `Functor<F>`. A multi-parameter class describes how types relate: `Natural<F, G>` says an `F` can be turned into a `G` (a [natural transformation](#natural-transformation)), `Readable<M, Env>` says `M` can read an environment of type `Env`, and `Fallible<E, F>` says `F` can fail with an `E`.\n\nSeparately, each parameter has a kind. `Monoid<A>`'s `A` is a plain type such as `int`, but `Functor<F>`'s `F` is a type constructor such as `Option`, which is why `Functor` needs [higher-kinded types](#higher-kinded-type).\n\n__Further reading__\n* [Type class](https://en.wikipedia.org/wiki/Type_class) on Wikipedia\n* [Ad hoc polymorphism](https://en.wikipedia.org/wiki/Ad_hoc_polymorphism) on Wikipedia\n* [Explore static virtual members in interfaces](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/tutorials/static-virtual-interface-members) on Microsoft Learn",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -2421,6 +2473,10 @@
           "url": "https://en.wikipedia.org/wiki/Type_class"
         },
         {
+          "title": "Ad hoc polymorphism",
+          "url": "https://en.wikipedia.org/wiki/Ad_hoc_polymorphism"
+        },
+        {
           "title": "Explore static virtual members in interfaces",
           "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/tutorials/static-virtual-interface-members"
         }
@@ -2431,7 +2487,8 @@
         "higher-kinded-type"
       ],
       "relatedIds": [
-        "polymorphism",
+        "parametricity",
+        "fallible",
         "higher-kinded-type",
         "monoid",
         "functor",
@@ -2501,10 +2558,14 @@
         "open/closed",
         "visitor pattern",
         "tagless final",
-        "extensibility"
+        "extensibility",
+        "dispatch",
+        "dynamic dispatch",
+        "virtual call",
+        "subtype polymorphism"
       ],
       "summary": "The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard.",
-      "body": "The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard.\n\nA [sum type](#sum-type) with pattern matching is closed over its cases. Adding an operation is just another function, but adding a case means changing every existing `switch`:\n\n```csharp\nint Eval(Expr e) => e switch\n{\n    Num n  => n.Value,\n    Plus p => Eval(p.Left) + Eval(p.Right),\n    _      => throw new ArgumentOutOfRangeException(nameof(e))\n};\n\n// A new operation leaves Eval untouched...\nstring Show(Expr e) => e switch\n{\n    Num n  => n.Value.ToString(),\n    Plus p => $\"({Show(p.Left)} + {Show(p.Right)})\",\n    _      => throw new ArgumentOutOfRangeException(nameof(e))\n};\n\nvar expr = new Plus(new Num(1), new Plus(new Num(2), new Num(3)));\nEval(expr); // => 6\nShow(expr); // => \"(1 + (2 + 3))\"\n\n// ...but a new case, such as Times, means revisiting Eval, Show and every other switch\nabstract record Expr;\nrecord Num(int Value) : Expr;\nrecord Plus(Expr Left, Expr Right) : Expr;\n```\n\nInterfaces (and [type classes](#type-class)) are the reverse: open over cases. A new case is just a new class, but a new operation must be added to the interface and to every class that implements it:\n\n```csharp\nvar tree = new PlusNode(new NumNode(1), new NumNode(2));\ntree.Eval(); // => 3\n\ninterface INode { int Eval(); }\nrecord NumNode(int Value) : INode { public int Eval() => Value; }\nrecord PlusNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() + Right.Eval(); }\n// A new case is one new class, with no other changes:\nrecord TimesNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() * Right.Eval(); }\n```\n\nThe choice is about which kind of change you expect more often. Functional code tends to fix the cases and add operations; object-oriented code tends to fix the operations and add cases. Techniques such as the visitor pattern and \"tagless final\" (operations as type classes over [higher-kinded types](#higher-kinded-type)) try to get both.\n\n__Further reading__\n* [Expression problem](https://en.wikipedia.org/wiki/Expression_problem) on Wikipedia\n* [The Expression Problem](https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt), Philip Wadler's original 1998 email",
+      "body": "The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard.\n\nA [sum type](#sum-type) with pattern matching is closed over its cases. Adding an operation is just another function, but adding a case means changing every existing `switch`:\n\n```csharp\nint Eval(Expr e) => e switch\n{\n    Num n  => n.Value,\n    Plus p => Eval(p.Left) + Eval(p.Right),\n    _      => throw new ArgumentOutOfRangeException(nameof(e))\n};\n\n// A new operation leaves Eval untouched...\nstring Show(Expr e) => e switch\n{\n    Num n  => n.Value.ToString(),\n    Plus p => $\"({Show(p.Left)} + {Show(p.Right)})\",\n    _      => throw new ArgumentOutOfRangeException(nameof(e))\n};\n\nvar expr = new Plus(new Num(1), new Plus(new Num(2), new Num(3)));\nEval(expr); // => 6\nShow(expr); // => \"(1 + (2 + 3))\"\n\n// ...but a new case, such as Times, means revisiting Eval, Show and every other switch\nabstract record Expr;\nrecord Num(int Value) : Expr;\nrecord Plus(Expr Left, Expr Right) : Expr;\n```\n\nInterfaces (and [type classes](#type-class)) are the reverse: open over cases. A new case is just a new class, but a new operation must be added to the interface and to every class that implements it:\n\n```csharp\nvar tree = new PlusNode(new NumNode(1), new NumNode(2));\ntree.Eval(); // => 3\n\ninterface INode { int Eval(); }\nrecord NumNode(int Value) : INode { public int Eval() => Value; }\nrecord PlusNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() + Right.Eval(); }\n// A new case is one new class, with no other changes:\nrecord TimesNode(INode Left, INode Right) : INode { public int Eval() => Left.Eval() * Right.Eval(); }\n```\n\nThe two designs also dispatch differently: the `switch` picks a branch by testing the value's case, while `tree.Eval()` is a virtual call that runs whichever `Eval` the object's class overrides. The choice between them is about which kind of change you expect more often. Functional code tends to fix the cases and add operations; object-oriented code tends to fix the operations and add cases. Techniques such as the visitor pattern and \"tagless final\" (operations as type classes over [higher-kinded types](#higher-kinded-type)) try to get both.\n\n__Further reading__\n* [Expression problem](https://en.wikipedia.org/wiki/Expression_problem) on Wikipedia\n* [The Expression Problem](https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt), Philip Wadler's original 1998 email",
       "codeBlocks": [
         {
           "lang": "csharp",
@@ -2531,7 +2592,6 @@
         "higher-kinded-type"
       ],
       "relatedIds": [
-        "polymorphism",
         "sum-type",
         "type-class",
         "higher-kinded-type"
@@ -2587,8 +2647,7 @@
         "expression-problem",
         "option",
         "either",
-        "prism",
-        "polymorphism"
+        "prism"
       ]
     },
     {
@@ -2794,6 +2853,7 @@
       ],
       "relatedIds": [
         "never-type",
+        "fallible",
         "option",
         "sum-type",
         "monad",
@@ -3166,7 +3226,7 @@
         "id": "side-effects",
         "name": "Side effects",
         "category": "purity-state",
-        "val": 10,
+        "val": 11,
         "summary": "A function or expression is said to have a side effect if apart from returning a value, it interacts with (reads from or writes to) external mutable state."
       },
       {
@@ -3250,7 +3310,7 @@
         "id": "functor",
         "name": "Functor",
         "category": "algebraic-structures",
-        "val": 18,
+        "val": 19,
         "summary": "An object that implements a map function that takes a function which is run on the contents of that object. A functor must adhere to two rules:"
       },
       {
@@ -3327,7 +3387,7 @@
         "id": "monad",
         "name": "Monad",
         "category": "algebraic-structures",
-        "val": 21,
+        "val": 22,
         "summary": "A monad is an object with of and chain functions. chain is like map except it un-nests the resulting nested object."
       },
       {
@@ -3362,14 +3422,14 @@
         "id": "monad-transformer",
         "name": "Monad Transformer",
         "category": "effects",
-        "val": 11,
+        "val": 12,
         "summary": "While functors and applicative functors compose naturally, monads do not compose generally without knowing their specific types. A Monad Transformer is a type constructor that takes an existing monad and produces a new monad with combined capabilities (such as combining error handling, asynchronous tasks, and state)."
       },
       {
         "id": "reader-monad",
         "name": "Reader Monad",
         "category": "effects",
-        "val": 8,
+        "val": 9,
         "summary": "A computation that reads from a shared, read-only environment. Instead of passing configuration through every function by hand, each step asks for what it needs, and the environment is supplied once, when the whole computation is run. It is dependency injection done with a monad."
       },
       {
@@ -3385,6 +3445,13 @@
         "category": "effects",
         "val": 9,
         "summary": "A computation that threads a piece of state from one step to the next. Each step can read the current state (get), replace it (put) or update it (modify), and the state is passed along behind the scenes, so pure code can describe a stateful algorithm without a mutable variable."
+      },
+      {
+        "id": "fallible",
+        "name": "Fallible",
+        "category": "effects",
+        "val": 10,
+        "summary": "A type class for computations that can fail with an error and recover from it, so error handling can be written once for every type that supports it. It has two operations: Fail produces a failure, and Catch handles one, optionally only errors that match a predicate. Haskell calls it MonadError."
       },
       {
         "id": "applicative-functor",
@@ -3488,7 +3555,7 @@
         "id": "natural-transformation",
         "name": "Natural Transformation",
         "category": "category-morphisms",
-        "val": 8,
+        "val": 9,
         "summary": "A structure-preserving mapping between two functors, transforming F<A> into G<A> without altering or inspecting the underlying value A."
       },
       {
@@ -3555,18 +3622,18 @@
         "summary": "In C# the types of arguments and return values are part of every function's signature. Even so, functional programmers often describe functions with Haskell-style type signatures in comments, because they are short and easy to read."
       },
       {
-        "id": "polymorphism",
-        "name": "Polymorphism",
+        "id": "parametricity",
+        "name": "Parametricity",
         "category": "types-data",
         "val": 8,
-        "summary": "Writing code once that works for values of many types. There are three main kinds."
+        "summary": "The property that a generic function behaves the same way for every type it is given, because it can't inspect values of a type it knows nothing about. Generic code of this kind is called parametric polymorphism: one piece of code that works for every type. The useful consequence is that a generic signature alone limits what a function can do, often enough to prove things about it without reading its body (Philip Wadler called these \"theorems for free\")."
       },
       {
         "id": "type-class",
         "name": "Type Class",
         "category": "algebraic-structures",
-        "val": 10,
-        "summary": "An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time."
+        "val": 11,
+        "summary": "An interface that describes what a type can do, written separately from the type, so that generic code can require it. Haskell calls them type classes; language-ext calls them traits. Unlike an ordinary interface, a type class describes the type rather than an object: its members are static, and the compiler chooses the implementation from the type, with no virtual call at run time. This is called ad hoc polymorphism: one name with a different implementation for each type, picked at compile time (static dispatch), where an overridden method is picked at run time from the object's actual class (dynamic dispatch)."
       },
       {
         "id": "higher-kinded-type",
@@ -3579,7 +3646,7 @@
         "id": "expression-problem",
         "name": "Expression Problem",
         "category": "types-data",
-        "val": 8,
+        "val": 7,
         "summary": "The difficulty of designing data so that both new cases and new operations can be added without editing existing code. Each common design makes one of the two easy and the other hard."
       },
       {
@@ -3593,7 +3660,7 @@
         "id": "sum-type",
         "name": "Sum type",
         "category": "types-data",
-        "val": 9,
+        "val": 8,
         "summary": "A Sum type is the combination of two types together into another one. It is called sum because the number of possible values in the result type is the sum of the input types."
       },
       {
@@ -3628,7 +3695,7 @@
         "id": "either",
         "name": "Either",
         "category": "types-data",
-        "val": 11,
+        "val": 12,
         "summary": "A sum type with two cases, Left and Right. By convention, Right represents a successful computation and Left contains an error or failure reason (\"right is right\")."
       },
       {
@@ -3979,18 +4046,53 @@
         "type": "core"
       },
       {
-        "source": "polymorphism",
+        "source": "parametricity",
+        "target": "type-signatures",
+        "type": "core"
+      },
+      {
+        "source": "parametricity",
         "target": "type-class",
         "type": "core"
       },
       {
-        "source": "polymorphism",
-        "target": "expression-problem",
+        "source": "parametricity",
+        "target": "functor",
         "type": "core"
       },
       {
-        "source": "polymorphism",
-        "target": "type-signatures",
+        "source": "parametricity",
+        "target": "natural-transformation",
+        "type": "core"
+      },
+      {
+        "source": "fallible",
+        "target": "either",
+        "type": "core"
+      },
+      {
+        "source": "fallible",
+        "target": "monad",
+        "type": "core"
+      },
+      {
+        "source": "fallible",
+        "target": "type-class",
+        "type": "core"
+      },
+      {
+        "source": "fallible",
+        "target": "side-effects",
+        "type": "core"
+      },
+      {
+        "source": "fallible",
+        "target": "reader-monad",
+        "type": "core"
+      },
+      {
+        "source": "fallible",
+        "target": "monad-transformer",
         "type": "core"
       },
       {
@@ -4441,11 +4543,6 @@
       {
         "source": "isomorphism",
         "target": "morphism",
-        "type": "reference"
-      },
-      {
-        "source": "polymorphism",
-        "target": "sum-type",
         "type": "reference"
       },
       {
