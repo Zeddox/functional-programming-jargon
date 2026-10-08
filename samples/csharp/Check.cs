@@ -8,11 +8,11 @@ public static class Check
     public static readonly List<string> Failures = [];
     public static string Section = "";
 
-    public static void That<T>(T actual, string expected, int line)
+    public static void That<T>(T actual, string expected, int line, string file = "readme.md")
     {
         var shown = Render(actual);
         if (Normalise(shown) != Normalise(expected))
-            Failures.Add($"readme.md:{line} [{Section}]\n    expected: {expected}\n    actual:   {shown}");
+            Failures.Add($"{file}:{line} [{Section}]\n    expected: {expected}\n    actual:   {shown}");
     }
 
     static string Normalise(string s) => string.Concat(s.Where(c => !char.IsWhiteSpace(c)));

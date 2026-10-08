@@ -1,5 +1,6 @@
-// Extracts every ```csharp block from readme.md into a compilable C# file per
-// section, so that the readme stays the single source of truth for samples.
+// Extracts every ```csharp block from readme.md (and combinators.md) into a
+// compilable C# file per section, so the docs stay the single source of truth
+// for samples.
 //
 // Conventions for readme snippets:
 //  * All blocks within a section are concatenated (in order) and must form
@@ -16,9 +17,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
-const readmePath = path.join(here, '../../readme.md')
 const outDir = path.join(here, 'Generated')
-const lines = fs.readFileSync(readmePath, 'utf8').split('\n')
+// `prefix` keeps section namespaces from different files apart.
+const SOURCES = [
+  { file: 'readme.md', prefix: '' },
+  { file: 'combinators.md', prefix: 'Combinators' }
+]
 
 const DECL = /^(\[.*\]\s*)?((public|internal|file|static|abstract|sealed|partial|readonly|ref)\s+)*(record|class|interface|struct|enum|delegate)\b/
 const CHECK = /^(\s*)(?:var\s+(\w+)\s*=\s*)?(.+?);\s*\/\/\s*=>\s*(.+?)\s*$/
@@ -26,22 +30,32 @@ const CHECK = /^(\s*)(?:var\s+(\w+)\s*=\s*)?(.+?);\s*\/\/\s*=>\s*(.+?)\s*$/
 const pascal = s => s.replace(/[^A-Za-z0-9]+/g, ' ').trim().split(' ')
   .map(w => w[0].toUpperCase() + w.slice(1)).join('')
 
-// 1. Collect sections (## / ###) after the TOC and their csharp blocks.
+// 1. Collect sections (## / ###) and their csharp blocks, skipping any
+//    table of contents (everything before a `<!-- /RM -->` marker).
 const sections = []
-let current = null
-let inToc = true
-for (let i = 0; i < lines.length; i++) {
-  const line = lines[i]
-  if (line.includes('<!-- /RM -->')) { inToc = false; continue }
-  if (inToc) continue
-  const h = /^#{2,3}\s+(.+)$/.exec(line)
-  if (h) { current = { title: h[1].trim(), blocks: [] }; sections.push(current); continue }
-  if (current && /^```(csharp|cs)\s*$/.test(line)) {
-    const start = i + 1
-    let end = start
-    while (end < lines.length && !/^```\s*$/.test(lines[end])) end++
-    current.blocks.push({ start: start + 1, body: lines.slice(start, end) }) // 1-based line no.
-    i = end
+for (const source of SOURCES) {
+  const filePath = path.join(here, '../..', source.file)
+  const lines = fs.readFileSync(filePath, 'utf8').split('\n')
+  const rel = path.relative(outDir, filePath).replaceAll('\\', '/')
+  let current = null
+  let inToc = lines.some(l => l.includes('<!-- /RM -->'))
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    if (line.includes('<!-- /RM -->')) { inToc = false; continue }
+    if (inToc) continue
+    const h = /^#{2,3}\s+(.+)$/.exec(line)
+    if (h) {
+      current = { title: h[1].trim(), blocks: [], file: source.file, rel, prefix: source.prefix }
+      sections.push(current)
+      continue
+    }
+    if (current && /^```(csharp|cs)\s*$/.test(line)) {
+      const start = i + 1
+      let end = start
+      while (end < lines.length && !/^```\s*$/.test(lines[end])) end++
+      current.blocks.push({ start: start + 1, body: lines.slice(start, end) }) // 1-based line no.
+      i = end
+    }
   }
 }
 
@@ -53,7 +67,7 @@ const depthDelta = l => { const c = code(l); return (c.match(/\{/g) || []).lengt
 // against `expected`. A `var x = ...` statement checks `x`; any other
 // statement is also compiled verbatim (in dead code) so that a snippet like
 // `1 + 1; // => 2`, which is not a valid C# statement, fails the build.
-function checkLastStatement (stmts, expected, ln) {
+function checkLastStatement (stmts, expected, ln, file) {
   let end = stmts.length - 1
   while (end >= 0 && stmts[end].trim() === '') end--
   let start = end
@@ -61,21 +75,22 @@ function checkLastStatement (stmts, expected, ln) {
   while (start > 0 && !ends(stmts[start - 1])) start--
   const text = stmts.slice(start, end + 1).join('\n').replace(/;\s*(\/\/.*)?$/, '')
   const lit = JSON.stringify(expected)
+  const at = `${ln}, ${JSON.stringify(file)}`
   const v = /^\s*var\s+(\w+)\s*=/.exec(text)
   stmts.splice(start, end - start + 1, v
-    ? `${text}; Jargon.Check.That(${v[1]}, ${lit}, ${ln});`
-    : `if (false) { ${text.trim()}; } Jargon.Check.That(${text.trim()}, ${lit}, ${ln});`)
+    ? `${text}; Jargon.Check.That(${v[1]}, ${lit}, ${at});`
+    : `if (false) { ${text.trim()}; } Jargon.Check.That(${text.trim()}, ${lit}, ${at});`)
 }
 
 // 2. Split each section into usings / statements / declarations, keeping
-//    #line directives so compiler errors point back at readme.md.
-const rel = path.relative(outDir, readmePath).replaceAll('\\', '/')
+//    #line directives so compiler errors point back at the markdown source.
 fs.rmSync(outDir, { recursive: true, force: true })
 fs.mkdirSync(outDir, { recursive: true })
 
 const registry = []
 for (const s of sections) {
   if (s.blocks.length === 0) continue
+  const rel = s.rel
   const usings = []
   const stmts = []
   const decls = []
@@ -105,21 +120,22 @@ for (const s of sections) {
       const own = /^\s*\/\/\s*=>\s*(.+?)\s*$/.exec(line)
       if (own) {
         // `// => expected` on its own line checks the statement just above it.
-        checkLastStatement(stmts, own[1], ln)
+        checkLastStatement(stmts, own[1], ln, s.file)
         stmts.push(line)
         return
       }
       const m = CHECK.exec(line)
       if (m) {
         stmts.push(line.replace(/\s*\/\/\s*=>.*$/, ''))
-        checkLastStatement(stmts, m[4], ln)
+        checkLastStatement(stmts, m[4], ln, s.file)
       } else {
         stmts.push(line)
       }
     })
   }
-  const ns = pascal(s.title)
-  registry.push({ ns, title: s.title })
+  const ns = s.prefix + pascal(s.title)
+  const title = s.prefix ? `${s.prefix}: ${s.title}` : s.title
+  registry.push({ ns, title })
   const file = [
     '// <auto-generated/> by extract.mjs from readme.md — do not edit.',
     '#nullable enable',
@@ -129,7 +145,7 @@ for (const s of sections) {
     '#line default',
     'public static class Section',
     '{',
-    `    public const string Title = ${JSON.stringify(s.title)};`,
+    `    public const string Title = ${JSON.stringify(title)};`,
     '    public static async Task Run()',
     '    {',
     ...stmts,

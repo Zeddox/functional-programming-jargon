@@ -440,6 +440,15 @@ entries.forEach(entry => {
   entry.relatedIds = Array.from(related);
 });
 
+// The C# combinator reference (combinators.md) is shown in the app as a popup
+const combinatorsPath = [path.join(__dirname, '../../combinators.md'), path.join(__dirname, '../combinators.md')]
+  .find(p => fs.existsSync(p));
+const combinatorsSource = combinatorsPath ? fs.readFileSync(combinatorsPath, 'utf8') : '';
+const combinatorsTitle = (/^#\s+(.+)$/m.exec(combinatorsSource) || [])[1] || 'Function Combinators';
+const combinators = combinatorsSource
+  ? { title: combinatorsTitle.trim(), markdown: combinatorsSource.replace(/^#\s+.+\n+/m, '').trim() }
+  : null;
+
 const output = {
   meta: {
     title: "FP Jargon",
@@ -451,6 +460,7 @@ const output = {
   },
   categories: CATEGORIES,
   terms: entries,
+  combinators,
   graph: {
     nodes: entries.map(e => ({
       id: e.id,
@@ -501,6 +511,10 @@ entries.forEach(e => {
   
   llmsFull += `---\n\n`;
 });
+
+if (combinators) {
+  llmsFull += `## ${combinators.title}\n\n${combinators.markdown}\n`;
+}
 
 const llmsFullPath = path.join(__dirname, '../public/llms-full.txt');
 fs.writeFileSync(llmsFullPath, llmsFull, 'utf8');

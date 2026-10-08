@@ -3,6 +3,7 @@ import jargonsData from './data/jargons.json';
 import GraphCanvas from './components/GraphCanvas';
 import SearchHUD from './components/SearchHUD';
 import NodeDetailPanel from './components/NodeDetailPanel';
+import CombinatorsModal from './components/CombinatorsModal';
 import { soundEffects } from './utils/audio';
 import {
   Search,
@@ -24,7 +25,7 @@ const clampPanelWidth = (width, winW) =>
   Math.max(MIN_PANEL_WIDTH, Math.min(width, winW - MIN_CANVAS_WIDTH));
 
 export default function App() {
-  const { meta, categories, terms, graph } = jargonsData;
+  const { meta, categories, terms, graph, combinators } = jargonsData;
   
   // Highlighted node on the graph (or from initial URL hash)
   const [selectedNodeId, setSelectedNodeId] = useState(() => {
@@ -49,6 +50,11 @@ export default function App() {
   // Command palette search modal
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // C# function combinator reference popup (also reachable via #combinators)
+  const [isCombinatorsOpen, setIsCombinatorsOpen] = useState(
+    () => typeof window !== 'undefined' && window.location.hash === '#combinators'
+  );
   
   // Customization toggles
   const [useCategoryColors] = useState(true);
@@ -111,7 +117,9 @@ export default function App() {
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.replace(/^#/, '');
-      if (hash && allTermsMap[hash]) {
+      if (hash === 'combinators') {
+        setIsCombinatorsOpen(true);
+      } else if (hash && allTermsMap[hash]) {
         setSelectedNodeId(hash);
         setIsPanelOpen(true);
         setSearchQuery('');
@@ -169,11 +177,20 @@ export default function App() {
     }
   }, [isDark]);
 
-  // Keyboard shortcut: Esc to close panel or search modal
+  const handleCloseCombinators = () => {
+    setIsCombinatorsOpen(false);
+    if (window.location.hash === '#combinators') {
+      window.history.replaceState(null, '', isPanelOpen && selectedNodeId ? `#${selectedNodeId}` : window.location.pathname);
+    }
+  };
+
+  // Keyboard shortcut: Esc to close combinators popup, search modal or panel
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        if (isSearchOpen) {
+        if (isCombinatorsOpen) {
+          handleCloseCombinators();
+        } else if (isSearchOpen) {
           setIsSearchOpen(false);
           setSearchQuery('');
         } else if (isPanelOpen) {
@@ -183,7 +200,7 @@ export default function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSearchOpen, isPanelOpen]);
+  }, [isSearchOpen, isPanelOpen, isCombinatorsOpen]);
 
   const activeTerm = (selectedNodeId && isPanelOpen) ? allTermsMap[selectedNodeId] : null;
 
@@ -356,6 +373,7 @@ export default function App() {
           allTermsMap={allTermsMap}
           onSelectTerm={handleSelectNode}
           onClose={handleClosePanel}
+          onOpenCombinators={() => setIsCombinatorsOpen(true)}
           soundEnabled={soundEnabled}
           useCategoryColors={useCategoryColors}
           isDark={isDark}
@@ -365,6 +383,16 @@ export default function App() {
           onResizingChange={setIsResizingPanel}
         />
       )}
+
+      {/* C# Function Combinator Reference */}
+      <CombinatorsModal
+        isOpen={isCombinatorsOpen}
+        combinators={combinators}
+        onClose={handleCloseCombinators}
+        onSelectTerm={handleSelectNode}
+        soundEnabled={soundEnabled}
+        isDark={isDark}
+      />
 
       {/* Command Palette Search Modal */}
       <SearchHUD

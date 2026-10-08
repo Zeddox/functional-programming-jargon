@@ -880,7 +880,7 @@ language-ext ships the C combinator as `flip`:
 flip(divide)(10)(30); // => 3
 ```
 
-See also [List of Functional Combinators in JavaScript](https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45) which includes links to more references.
+See also [Function Combinators in C#](combinators.md), a C# take on Avaq's [List of Functional Combinators in JavaScript](https://gist.github.com/Avaq/1f0636ec5c8d6aed2e45), which includes links to more references.
 
 ## Lazy evaluation
 

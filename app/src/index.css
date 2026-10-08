@@ -271,3 +271,25 @@
   margin-bottom: 1rem;
 }
 
+
+.prose-fp table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 0.5rem 0 0.85rem;
+}
+.prose-fp th, .prose-fp td {
+  border: 1px solid var(--border-subtle);
+  padding: 0.35rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.prose-fp th {
+  font-weight: 700;
+  background-color: var(--bg-surface);
+}
+.prose-fp h3 {
+  scroll-margin-top: 0.75rem;
+}

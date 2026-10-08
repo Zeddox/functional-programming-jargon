@@ -1,24 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, ExternalLink, Link2, BookOpen, GitFork, Check, ChevronUp, ChevronDown } from 'lucide-react';
-import { marked } from 'marked';
 import { soundEffects } from '../utils/audio';
+import { splitMarkdownParts, internalLinkTarget } from '../utils/markdown';
 import CodeBlock from './CodeBlock';
-
-// Configure marked for GitHub Flavored Markdown with custom link routing
-marked.use({
-  gfm: true,
-  breaks: true,
-  renderer: {
-    link({ href, title, text }) {
-      const isAnchor = href && href.startsWith('#');
-      if (isAnchor) {
-        const termId = href.replace(/^#/, '').toLowerCase();
-        return `<a href="${href}" data-term-id="${termId}" class="internal-term-link">${text}</a>`;
-      }
-      return `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-    }
-  }
-});
 
 export default function NodeDetailPanel({
   term,
@@ -26,6 +10,7 @@ export default function NodeDetailPanel({
   allTermsMap,
   onSelectTerm,
   onClose,
+  onOpenCombinators,
   soundEnabled,
   useCategoryColors,
   isDark,
@@ -63,51 +48,19 @@ export default function NodeDetailPanel({
 
     // Strip trailing further reading section since it has a dedicated section
     const cleanBody = term.body.replace(/\n*__Further reading[\s\S]*$/i, '').trim();
-
-    const parts = [];
-    const codeRegex = /```([a-z]*)\n([\s\S]*?)```/g;
-    let lastIndex = 0;
-    let match;
-
-    while ((match = codeRegex.exec(cleanBody)) !== null) {
-      if (match.index > lastIndex) {
-        const text = cleanBody.slice(lastIndex, match.index).trim();
-        if (text) {
-          parts.push({
-            type: 'markdown',
-            html: marked.parse(text)
-          });
-        }
-      }
-      parts.push({
-        type: 'code',
-        lang: match[1] || 'csharp',
-        code: match[2].trim()
-      });
-      lastIndex = codeRegex.lastIndex;
-    }
-
-    if (lastIndex < cleanBody.length) {
-      const text = cleanBody.slice(lastIndex).trim();
-      if (text) {
-        parts.push({
-          type: 'markdown',
-          html: marked.parse(text)
-        });
-      }
-    }
-
-    return parts;
+    return splitMarkdownParts(cleanBody);
   }, [term]);
 
   // Click handler to catch internal markdown links and switch concepts
   const handleContentClick = (e) => {
-    const link = e.target.closest('a');
-    if (!link) return;
-    const termId = link.getAttribute('data-term-id') || (link.getAttribute('href')?.startsWith('#') ? link.getAttribute('href').slice(1) : null);
-    if (termId && allTermsMap && allTermsMap[termId.toLowerCase()]) {
+    const target = internalLinkTarget(e.target.closest('a'));
+    if (target?.type === 'combinators') {
       e.preventDefault();
-      onSelectTerm(termId.toLowerCase());
+      onOpenCombinators();
+      soundEffects.toggle(soundEnabled);
+    } else if (target?.type === 'term' && allTermsMap && allTermsMap[target.id]) {
+      e.preventDefault();
+      onSelectTerm(target.id);
       soundEffects.select(soundEnabled);
     }
   };
