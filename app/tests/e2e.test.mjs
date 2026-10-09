@@ -149,7 +149,7 @@ server.listen(PORT, async () => {
 
     console.log('Running test 7: Graph views widen for hidden terms...');
     const viewPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    const checkedView = () => viewPage.locator('[role="radiogroup"] [aria-checked="true"]').textContent();
+    const checkedView = () => viewPage.locator('[role="radiogroup"][aria-label="Graph view"] [aria-checked="true"]').textContent();
     await viewPage.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
     if (!(await checkedView()).startsWith('Essentials')) throw new Error(`Default view should be Essentials, got ${await checkedView()}`);
     await viewPage.goto(`http://localhost:${PORT}/#yoneda-lemma`, { waitUntil: 'networkidle' });
@@ -209,24 +209,31 @@ server.listen(PORT, async () => {
     await topicPage.reload({ waitUntil: 'networkidle' });
     const topicView = () => topicPage.locator('[role="radiogroup"][aria-label="Graph view"] [aria-checked="true"]').textContent();
     if (!(await topicView()).startsWith('Essentials')) throw new Error('Should start in Essentials');
-    const picker = topicPage.getByRole('combobox', { name: 'Topic' });
-    if ((await picker.locator('option').count()) !== 9) throw new Error('The picker should list all 8 topics plus "All topics"');
-    if (!(await picker.locator('option[value="lambda-calculus"]').textContent()).includes('in Practical')) throw new Error('A topic Essentials hides should say which view shows it');
+    const picker = topicPage.getByRole('radiogroup', { name: 'Topic' });
+    const topicItem = (name) => picker.getByRole('radio', { name });
+    const pickedTopic = () => picker.locator('[aria-checked="true"]').textContent();
+    if ((await picker.getByRole('radio').count()) !== 9) throw new Error('The picker should list all 8 topics plus "All topics"');
+    if (!(await topicItem(/Lambda Calculus/).textContent()).includes('in Practical')) throw new Error('A topic Essentials hides should say which view shows it');
     // A topic the view shows keeps the view
-    await picker.selectOption('effects');
+    await topicItem(/Effects/).click();
     if (!(await topicView()).startsWith('Essentials')) throw new Error('Effects is in Essentials; the view should stay');
     // A topic it hides widens to the next view that has it
-    await picker.selectOption('lambda-calculus');
+    await topicItem(/Lambda Calculus/).click();
     await topicPage.waitForFunction(() => document.querySelector('[role="radiogroup"][aria-label="Graph view"] [aria-checked="true"]')?.textContent.startsWith('Practical'));
-    if ((await picker.inputValue()) !== 'lambda-calculus') throw new Error('The picked topic should stay selected after widening');
+    if (!(await pickedTopic()).includes('Lambda Calculus')) throw new Error('The picked topic should stay selected after widening');
+    // Zooming far out lets go of the topic
+    await topicPage.mouse.move(640, 400);
+    for (let i = 0; i < 12; i++) await topicPage.mouse.wheel(0, 200);
+    if (!(await pickedTopic()).startsWith('All topics')) throw new Error('Zooming out should go back to all topics');
     // Narrowing the view so the topic disappears drops it; Reset clears it too
+    await topicItem(/Lambda Calculus/).click();
     await topicPage.getByRole('radio', { name: /Essentials/ }).click();
-    await topicPage.waitForFunction(() => document.querySelector('[data-testid="topic-picker"]').value === '');
-    await picker.selectOption('types-data');
+    await topicPage.waitForFunction(() => document.querySelector('[data-testid="topic-picker"] [aria-checked="true"]')?.textContent.startsWith('All topics'));
+    await topicItem(/Types/).first().click();
     await topicPage.getByRole('button', { name: /Reset/ }).click();
-    if ((await picker.inputValue()) !== '') throw new Error('Reset should go back to all topics');
+    if (!(await pickedTopic()).startsWith('All topics')) throw new Error('Reset should go back to all topics');
     await topicPage.close();
-    console.log('✓ Test 10 passed: Topics frame their ring, widen the view when hidden, and reset cleanly.');
+    console.log('✓ Test 10 passed: Topics frame their ring, widen the view when hidden, follow the camera out, and reset cleanly.');
 
   } catch (err) {
     console.error('Test failed:', err);

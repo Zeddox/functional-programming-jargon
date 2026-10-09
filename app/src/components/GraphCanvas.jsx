@@ -103,17 +103,19 @@ export default function GraphCanvas({
     // of the floating header above and the controls below
     const rect = containerRef.current?.getBoundingClientRect() ?? { top: 0, width: winW, height: winH };
     // With nothing selected the footer also holds the empty-state card
-    const HEADER = 96, FOOTER = selectedNodeId ? 56 : isMobile ? 200 : 140;
+    // The topic list runs down the left edge above phone width
+    const HEADER = isMobile ? 96 : 56, FOOTER = selectedNodeId ? 56 : isMobile ? 200 : 140;
+    const LEFT = isMobile ? 0 : 272;
     const drawerW = isPanelOpen && !isMobile ? panelWidth : 0;
     const sheetH = isPanelOpen && isMobile ? winH * 0.46 : 0;
     const top = Math.max(0, HEADER - rect.top);
-    const visW = rect.width - drawerW;
+    const visW = rect.width - drawerW - LEFT;
     const visH = rect.height - top - Math.max(FOOTER, sheetH);
     const scale = Math.min(visW / (x1 - x0), visH / (y1 - y0)) * 0.96;
 
     // World point that should sit in the middle of the visible area
     const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-    const shiftX = (rect.width / 2 - visW / 2) / scale;
+    const shiftX = (rect.width / 2 - (LEFT + visW / 2)) / scale;
     const shiftY = (rect.height / 2 - (top + visH / 2)) / scale;
     return { x: -cx - shiftX, y: -cy - shiftY, scale };
   };
@@ -857,6 +859,7 @@ export default function GraphCanvas({
       }
     }
 
+    if (isPanning && Math.hypot(e.clientX - panStart.x, e.clientY - panStart.y) >= 4) followCamera();
     stateRef.current.isPanning = false;
   };
 
@@ -955,6 +958,7 @@ export default function GraphCanvas({
     if (touchRef.current.isPinching) {
       if (e.touches.length < 2) {
         touchRef.current.isPinching = false;
+        followCamera();
       }
       return;
     }
@@ -971,6 +975,7 @@ export default function GraphCanvas({
       }
     }
 
+    if (touchRef.current.hasMoved && stateRef.current.isPanning) followCamera();
     stateRef.current.dragNode = null;
     stateRef.current.isPanning = false;
   };
@@ -982,6 +987,25 @@ export default function GraphCanvas({
     const newScale = Math.max(0.15, Math.min(3.5, camera.targetScale * zoomFactor));
     camera.targetScale = newScale;
     stateRef.current.followOverview = false;
+    followCamera();
+  };
+
+  // After the user pans or zooms, the topic follows the camera: the ring the
+  // view is centred in, once it fills at least half the screen; else none
+  const followCamera = () => {
+    const { camera, clusterCenters, clusterRings } = stateRef.current;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect || !clusterCenters) return;
+    const x = -camera.targetX, y = -camera.targetY;
+    const fit = Math.min(rect.width, rect.height) * 0.5;
+    let found = '', nearest = Infinity;
+    for (const [id, c] of Object.entries(clusterCenters)) {
+      const ring = clusterRings[id];
+      const d = Math.hypot(x - c.x, y - c.y);
+      if (d < ring && ring * 2 * camera.targetScale >= fit && d < nearest) { found = id; nearest = d; }
+    }
+    stateRef.current.topic = found;
+    setTopic(found);
   };
 
   const handleResetCamera = () => {
@@ -1063,33 +1087,67 @@ export default function GraphCanvas({
         </div>
       )}
 
-      {/* Frame one topic (a dashed ring): top left, clear of the bottom controls */}
-      {topicIds.length > 0 && (
-        <div className="absolute top-16 left-4 sm:left-6 z-20 font-mono">
-          <select
-            aria-label="Topic"
-            data-testid="topic-picker"
-            value={topic}
-            onChange={e => handlePickTopic(e.target.value)}
-            className={`max-w-[15rem] truncate px-1.5 py-1 text-[11px] border backdrop-blur-md cursor-pointer ${
-              isDark
-                ? 'bg-[#1a1a19]/90 text-[#f0f0ee] border-[rgba(240,240,238,0.18)]'
-                : 'bg-[#eaeae8]/90 text-[#1a1a19] border-[rgba(26,26,25,0.18)]'
-            }`}
-          >
-            <option value="">All topics</option>
-            {topicIds.map(id => {
-              const shown = shownByTopic[id] || 0;
-              const wider = shown ? null : viewWithTopic(id);
-              return (
-                <option key={id} value={id}>
-                  {categories[id].name} · {shown ? shown : wider ? `in ${VIEW_LABELS[wider]}` : 0}
-                </option>
-              );
-            })}
-          </select>
-        </div>
-      )}
+      {/* Frame one topic (a dashed ring): a list down the left, a dropdown on phones */}
+      {topicIds.length > 0 && (() => {
+        const fg = isDark ? '#f0f0ee' : '#1a1a19';
+        const colorOf = (id) => useCategoryColors ? categories[id].color : (isDark ? '#38bdf8' : '#0284c7');
+        const countLabel = (id) => {
+          const shown = shownByTopic[id] || 0;
+          const wider = shown ? null : viewWithTopic(id);
+          return shown ? shown : wider ? `in ${VIEW_LABELS[wider]}` : 0;
+        };
+        const item = (id, label, color) => {
+          const isActive = id === topic;
+          return (
+            <button
+              key={id || 'all'}
+              role="radio"
+              aria-checked={isActive}
+              onClick={() => handlePickTopic(isActive ? '' : id)}
+              className="flex items-center justify-between gap-3 px-2 py-1 text-left border-l-2 transition-colors"
+              style={{
+                color: fg,
+                borderLeftColor: isActive ? color : `${color}66`,
+                backgroundColor: isActive ? `${color}40` : `${color}14`,
+                boxShadow: isActive ? `inset 0 0 0 1px ${color}` : 'none'
+              }}
+            >
+              <span className="truncate">{label}</span>
+              {id && <span className="opacity-60 shrink-0">{countLabel(id)}</span>}
+            </button>
+          );
+        };
+        return (
+          <div className="absolute top-16 left-4 sm:left-6 z-20 font-mono">
+            <div
+              role="radiogroup"
+              aria-label="Topic"
+              data-testid="topic-picker"
+              className={`hidden sm:flex flex-col gap-px w-60 text-[11px] border backdrop-blur-md ${
+                isDark ? 'bg-[#1a1a19]/90 border-[rgba(240,240,238,0.18)]' : 'bg-[#eaeae8]/90 border-[rgba(26,26,25,0.18)]'
+              }`}
+            >
+              {item('', 'All topics', isDark ? '#f0f0ee' : '#1a1a19')}
+              {topicIds.map(id => item(id, categories[id].name, colorOf(id)))}
+            </div>
+            <select
+              aria-label="Topic"
+              value={topic}
+              onChange={e => handlePickTopic(e.target.value)}
+              className={`sm:hidden max-w-[15rem] truncate px-1.5 py-1 text-[11px] border backdrop-blur-md cursor-pointer ${
+                isDark
+                  ? 'bg-[#1a1a19]/90 text-[#f0f0ee] border-[rgba(240,240,238,0.18)]'
+                  : 'bg-[#eaeae8]/90 text-[#1a1a19] border-[rgba(26,26,25,0.18)]'
+              }`}
+            >
+              <option value="">All topics</option>
+              {topicIds.map(id => (
+                <option key={id} value={id}>{categories[id].name} · {countLabel(id)}</option>
+              ))}
+            </select>
+          </div>
+        );
+      })()}
 
       {/* Canvas Floating Controls (Adapts dynamically to mobile bottom sheet) */}
       <div className={`absolute ${
