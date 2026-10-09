@@ -101,6 +101,10 @@ export default function App() {
 
   const viewCounts = useMemo(() => Object.fromEntries(VIEW_LEVELS.map(v =>
     [v, terms.filter(t => levelRank(t.level) <= levelRank(v)).length])), [terms]);
+  // Per topic (category), how many terms each view shows: { [category]: { [view]: n } }
+  const topicCounts = useMemo(() => Object.fromEntries(Object.keys(categories).map(id =>
+    [id, Object.fromEntries(VIEW_LEVELS.map(v =>
+      [v, terms.filter(t => t.category === id && levelRank(t.level) <= levelRank(v)).length]))])), [terms, categories]);
 
   const pathSteps = useMemo(() => activePath?.steps.map(s => s.termId) ?? null, [activePath]);
 
@@ -534,6 +538,7 @@ export default function App() {
           pathSeen={activePath ? progress.paths[activePath.id]?.seen : null}
           view={view}
           viewCounts={viewCounts}
+          topicCounts={topicCounts}
           onViewChange={(next) => {
             setView(next);
             soundEffects.toggle(soundEnabled);

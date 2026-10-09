@@ -202,6 +202,32 @@ server.listen(PORT, async () => {
     await pathPage.close();
     console.log('✓ Test 8 passed: Paths start, advance, pause on Esc and resume after reload.');
 
+    console.log('Running test 10: Topic picker frames a topic and widens the view when needed...');
+    const topicPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    await topicPage.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
+    await topicPage.evaluate(() => localStorage.removeItem('fp_view'));
+    await topicPage.reload({ waitUntil: 'networkidle' });
+    const topicView = () => topicPage.locator('[role="radiogroup"][aria-label="Graph view"] [aria-checked="true"]').textContent();
+    if (!(await topicView()).startsWith('Essentials')) throw new Error('Should start in Essentials');
+    const picker = topicPage.getByRole('combobox', { name: 'Topic' });
+    if ((await picker.locator('option').count()) !== 9) throw new Error('The picker should list all 8 topics plus "All topics"');
+    if (!(await picker.locator('option[value="lambda-calculus"]').textContent()).includes('in Practical')) throw new Error('A topic Essentials hides should say which view shows it');
+    // A topic the view shows keeps the view
+    await picker.selectOption('effects');
+    if (!(await topicView()).startsWith('Essentials')) throw new Error('Effects is in Essentials; the view should stay');
+    // A topic it hides widens to the next view that has it
+    await picker.selectOption('lambda-calculus');
+    await topicPage.waitForFunction(() => document.querySelector('[role="radiogroup"][aria-label="Graph view"] [aria-checked="true"]')?.textContent.startsWith('Practical'));
+    if ((await picker.inputValue()) !== 'lambda-calculus') throw new Error('The picked topic should stay selected after widening');
+    // Narrowing the view so the topic disappears drops it; Reset clears it too
+    await topicPage.getByRole('radio', { name: /Essentials/ }).click();
+    await topicPage.waitForFunction(() => document.querySelector('[data-testid="topic-picker"]').value === '');
+    await picker.selectOption('types-data');
+    await topicPage.getByRole('button', { name: /Reset/ }).click();
+    if ((await picker.inputValue()) !== '') throw new Error('Reset should go back to all topics');
+    await topicPage.close();
+    console.log('✓ Test 10 passed: Topics frame their ring, widen the view when hidden, and reset cleanly.');
+
   } catch (err) {
     console.error('Test failed:', err);
     exitCode = 1;
