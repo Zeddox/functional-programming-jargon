@@ -47,7 +47,7 @@ export default function CodeLab({ term, initialExerciseId = null, isDark, passed
   return (
     <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-black/50 p-0 sm:p-6" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div role="dialog" aria-modal="true" aria-labelledby="codelab-title" data-testid="codelab"
-        className={`flex w-full max-w-6xl flex-col overflow-hidden border sm:rounded-xl ${surface}`}>
+        className={`flex w-full sm:w-[80vw] flex-col overflow-hidden border sm:rounded-xl ${surface}`}>
         <header className={`flex flex-wrap items-center gap-2 border-b px-4 py-3 ${line}`}>
           <h2 id="codelab-title" className="mr-2 text-sm font-semibold">Try it: {term.title}</h2>
           <div role="tablist" aria-label="Code" className="flex flex-wrap gap-1">
