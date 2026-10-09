@@ -364,6 +364,15 @@ export default function App() {
   const activeTerm = (selectedNodeId && isPanelOpen) ? allTermsMap[selectedNodeId] : null;
   const resumable = pausedPath(progress, paths);
 
+  // The tab title names the selected term and its topic, e.g. "Functor · Category & Morphisms — FP Jargon"
+  useEffect(() => {
+    const term = selectedNodeId && allTermsMap[selectedNodeId];
+    const topic = term && categories[term.category]?.name;
+    document.title = term
+      ? `${term.title}${topic ? ` · ${topic}` : ''} — FP Jargon`
+      : 'FP Jargon — Interactive Functional Programming Knowledge Graph';
+  }, [selectedNodeId]);
+
   return (
     <div className={`relative w-screen h-screen overflow-hidden flex flex-col font-mono transition-colors duration-200 ${
       isDark ? 'bg-[#121212] text-[#f0f0ee]' : 'bg-[#eaeae8] text-[#1a1a19]'

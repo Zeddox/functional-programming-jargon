@@ -58,6 +58,8 @@ server.listen(PORT, async () => {
     if (!isPanelOpen) throw new Error('Aside panel did not open on /#thunk');
     const title = await page.locator('aside h2').textContent();
     if (!title.toLowerCase().includes('thunk')) throw new Error(`Expected title Thunk, got: ${title}`);
+    const tabTitle = await page.title();
+    if (!/^Thunk · .+ — FP Jargon$/.test(tabTitle)) throw new Error(`Tab title should name the term and topic, got: ${tabTitle}`);
     console.log('✓ Test 1 passed: /#thunk opened Thunk concept successfully.');
 
     console.log('Running test 2: Search and select concept...');
@@ -100,6 +102,7 @@ server.listen(PORT, async () => {
     await page.waitForTimeout(300);
     if (await page.locator('aside').isVisible().catch(() => false)) throw new Error('Empty-canvas click should close the panel');
     if (!(await page.getByTestId('empty-state').isVisible())) throw new Error('Empty-canvas click should clear the selection');
+    if (!(await page.title()).startsWith('FP Jargon —')) throw new Error('Clearing the selection should restore the tab title');
     console.log('✓ Test 3 passed: Root URL shows the overview; Esc and empty-canvas clicks clear the selection.');
 
     console.log('Running test 4: Batch 3 direct hash navigation (#free-monad, #profunctor, #algebraic-effects)...');
