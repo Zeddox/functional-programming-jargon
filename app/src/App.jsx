@@ -691,6 +691,7 @@ export default function App() {
             term={allTermsMap[codeLab.termId]}
             initialExerciseId={codeLab.exerciseId}
             isDark={isDark}
+            passedExercises={passedExercises}
             onClose={() => setCodeLab(null)}
             onExercisePassed={(id) => setPassedExercises(prev => ({ ...prev, [id]: true }))}
           />
