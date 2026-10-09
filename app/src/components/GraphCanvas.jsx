@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { soundEffects } from '../utils/audio';
-import { clusterLayout, REFERENCE_EXTENT } from '../utils/clusterLayout';
+import { clusterLayout, REFERENCE_EXTENT, CLUSTER_ORDER } from '../utils/clusterLayout';
 import { VIEW_LEVELS, VIEW_LABELS } from '../utils/learning';
 
 // Colour of the active learning path's route and step badges
@@ -36,12 +36,15 @@ export default function GraphCanvas({
   pathSeen = null,
   view,
   viewCounts = {},
+  topicCounts = {},
   onViewChange
 }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const [hoveredNodeId, setHoveredNodeId] = useState(null);
   const [tooltip, setTooltip] = useState(null);
+  // Topic (category) the camera frames instead of the whole graph; '' for all
+  const [topic, setTopic] = useState('');
 
   // Simulation and camera state refs (mutable for 60fps render loop)
   const stateRef = useRef({
@@ -74,16 +77,25 @@ export default function GraphCanvas({
   });
 
   // Camera target that fits every node (with room for its label) into the
-  // space left between the header, the bottom controls and an open drawer
+  // space left between the header, the bottom controls and an open drawer.
+  // With a topic picked, it fits that topic's ring (and its name pill) instead.
   const overviewTarget = () => {
     const winW = typeof window !== 'undefined' ? window.innerWidth : 1280;
     const winH = typeof window !== 'undefined' ? window.innerHeight : 800;
     const isMobile = winW < 640;
     const PAD = 50;
     let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-    for (const n of stateRef.current.nodes) {
-      x0 = Math.min(x0, n.x - PAD); x1 = Math.max(x1, n.x + PAD);
-      y0 = Math.min(y0, n.y - PAD); y1 = Math.max(y1, n.y + PAD);
+    const { topic: framed, clusterCenters, clusterRings } = stateRef.current;
+    const center = framed && clusterCenters[framed];
+    if (center) {
+      const ring = clusterRings[framed] + 20;
+      x0 = center.x - ring; x1 = center.x + ring;
+      y0 = center.y - ring - 30; y1 = center.y + ring;
+    } else {
+      for (const n of stateRef.current.nodes) {
+        x0 = Math.min(x0, n.x - PAD); x1 = Math.max(x1, n.x + PAD);
+        y0 = Math.min(y0, n.y - PAD); y1 = Math.max(y1, n.y + PAD);
+      }
     }
     if (!Number.isFinite(x0)) return { x: 0, y: 0, scale: 0.5 };
 
@@ -91,7 +103,7 @@ export default function GraphCanvas({
     // of the floating header above and the controls below
     const rect = containerRef.current?.getBoundingClientRect() ?? { top: 0, width: winW, height: winH };
     // With nothing selected the footer also holds the empty-state card
-    const HEADER = 56, FOOTER = selectedNodeId ? 56 : isMobile ? 200 : 140;
+    const HEADER = 96, FOOTER = selectedNodeId ? 56 : isMobile ? 200 : 140;
     const drawerW = isPanelOpen && !isMobile ? panelWidth : 0;
     const sheetH = isPanelOpen && isMobile ? winH * 0.46 : 0;
     const top = Math.max(0, HEADER - rect.top);
@@ -106,6 +118,7 @@ export default function GraphCanvas({
     return { x: -cx - shiftX, y: -cy - shiftY, scale };
   };
   stateRef.current.overviewTarget = overviewTarget;
+  stateRef.current.topic = topic;
   // The render loop reads the active path from here, so it never sees stale props
   stateRef.current.path = pathSteps
     ? { steps: pathSteps, index: pathIndex, seen: new Set(pathSeen || []), ids: new Set(pathSteps) }
@@ -972,9 +985,41 @@ export default function GraphCanvas({
   };
 
   const handleResetCamera = () => {
+    stateRef.current.topic = '';
+    setTopic('');
     showOverview();
     soundEffects.toggle(soundEnabled);
   };
+
+  // Topics in ring order, each with how many of its terms the current view shows
+  const shownByTopic = useMemo(() => {
+    const counts = {};
+    for (const n of graphData?.nodes ?? []) counts[n.category] = (counts[n.category] || 0) + 1;
+    return counts;
+  }, [graphData]);
+  const topicIds = useMemo(() => [
+    ...CLUSTER_ORDER.filter(id => categories?.[id]),
+    ...Object.keys(categories || {}).filter(id => !CLUSTER_ORDER.includes(id))
+  ], [categories]);
+  // The first broader view that has some of this topic's terms
+  const viewWithTopic = (id) => VIEW_LEVELS.slice(VIEW_LEVELS.indexOf(view) + 1).find(level => topicCounts[id]?.[level] > 0);
+
+  // Picking a topic frames its ring; a topic the view hides widens the view first
+  const handlePickTopic = (id) => {
+    if (id && !shownByTopic[id]) {
+      const wider = viewWithTopic(id);
+      if (wider) onViewChange?.(wider);
+    }
+    stateRef.current.topic = id;
+    setTopic(id);
+    showOverview();
+    soundEffects.toggle(soundEnabled);
+  };
+
+  // A view that no longer shows the framed topic drops it
+  useEffect(() => {
+    if (topic && graphData && !shownByTopic[topic]) setTopic('');
+  }, [shownByTopic]);
 
   return (
     <div
@@ -1015,6 +1060,34 @@ export default function GraphCanvas({
           <p className="text-[11px] line-clamp-2 leading-relaxed opacity-80">
             {tooltip.node.summary}
           </p>
+        </div>
+      )}
+
+      {/* Frame one topic (a dashed ring): top left, clear of the bottom controls */}
+      {topicIds.length > 0 && (
+        <div className="absolute top-16 left-4 sm:left-6 z-20 font-mono">
+          <select
+            aria-label="Topic"
+            data-testid="topic-picker"
+            value={topic}
+            onChange={e => handlePickTopic(e.target.value)}
+            className={`max-w-[15rem] truncate px-1.5 py-1 text-[11px] border backdrop-blur-md cursor-pointer ${
+              isDark
+                ? 'bg-[#1a1a19]/90 text-[#f0f0ee] border-[rgba(240,240,238,0.18)]'
+                : 'bg-[#eaeae8]/90 text-[#1a1a19] border-[rgba(26,26,25,0.18)]'
+            }`}
+          >
+            <option value="">All topics</option>
+            {topicIds.map(id => {
+              const shown = shownByTopic[id] || 0;
+              const wider = shown ? null : viewWithTopic(id);
+              return (
+                <option key={id} value={id}>
+                  {categories[id].name} · {shown ? shown : wider ? `in ${VIEW_LABELS[wider]}` : 0}
+                </option>
+              );
+            })}
+          </select>
         </div>
       )}
 
