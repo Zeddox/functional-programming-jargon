@@ -58,6 +58,8 @@ export default function App() {
 
   
   // Highlighted node on the graph (from the initial URL hash); null shows the overview
+  // Topic (category) the graph frames; GraphCanvas owns it and reports changes
+  const [framedTopic, setFramedTopic] = useState('');
   const [selectedNodeId, setSelectedNodeId] = useState(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash.replace(/^#/, '');
@@ -364,14 +366,17 @@ export default function App() {
   const activeTerm = (selectedNodeId && isPanelOpen) ? allTermsMap[selectedNodeId] : null;
   const resumable = pausedPath(progress, paths);
 
-  // The tab title names the selected term and its topic, e.g. "Functor · Category & Morphisms — FP Jargon"
+  // The tab title names the selected term and its topic, e.g. "Functor · Category & Morphisms — FP Jargon",
+  // or with nothing selected the topic the graph frames, e.g. "Effects — FP Jargon"
   useEffect(() => {
     const term = selectedNodeId && allTermsMap[selectedNodeId];
-    const topic = term && categories[term.category]?.name;
+    const topic = term ? categories[term.category]?.name : categories[framedTopic]?.name;
     document.title = term
       ? `${term.title}${topic ? ` · ${topic}` : ''} — FP Jargon`
-      : 'FP Jargon — Interactive Functional Programming Knowledge Graph';
-  }, [selectedNodeId]);
+      : topic
+        ? `${topic} — FP Jargon`
+        : 'FP Jargon — Interactive Functional Programming Knowledge Graph';
+  }, [selectedNodeId, framedTopic]);
 
   return (
     <div className={`relative w-screen h-screen overflow-hidden flex flex-col font-mono transition-colors duration-200 ${
@@ -548,6 +553,7 @@ export default function App() {
           view={view}
           viewCounts={viewCounts}
           topicCounts={topicCounts}
+          onTopicChange={setFramedTopic}
           onViewChange={(next) => {
             setView(next);
             soundEffects.toggle(soundEnabled);

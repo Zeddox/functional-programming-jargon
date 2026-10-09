@@ -37,6 +37,7 @@ export default function GraphCanvas({
   view,
   viewCounts = {},
   topicCounts = {},
+  onTopicChange,
   onViewChange
 }) {
   const canvasRef = useRef(null);
@@ -1039,6 +1040,8 @@ export default function GraphCanvas({
     showOverview();
     soundEffects.toggle(soundEnabled);
   };
+
+  useEffect(() => { onTopicChange?.(topic); }, [topic]);
 
   // A view that no longer shows the framed topic drops it
   useEffect(() => {

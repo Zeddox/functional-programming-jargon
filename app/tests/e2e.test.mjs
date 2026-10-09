@@ -220,6 +220,7 @@ server.listen(PORT, async () => {
     // A topic the view shows keeps the view
     await topicItem(/Effects/).click();
     if (!(await topicView()).startsWith('Essentials')) throw new Error('Effects is in Essentials; the view should stay');
+    await topicPage.waitForFunction(() => document.title === 'Effects — FP Jargon', null, { timeout: 3000 });
     // A topic it hides widens to the next view that has it
     await topicItem(/Lambda Calculus/).click();
     await topicPage.waitForFunction(() => document.querySelector('[role="radiogroup"][aria-label="Graph view"] [aria-checked="true"]')?.textContent.startsWith('Practical'));
@@ -235,6 +236,7 @@ server.listen(PORT, async () => {
     await topicItem(/Types/).first().click();
     await topicPage.getByRole('button', { name: /Reset/ }).click();
     if (!(await pickedTopic()).startsWith('All topics')) throw new Error('Reset should go back to all topics');
+    await topicPage.waitForFunction(() => document.title.startsWith('FP Jargon —'), null, { timeout: 3000 });
     await topicPage.close();
     console.log('✓ Test 10 passed: Topics frame their ring, widen the view when hidden, follow the camera out, and reset cleanly.');
 
