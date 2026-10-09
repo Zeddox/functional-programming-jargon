@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>C# Runner</title>
+  <style>
+    :root { --bg: #121212; --fg: #f0f0ee; --muted: #9a9a96; --line: rgba(240,240,238,.18); --ok: #4ade80; --err: #f87171; --warn: #fbbf24; }
+    body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg); font: 13px/1.5 ui-monospace, "JetBrains Mono", monospace; }
+    main { max-width: 860px; margin: 0 auto; display: grid; gap: 12px; }
+    textarea { width: 100%; box-sizing: border-box; min-height: 260px; background: #1a1a19; color: var(--fg); border: 1px solid var(--line); padding: 12px; font: inherit; tab-size: 4; }
+    button { background: #1a1a19; color: var(--fg); border: 1px solid var(--line); padding: 6px 12px; font: inherit; cursor: pointer; }
+    button:disabled { opacity: .4; cursor: default; }
+    pre { margin: 0; background: #1a1a19; border: 1px solid var(--line); padding: 12px; white-space: pre-wrap; min-height: 2em; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    #status { color: var(--muted); }
+    .error { color: var(--err); } .warning { color: var(--warn); } .ok { color: var(--ok); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 style="font-size:16px;margin:0">C# runner prototype</h1>
+    <div class="row">
+      <select id="sample" aria-label="Sample"></select>
+      <button id="run" disabled>Run</button>
+      <span id="status">Starting .NET…</span>
+    </div>
+    <textarea id="code" spellcheck="false" aria-label="C# code"></textarea>
+    <pre id="output" aria-label="Output"></pre>
+  </main>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

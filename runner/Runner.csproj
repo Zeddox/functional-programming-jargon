@@ -1,0 +1,75 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+
+  <!--
+    In-browser C# runner: Roslyn compiles learner code (C# preview, so C# 15
+    unions work) against the .NET 11 reference assemblies and language-ext,
+    then runs it in the same WebAssembly runtime. Published as static files.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- Roslyn ships its messages in 13 languages; English is enough -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- Keep real exception messages for learners (WebAssembly publishes strip them by default) -->
+    <UseSystemResourceKeys>false</UseSystemResourceKeys>
+    <!-- Trimmed, except for the assemblies listed under "Learner surface" below -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>full</TrimMode>
+    <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
+    <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-77" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <!--
+    Learner surface: what learner code can compile against. Each reference
+    assembly is embedded for Roslyn, and the implementation behind it is kept
+    whole by the trimmer, so anything that compiles also exists at runtime.
+    language-ext's own dependencies are all here, plus a few common extras.
+  -->
+  <PropertyGroup>
+    <FrameworkRefDir>$(NetCoreTargetingPackRoot)/Microsoft.NETCore.App.Ref/$(BundledNETCoreAppPackageVersion)/ref/$(TargetFramework)</FrameworkRefDir>
+    <LearnerRefs>
+      Microsoft.CSharp; Microsoft.Win32.Primitives; netstandard;
+      System.Collections; System.Collections.Concurrent; System.Collections.Immutable; System.Collections.NonGeneric;
+      System.Console; System.Diagnostics.Contracts; System.Diagnostics.StackTrace; System.Formats.Asn1;
+      System.Linq; System.Linq.AsyncEnumerable; System.Linq.Expressions; System.Linq.Queryable;
+      System.Memory; System.Net.Primitives; System.ObjectModel;
+      System.Reflection.Emit.ILGeneration; System.Reflection.Emit.Lightweight; System.Reflection.Primitives;
+      System.Runtime; System.Runtime.InteropServices; System.Runtime.Numerics; System.Runtime.Serialization.Primitives;
+      System.Security.Cryptography; System.Text.RegularExpressions;
+      System.Threading; System.Threading.Overlapped; System.Threading.ThreadPool
+    </LearnerRefs>
+    <!-- Implementations behind those references (most facades forward into CoreLib) -->
+    <LearnerImplementations>
+      System.Private.CoreLib; Microsoft.CSharp;
+      System.Collections; System.Collections.Concurrent; System.Collections.Immutable; System.Collections.NonGeneric;
+      System.Console; System.Linq; System.Linq.AsyncEnumerable; System.Linq.Expressions; System.Linq.Queryable;
+      System.Memory; System.ObjectModel; System.Runtime.Numerics; System.Text.RegularExpressions;
+      System.Formats.Asn1; System.Security.Cryptography
+    </LearnerImplementations>
+  </PropertyGroup>
+  <ItemGroup>
+    <LearnerRef Include="$(LearnerRefs)" />
+    <EmbeddedResource Include="@(LearnerRef->'$(FrameworkRefDir)/%(Identity).dll')" LogicalName="ref/%(Filename)%(Extension)" />
+    <!-- The package's own DLL: the trimmed runtime copy has its references
+         rewritten to System.Private.CoreLib, which Roslyn can't bind against -->
+    <EmbeddedResource Include="$(PkgLanguageExt_Core)/lib/net10.0/LanguageExt.Core.dll" LogicalName="ref/LanguageExt.Core.dll" />
+
+    <TrimmerRootAssembly Include="$(LearnerImplementations)" />
+    <!-- Keep the facades too: learner code references System.Runtime and
+         friends, which forward into CoreLib, and the trimmer would drop them -->
+    <TrimmerRootAssembly Include="$(LearnerRefs)" />
+    <TrimmerRootAssembly Include="LanguageExt.Core" />
+    <!-- Roslyn isn't annotated for trimming, so keep it whole -->
+    <TrimmerRootAssembly Include="Microsoft.CodeAnalysis" />
+    <TrimmerRootAssembly Include="Microsoft.CodeAnalysis.CSharp" />
+  </ItemGroup>
+
+</Project>
