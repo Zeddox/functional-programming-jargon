@@ -12,7 +12,7 @@ import { loadExerciseState } from './utils/runner';
 const CodeLab = lazy(() => import('./components/CodeLab'));
 import {
   VIEW_LEVELS, levelRank, viewFor, loadView, saveView,
-  loadProgress, saveProgress, stepIndexOf, pausedPath
+  loadProgress, saveProgress, stepIndexOf, pausedPath, explorerPath, explorerProgress
 } from './utils/learning';
 import {
   Search,
@@ -35,7 +35,9 @@ const clampPanelWidth = (width, winW) =>
   Math.max(MIN_PANEL_WIDTH, Math.min(width, winW - MIN_CANVAS_WIDTH));
 
 export default function App() {
-  const { meta, categories, terms, graph, combinators, paths = [] } = jargonsData;
+  const { meta, categories, terms, graph, combinators, paths: allPaths = [] } = jargonsData;
+  // The explorer shows paths as their term steps (see explorerPath in utils/learning.js)
+  const paths = useMemo(() => allPaths.map(explorerPath), [allPaths]);
 
   // Graph view: how much of the jargon to show. A link or search result for a
   // term outside the view widens the view to include it.
@@ -50,7 +52,9 @@ export default function App() {
   useEffect(() => saveView(view), [view]);
 
   // Learning-path progress (see utils/learning.js for the stored shape)
-  const [progress, setProgressState] = useState(() => loadProgress(paths));
+  const [storedProgress, setProgressState] = useState(() => loadProgress(allPaths));
+  // What the explorer shows: bookmarks on non-term steps fall back to a term step
+  const progress = useMemo(() => explorerProgress(storedProgress, allPaths), [storedProgress, allPaths]);
   const updateProgress = (fn) => setProgressState(prev => {
     const next = fn(prev);
     saveProgress(next);

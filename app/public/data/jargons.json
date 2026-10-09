@@ -6171,54 +6171,110 @@
       "intro": "From \"a function is a value\" to LINQ query syntax over `Option` and `IO`. Start here if you're new to functional programming.",
       "steps": [
         {
+          "kind": "term",
+          "id": "function",
           "termId": "function",
           "note": "Everything else is built from functions that map an input to an output and do nothing else."
         },
         {
+          "kind": "term",
+          "id": "pure-function",
           "termId": "pure-function",
           "note": "Purity is the property that makes functions safe to combine, cache and test."
         },
         {
+          "kind": "exercise",
+          "id": "exercise:pure-function/leave-the-input-alone",
+          "title": "Leave the input alone",
+          "note": "Turn a function that quietly changes its input into a pure one.",
+          "exerciseId": "pure-function/leave-the-input-alone",
+          "termId": "pure-function"
+        },
+        {
+          "kind": "term",
+          "id": "lambda",
           "termId": "lambda",
           "note": "C#'s `x => ...` lets you write a function inline, wherever you need one."
         },
         {
+          "kind": "term",
+          "id": "first-class-function",
           "termId": "first-class-function",
           "note": "Once a function is a value, you can store it, pass it and return it."
         },
         {
+          "kind": "term",
+          "id": "higher-order-functions-hof",
           "termId": "higher-order-functions-hof",
           "note": "`Select`, `Where` and `Aggregate` are functions that take functions; now you can write your own."
         },
         {
+          "kind": "exercise",
+          "id": "exercise:higher-order-functions-hof/twice",
+          "title": "Twice",
+          "note": "Write a function that takes a function and returns a new one.",
+          "exerciseId": "higher-order-functions-hof/twice",
+          "termId": "higher-order-functions-hof"
+        },
+        {
+          "kind": "term",
+          "id": "closure",
           "termId": "closure",
           "note": "A returned lambda remembers the variables around it, which is how functions get configured."
         },
         {
+          "kind": "term",
+          "id": "partial-application",
           "termId": "partial-application",
           "note": "Fix some arguments now and supply the rest later, which builds on closures."
         },
         {
+          "kind": "term",
+          "id": "currying",
           "termId": "currying",
           "note": "Turning a many-argument function into a chain of one-argument functions makes partial application automatic."
         },
         {
+          "kind": "term",
+          "id": "function-composition",
           "termId": "function-composition",
           "note": "With one-argument functions, small steps snap together into pipelines."
         },
         {
+          "kind": "recap",
+          "id": "recap:functions-as-values",
+          "title": "Functions as values",
+          "note": "Functions are values you can pass, return and configure, and pure ones combine safely. Next, the same idea moves inside containers: instead of taking a value out of an `Option` to work on it, you send the function in."
+        },
+        {
+          "kind": "term",
+          "id": "functor",
           "termId": "functor",
           "note": "`Map` composes a function with whatever is inside a box (a list, an `Option`, an `IO`) without opening it."
         },
         {
+          "kind": "exercise",
+          "id": "exercise:functor/shout-without-unwrapping",
+          "title": "Shout without unwrapping",
+          "note": "Use `Map` on an `Option` instead of taking the value out.",
+          "exerciseId": "functor/shout-without-unwrapping",
+          "termId": "functor"
+        },
+        {
+          "kind": "term",
+          "id": "applicative-functor",
           "termId": "applicative-functor",
           "note": "`Map` handles one boxed value; applicative apply combines several independent ones."
         },
         {
+          "kind": "term",
+          "id": "monad",
           "termId": "monad",
           "note": "`Bind` handles the step functors can't, where the next computation depends on the previous result."
         },
         {
+          "kind": "term",
+          "id": "monad-comprehension",
           "termId": "monad-comprehension",
           "note": "LINQ's `from ... select` is monad syntax, so chains of `Bind` read like ordinary code."
         }
@@ -6230,50 +6286,74 @@
       "intro": "Model failure as a value the compiler can see, instead of a `throw` it can't.",
       "steps": [
         {
+          "kind": "term",
+          "id": "partial-function",
           "termId": "partial-function",
           "note": "`int.Parse` and `list[0]` don't have an answer for every input, and the signature doesn't say so."
         },
         {
+          "kind": "term",
+          "id": "total-function",
           "termId": "total-function",
           "note": "The goal is a function that returns something for every input it accepts."
         },
         {
+          "kind": "term",
+          "id": "dealing-with-partial-functions",
           "termId": "dealing-with-partial-functions",
           "note": "The usual fixes are narrowing the input or widening the output; the rest of the path widens the output."
         },
         {
+          "kind": "term",
+          "id": "option",
           "termId": "option",
           "note": "`Option` widens the output with \"no answer\" for failures that need no explanation."
         },
         {
+          "kind": "term",
+          "id": "either",
           "termId": "either",
           "note": "When the caller needs to know why, `Either` carries an error value on the left."
         },
         {
+          "kind": "term",
+          "id": "pattern-matching",
           "termId": "pattern-matching",
           "note": "`Match` makes the caller handle both cases before getting at the value."
         },
         {
+          "kind": "term",
+          "id": "functor",
           "termId": "functor",
           "note": "`Map` lets you keep working on the success value and leave the failure untouched."
         },
         {
+          "kind": "term",
+          "id": "monad",
           "termId": "monad",
           "note": "`Bind` chains steps that can each fail and stops at the first failure, without nested `if`s."
         },
         {
+          "kind": "term",
+          "id": "applicative-functor",
           "termId": "applicative-functor",
           "note": "Validating a form should report every error, not just the first; applicatives combine independent checks."
         },
         {
+          "kind": "term",
+          "id": "alternative",
           "termId": "alternative",
           "note": "`|` tries a fallback when the first attempt fails."
         },
         {
+          "kind": "term",
+          "id": "fallible",
           "termId": "fallible",
           "note": "Language-ext's trait for \"can fail and can catch\", shared by `Option`, `Either`, `Eff` and `IO`."
         },
         {
+          "kind": "term",
+          "id": "traversable",
           "termId": "traversable",
           "note": "`Traverse` turns a list of results that might have failed into one result holding a list."
         }
@@ -6285,54 +6365,80 @@
       "intro": "Make illegal states unrepresentable, so the compiler checks your business rules.",
       "steps": [
         {
+          "kind": "term",
+          "id": "value",
           "termId": "value",
           "note": "Data in functional code is plain values, compared by what they hold rather than by reference."
         },
         {
+          "kind": "term",
+          "id": "immutability",
           "termId": "immutability",
           "note": "Values that can't change can be shared freely; C# records give you this cheaply."
         },
         {
+          "kind": "term",
+          "id": "product-type",
           "termId": "product-type",
           "note": "A record holds this *and* that, and its possible values multiply."
         },
         {
+          "kind": "term",
+          "id": "sum-type",
           "termId": "sum-type",
           "note": "A union holds this *or* that, which is what products can't express."
         },
         {
+          "kind": "term",
+          "id": "algebraic-data-type",
           "termId": "algebraic-data-type",
           "note": "Sums of products describe most domain data exactly."
         },
         {
+          "kind": "term",
+          "id": "pattern-matching",
           "termId": "pattern-matching",
           "note": "`switch` takes an algebraic data type apart, and the compiler warns about cases you missed."
         },
         {
+          "kind": "term",
+          "id": "unit-type",
           "termId": "unit-type",
           "note": "The type with one value stands in for `void`, so every function returns something."
         },
         {
+          "kind": "term",
+          "id": "never-type",
           "termId": "never-type",
           "note": "The type with no values marks code that can't return, and impossible cases."
         },
         {
+          "kind": "term",
+          "id": "newtype",
           "termId": "newtype",
           "note": "Wrap an `int` as a `CustomerId` so it can't be passed where an `OrderId` belongs."
         },
         {
+          "kind": "term",
+          "id": "smart-constructor",
           "termId": "smart-constructor",
           "note": "Validate once when the value is created, and every later use can trust it."
         },
         {
+          "kind": "term",
+          "id": "refinement-type",
           "termId": "refinement-type",
           "note": "The idea behind smart constructors, a type that is a base type plus a rule."
         },
         {
+          "kind": "term",
+          "id": "phantom-type",
           "termId": "phantom-type",
           "note": "A type parameter that holds no data can still tag values, so metres and miles can't be added together."
         },
         {
+          "kind": "term",
+          "id": "lens",
           "termId": "lens",
           "note": "With immutable nested records, lenses read and update deep fields without long `with` chains."
         }
@@ -6344,62 +6450,92 @@
       "intro": "The ideas behind the names, using code you already write.",
       "steps": [
         {
+          "kind": "term",
+          "id": "category",
           "termId": "category",
           "note": "Types as objects and functions as arrows, with composition and identity as the only rules."
         },
         {
+          "kind": "term",
+          "id": "morphism",
           "termId": "morphism",
           "note": "The arrows; in C# these are mostly functions."
         },
         {
+          "kind": "term",
+          "id": "isomorphism",
           "termId": "isomorphism",
           "note": "Two types are \"the same\" when you can convert there and back without loss."
         },
         {
+          "kind": "term",
+          "id": "functor",
           "termId": "functor",
           "note": "A functor maps one category to another and keeps the arrows working; `Map` is that mapping."
         },
         {
+          "kind": "term",
+          "id": "endofunctor",
           "termId": "endofunctor",
           "note": "C#'s functors all map types to types, so they are endofunctors."
         },
         {
+          "kind": "term",
+          "id": "natural-transformation",
           "termId": "natural-transformation",
           "note": "A conversion between functors, such as taking the head of a `Seq` as an `Option`, that commutes with `Map`."
         },
         {
+          "kind": "term",
+          "id": "monoid",
           "termId": "monoid",
           "note": "An associative combine with an identity; you've met it as `+` with `0` and string concatenation."
         },
         {
+          "kind": "term",
+          "id": "monad",
           "termId": "monad",
           "note": "\"a monoid in the category of endofunctors\", which makes sense once you've seen the previous three steps."
         },
         {
+          "kind": "term",
+          "id": "kleisli-category",
           "termId": "kleisli-category",
           "note": "Functions that return a monad form their own category, with `Bind` as composition."
         },
         {
+          "kind": "term",
+          "id": "product-and-coproduct",
           "termId": "product-and-coproduct",
           "note": "Tuples and unions described by their arrows instead of their fields."
         },
         {
+          "kind": "term",
+          "id": "duality",
           "termId": "duality",
           "note": "Reverse every arrow and products become coproducts; many concepts come in such pairs."
         },
         {
+          "kind": "term",
+          "id": "catamorphism",
           "termId": "catamorphism",
           "note": "Fold, generalised to any recursive data type."
         },
         {
+          "kind": "term",
+          "id": "anamorphism",
           "termId": "anamorphism",
           "note": "Unfold, which is the dual of the fold you just met."
         },
         {
+          "kind": "term",
+          "id": "adjunction",
           "termId": "adjunction",
           "note": "A pair of functors that are almost inverses; currying is one, and composing the pair always gives a monad (here, State)."
         },
         {
+          "kind": "term",
+          "id": "yoneda-lemma",
           "termId": "yoneda-lemma",
           "note": "A value is determined by how it relates to everything else, which is why any number of `Map`s can fuse into one pass."
         }
@@ -6411,50 +6547,74 @@
       "intro": "The tiny language every functional language is built on.",
       "steps": [
         {
+          "kind": "term",
+          "id": "lambda",
           "termId": "lambda",
           "note": "Start from the anonymous functions you already write in C#."
         },
         {
+          "kind": "term",
+          "id": "lambda-calculus",
           "termId": "lambda-calculus",
           "note": "A language with nothing except functions, variables and application."
         },
         {
+          "kind": "term",
+          "id": "free-and-bound-variables",
           "termId": "free-and-bound-variables",
           "note": "A variable is either a parameter of an enclosing lambda or comes from outside; closures capture the outside ones."
         },
         {
+          "kind": "term",
+          "id": "alpha-conversion",
           "termId": "alpha-conversion",
           "note": "Renaming a parameter doesn't change the function, but captured names need care."
         },
         {
+          "kind": "term",
+          "id": "beta-reduction",
           "termId": "beta-reduction",
           "note": "Applying a function means substituting the argument, which is the only computation rule."
         },
         {
+          "kind": "term",
+          "id": "eta-conversion",
           "termId": "eta-conversion",
           "note": "`x => f(x)` is just `f`, the rule behind point-free style."
         },
         {
+          "kind": "term",
+          "id": "reduction-strategy",
           "termId": "reduction-strategy",
           "note": "The order you reduce in decides whether a program finishes."
         },
         {
+          "kind": "term",
+          "id": "lazy-evaluation",
           "termId": "lazy-evaluation",
           "note": "Reducing only what's needed, the strategy behind `IEnumerable` and Haskell."
         },
         {
+          "kind": "term",
+          "id": "church-encoding",
           "termId": "church-encoding",
           "note": "Booleans, numbers and pairs built out of nothing but functions."
         },
         {
+          "kind": "term",
+          "id": "fixed-point-combinator",
           "termId": "fixed-point-combinator",
           "note": "Recursion without names, using the Y combinator."
         },
         {
+          "kind": "term",
+          "id": "combinatory-logic",
           "termId": "combinatory-logic",
           "note": "Lambda calculus without variables at all, using only S and K."
         },
         {
+          "kind": "term",
+          "id": "functional-combinator",
           "termId": "functional-combinator",
           "note": "The same combinators as everyday C# helpers, such as `identity`, `constant` and `flip`."
         }
@@ -6466,46 +6626,68 @@
       "intro": "Keep business logic pure and push I/O to the edges.",
       "steps": [
         {
+          "kind": "term",
+          "id": "side-effects",
           "termId": "side-effects",
           "note": "Name the problem; reading the clock or writing a file makes code hard to test and reason about."
         },
         {
+          "kind": "term",
+          "id": "pure-function",
           "termId": "pure-function",
           "note": "The opposite, where output depends only on input."
         },
         {
+          "kind": "term",
+          "id": "referential-transparency",
           "termId": "referential-transparency",
           "note": "Pure calls can be replaced by their results, which is what makes refactoring safe."
         },
         {
+          "kind": "term",
+          "id": "io",
           "termId": "io",
           "note": "Describe an effect as a value and run it later, so building the program stays pure."
         },
         {
+          "kind": "term",
+          "id": "reader-monad",
           "termId": "reader-monad",
           "note": "Pass configuration and dependencies implicitly, the functional answer to dependency injection."
         },
         {
+          "kind": "term",
+          "id": "writer-monad",
           "termId": "writer-monad",
           "note": "Collect logs alongside a result without a global logger."
         },
         {
+          "kind": "term",
+          "id": "state-monad",
           "termId": "state-monad",
           "note": "Thread changing state through pure steps instead of mutating a field."
         },
         {
+          "kind": "term",
+          "id": "monad-transformer",
           "termId": "monad-transformer",
           "note": "Real code needs reader, state and IO at once; transformers stack them."
         },
         {
+          "kind": "term",
+          "id": "free-monad",
           "termId": "free-monad",
           "note": "Write the program as data and choose the interpreter later, such as real or test."
         },
         {
+          "kind": "term",
+          "id": "algebraic-effects",
           "termId": "algebraic-effects",
           "note": "The newer approach, where effects are declared operations and handlers decide what they do."
         },
         {
+          "kind": "term",
+          "id": "property-based-testing",
           "termId": "property-based-testing",
           "note": "Pure cores make it possible to test laws over thousands of generated inputs."
         }

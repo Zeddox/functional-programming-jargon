@@ -27,10 +27,14 @@ export function saveView(view) {
   try { localStorage.setItem(VIEW_KEY, view); } catch { /* not persisted */ }
 }
 
-// Progress is stored by term id rather than step number, so it survives
+// Path steps (learning-paths.md) are terms, exercises, intros and recaps.
+// Each has an id unique in its path; a term step's id is its term id.
+export const isTermStep = (step) => step.kind === 'term';
+
+// Progress is stored by step id rather than step number, so it survives
 // steps being added to or reordered in learning-paths.md:
 //   { active: pathId | null,
-//     paths: { [pathId]: { current: termId, seen: [termId], done: bool, at: ms } } }
+//     paths: { [pathId]: { current: stepId, seen: [stepId], done: bool, at: ms } } }
 const EMPTY = { active: null, paths: {} };
 
 export function loadProgress(paths) {
@@ -42,9 +46,9 @@ export function loadProgress(paths) {
     for (const [id, entry] of Object.entries(raw.paths || {})) {
       const path = byId[id];
       if (!path || !entry) continue;
-      const ids = new Set(path.steps.map(s => s.termId));
+      const ids = new Set(path.steps.map(s => s.id));
       kept[id] = {
-        current: ids.has(entry.current) ? entry.current : path.steps[0].termId,
+        current: ids.has(entry.current) ? entry.current : path.steps[0].id,
         seen: (entry.seen || []).filter(t => ids.has(t)),
         done: Boolean(entry.done),
         at: Number(entry.at) || 0
@@ -60,8 +64,30 @@ export function saveProgress(progress) {
   try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch { /* not persisted */ }
 }
 
-export const stepIndexOf = (path, termId) =>
-  path ? path.steps.findIndex(s => s.termId === termId) : -1;
+export const stepIndexOf = (path, stepId) =>
+  path ? path.steps.findIndex(s => s.id === stepId) : -1;
+
+// The explorer's view of a path: its term steps only, since the graph and
+// drawer are about terms. Exercise, intro and recap steps are for the study
+// layout; in the explorer, exercises stay reachable from each term's drawer.
+export const explorerPath = (path) => ({ ...path, steps: path.steps.filter(isTermStep) });
+
+// Progress as the explorer sees it: a bookmark on a non-term step shows on
+// the term step before it (or the first term step), and only term steps
+// count as seen. Writes still go to the full progress.
+export function explorerProgress(progress, paths) {
+  const byId = Object.fromEntries(paths.map(p => [p.id, p]));
+  const shown = {};
+  for (const [id, entry] of Object.entries(progress.paths)) {
+    const path = byId[id];
+    if (!path) continue;
+    const at = Math.max(0, stepIndexOf(path, entry.current));
+    const termStep = path.steps.slice(0, at + 1).reverse().find(isTermStep) ?? path.steps.find(isTermStep);
+    const termIds = new Set(path.steps.filter(isTermStep).map(s => s.id));
+    shown[id] = { ...entry, current: termStep.id, seen: entry.seen.filter(s => termIds.has(s)) };
+  }
+  return { ...progress, paths: shown };
+}
 
 // The most recently used path that's paused part-way, for "resume"
 export function pausedPath(progress, paths) {

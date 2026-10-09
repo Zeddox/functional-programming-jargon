@@ -1,6 +1,14 @@
 # Learning Paths
 
-Guided routes through the [jargon](readme.md). Each path is an ordered list of terms, and each step says why it comes next. They assume you know C#, and nothing about functional programming.
+Guided routes through the [jargon](readme.md). Each path is an ordered list of steps, mostly terms, and each step says why it comes next. They assume you know C#, and nothing about functional programming.
+
+A step is one of:
+
+- **A term:** `[Pure Function](readme.md#pure-function): why it comes next`.
+- **An exercise:** `Exercise [Twice](exercises.md#twice): what it practises`, linking a heading in [exercises.md](exercises.md).
+- **A lesson with no term:** `Intro **Title**: text` or `Recap **Title**: text`.
+
+The graph explorer shows only a path's term steps (exercises are still reachable from each term's drawer); the study layout shows every step.
 
 ## Functions to monads
 
@@ -8,17 +16,21 @@ From "a function is a value" to LINQ query syntax over `Option` and `IO`. Start 
 
 1. [Function](readme.md#function): everything else is built from functions that map an input to an output and do nothing else.
 2. [Pure Function](readme.md#pure-function): purity is the property that makes functions safe to combine, cache and test.
-3. [Lambda](readme.md#lambda): C#'s `x => ...` lets you write a function inline, wherever you need one.
-4. [First-Class Function](readme.md#first-class-function): once a function is a value, you can store it, pass it and return it.
-5. [Higher-Order Functions (HOF)](readme.md#higher-order-functions-hof): `Select`, `Where` and `Aggregate` are functions that take functions; now you can write your own.
-6. [Closure](readme.md#closure): a returned lambda remembers the variables around it, which is how functions get configured.
-7. [Partial Application](readme.md#partial-application): fix some arguments now and supply the rest later, which builds on closures.
-8. [Currying](readme.md#currying): turning a many-argument function into a chain of one-argument functions makes partial application automatic.
-9. [Function Composition](readme.md#function-composition): with one-argument functions, small steps snap together into pipelines.
-10. [Functor](readme.md#functor): `Map` composes a function with whatever is inside a box (a list, an `Option`, an `IO`) without opening it.
-11. [Applicative Functor](readme.md#applicative-functor): `Map` handles one boxed value; applicative apply combines several independent ones.
-12. [Monad](readme.md#monad): `Bind` handles the step functors can't, where the next computation depends on the previous result.
-13. [Monad Comprehension](readme.md#monad-comprehension): LINQ's `from ... select` is monad syntax, so chains of `Bind` read like ordinary code.
+3. Exercise [Leave the input alone](exercises.md#leave-the-input-alone): turn a function that quietly changes its input into a pure one.
+4. [Lambda](readme.md#lambda): C#'s `x => ...` lets you write a function inline, wherever you need one.
+5. [First-Class Function](readme.md#first-class-function): once a function is a value, you can store it, pass it and return it.
+6. [Higher-Order Functions (HOF)](readme.md#higher-order-functions-hof): `Select`, `Where` and `Aggregate` are functions that take functions; now you can write your own.
+7. Exercise [Twice](exercises.md#twice): write a function that takes a function and returns a new one.
+8. [Closure](readme.md#closure): a returned lambda remembers the variables around it, which is how functions get configured.
+9. [Partial Application](readme.md#partial-application): fix some arguments now and supply the rest later, which builds on closures.
+10. [Currying](readme.md#currying): turning a many-argument function into a chain of one-argument functions makes partial application automatic.
+11. [Function Composition](readme.md#function-composition): with one-argument functions, small steps snap together into pipelines.
+12. Recap **Functions as values**: functions are values you can pass, return and configure, and pure ones combine safely. Next, the same idea moves inside containers: instead of taking a value out of an `Option` to work on it, you send the function in.
+13. [Functor](readme.md#functor): `Map` composes a function with whatever is inside a box (a list, an `Option`, an `IO`) without opening it.
+14. Exercise [Shout without unwrapping](exercises.md#shout-without-unwrapping): use `Map` on an `Option` instead of taking the value out.
+15. [Applicative Functor](readme.md#applicative-functor): `Map` handles one boxed value; applicative apply combines several independent ones.
+16. [Monad](readme.md#monad): `Bind` handles the step functors can't, where the next computation depends on the previous result.
+17. [Monad Comprehension](readme.md#monad-comprehension): LINQ's `from ... select` is monad syntax, so chains of `Bind` read like ordinary code.
 
 ## Errors without exceptions
 

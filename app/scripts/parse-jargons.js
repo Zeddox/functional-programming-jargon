@@ -838,23 +838,40 @@ entries.forEach(entry => {
 });
 
 // Learning paths (learning-paths.md): each `## Title` section is a path, its
-// first paragraph the intro, and each numbered `[Term](readme.md#id): note`
-// item a step
+// first paragraph the intro, and each numbered item a step, one of:
+//   [Term](readme.md#id): note             a term          { kind: 'term', id: termId, termId, note }
+//   Exercise [Title](exercises.md#slug): note   an exercise { kind: 'exercise', id: 'exercise:<exerciseId>', exerciseId, termId, title, note }
+//   Intro **Title**: text                  a lesson with no term (also Recap)
+//                                          { kind: 'intro' | 'recap', id: '<kind>:<slug>', title, note }
+// Exercise steps are checked against exercises.md once that's parsed (below).
 const pathsPath = [path.join(__dirname, '../../learning-paths.md'), path.join(__dirname, '../learning-paths.md')]
   .find(p => fs.existsSync(p));
 const pathsSource = pathsPath ? fs.readFileSync(pathsPath, 'utf8') : '';
+// Notes follow a colon in the markdown; shown alone they start a sentence
+const sentence = (text) => text.trim()[0].toUpperCase() + text.trim().slice(1);
 const learningPaths = pathsSource.split(/^## /m).slice(1).map(section => {
   const [titleLine, ...rest] = section.split('\n');
   const title = titleLine.trim();
   const body = rest.join('\n').trim();
   const intro = body.split(/\n\s*\n/)[0].trim();
-  const steps = [...body.matchAll(/^\d+\.\s+\[[^\]]+\]\(readme\.md#([\w-]+)\):\s*(.+)$/gm)]
-    .map(([, termId, note]) => {
+  const steps = [...body.matchAll(/^\d+\.\s+(.+)$/gm)].map(([, item]) => {
+    let m;
+    if ((m = /^\[[^\]]+\]\(readme\.md#([\w-]+)\):\s*(.+)$/.exec(item))) {
+      const [, termId, note] = m;
       if (!termIds.has(termId)) throw new Error(`Learning path "${title}" links to unknown term: ${termId}`);
-      // Notes follow a colon in the markdown; shown alone they start a sentence
-      const text = note.trim();
-      return { termId, note: text[0].toUpperCase() + text.slice(1) };
-    });
+      return { kind: 'term', id: termId, termId, note: sentence(note) };
+    }
+    if ((m = /^Exercise \[([^\]]+)\]\(exercises\.md#([\w-]+)\):\s*(.+)$/.exec(item))) {
+      const [, stepTitle, anchor, note] = m;
+      return { kind: 'exercise', id: null, anchor, title: stepTitle, note: sentence(note) };
+    }
+    if ((m = /^(Intro|Recap) \*\*([^*]+)\*\*:\s*(.+)$/.exec(item))) {
+      const [, kind, stepTitle, note] = m;
+      return { kind: kind.toLowerCase(), id: `${kind.toLowerCase()}:${slugify(stepTitle)}`, title: stepTitle.trim(), note: sentence(note) };
+    }
+    throw new Error(`Learning path "${title}" has a step it can't read: ${item}`);
+  });
+  if (!steps.some(s => s.kind === 'term')) throw new Error(`Learning path "${title}" needs at least one term step`);
   return { id: slugify(title.replace(/C#/g, 'csharp')), title, intro, steps };
 });
 
@@ -891,6 +908,26 @@ for (const section of exercisesSource.split(/^## /m).slice(1)) {
       if (!/^(avoid|require|pure|check) \S/.test(rule)) throw new Error(`exercises.md: "${title}" has a rule of an unknown kind: ${rule}`);
     return exercise;
   });
+}
+
+// Exercise steps in paths link exercises.md by the exercise's heading anchor
+const exercisesByAnchor = new Map();
+for (const entry of entries)
+  for (const exercise of entry.exercises ?? []) {
+    const anchor = exercise.id.split('/')[1];
+    if (exercisesByAnchor.has(anchor)) throw new Error(`exercises.md: two exercises have the anchor #${anchor}; paths can't tell them apart`);
+    exercisesByAnchor.set(anchor, { exercise, termId: entry.id });
+  }
+for (const learningPath of learningPaths) {
+  for (const step of learningPath.steps.filter(s => s.kind === 'exercise')) {
+    const found = exercisesByAnchor.get(step.anchor);
+    if (!found) throw new Error(`Learning path "${learningPath.title}" links to an unknown exercise: exercises.md#${step.anchor}`);
+    Object.assign(step, { id: `exercise:${found.exercise.id}`, exerciseId: found.exercise.id, termId: found.termId });
+    delete step.anchor;
+  }
+  const ids = learningPath.steps.map(s => s.id);
+  const repeated = ids.find((id, i) => ids.indexOf(id) !== i);
+  if (repeated) throw new Error(`Learning path "${learningPath.title}" has the step ${repeated} twice`);
 }
 
 // Playgrounds: each term's readme snippets as one runnable C# program
