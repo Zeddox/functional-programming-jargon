@@ -8,6 +8,7 @@ import { splitMarkdownParts, internalLinkTarget } from '../utils/markdown';
 import { stepIndexOf } from '../utils/learning';
 import CodeBlock from './CodeBlock';
 import InlineText from './InlineText';
+import TopicTag, { TopicSymbol, topicTagStyle } from './TopicTag';
 
 export default function NodeDetailPanel({
   term,
@@ -186,17 +187,7 @@ export default function NodeDetailPanel({
       }`}>
         <div className="space-y-1 flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap text-[11px]">
-            <span
-              className="px-2 py-0.5 border flex items-center gap-1.5 font-medium"
-              style={{
-                borderColor: `${cat.color || '#64748b'}50`,
-                backgroundColor: `${cat.color || '#64748b'}14`,
-                color: cat.color || '#64748b'
-              }}
-            >
-              <span className="w-1.5 h-1.5" style={{ backgroundColor: cat.color || '#64748b' }} />
-              {cat.name}
-            </span>
+            <TopicTag category={term.category} name={cat.name} color={cat.color} />
             <span className="opacity-50 text-[10px]">
               #{term.id}
             </span>
@@ -485,16 +476,12 @@ export default function NodeDetailPanel({
                       onSelectTerm(relId);
                       soundEffects.select(soundEnabled);
                     }}
-                    className={`px-2 py-1 text-xs border transition flex items-center gap-1.5 ${
-                      isDark
-                        ? 'bg-[#121212] hover:bg-[#242422] text-[#f0f0ee] border-[rgba(240,240,238,0.15)] hover:border-[rgba(240,240,238,0.4)]'
-                        : 'bg-[#eaeae8] hover:bg-[#dcdcd9] text-[#1a1a19] border-[rgba(26,26,25,0.15)] hover:border-[rgba(26,26,25,0.4)]'
-                    }`}
+                    // Styled as the related term's topic tag
+                    title={relCat?.name}
+                    className="px-2 py-1 text-xs border transition flex items-center gap-1.5 hover:brightness-125"
+                    style={topicTagStyle(relCat?.color)}
                   >
-                    <span
-                      className="w-1.5 h-1.5"
-                      style={{ backgroundColor: relCat?.color || '#3b82f6' }}
-                    />
+                    <TopicSymbol category={relTerm.category} />
                     <span>{relTerm.title}</span>
                     <span className="opacity-40">→</span>
                   </button>
