@@ -59,6 +59,8 @@ server.listen(PORT, async () => {
     if (!isPanelOpen) throw new Error('Aside panel did not open on /#thunk');
     const title = await page.locator('aside h2').textContent();
     if (!title.toLowerCase().includes('thunk')) throw new Error(`Expected title Thunk, got: ${title}`);
+    const tabTitle = await page.title();
+    if (!/^Thunk · .+ — FP Jargon$/.test(tabTitle)) throw new Error(`Tab title should name the term and topic, got: ${tabTitle}`);
     console.log('✓ Test 1 passed: /#thunk opened Thunk concept successfully.');
 
     console.log('Running test 2: Search and select concept...');
@@ -101,6 +103,7 @@ server.listen(PORT, async () => {
     await page.waitForTimeout(300);
     if (await page.locator('aside').isVisible().catch(() => false)) throw new Error('Empty-canvas click should close the panel');
     if (!(await page.getByTestId('empty-state').isVisible())) throw new Error('Empty-canvas click should clear the selection');
+    if (!(await page.title()).startsWith('FP Jargon —')) throw new Error('Clearing the selection should restore the tab title');
     console.log('✓ Test 3 passed: Root URL shows the overview; Esc and empty-canvas clicks clear the selection.');
 
     console.log('Running test 4: Batch 3 direct hash navigation (#free-monad, #profunctor, #algebraic-effects)...');
@@ -150,7 +153,7 @@ server.listen(PORT, async () => {
 
     console.log('Running test 7: Graph views widen for hidden terms...');
     const viewPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    const checkedView = () => viewPage.locator('[role="radiogroup"] [aria-checked="true"]').textContent();
+    const checkedView = () => viewPage.locator('[role="radiogroup"][aria-label="Graph view"] [aria-checked="true"]').textContent();
     await viewPage.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
     if (!(await checkedView()).startsWith('Essentials')) throw new Error(`Default view should be Essentials, got ${await checkedView()}`);
     await viewPage.goto(`http://localhost:${PORT}/#yoneda-lemma`, { waitUntil: 'networkidle' });
@@ -256,24 +259,62 @@ server.listen(PORT, async () => {
     await topicPage.reload({ waitUntil: 'networkidle' });
     const topicView = () => topicPage.locator('[role="radiogroup"][aria-label="Graph view"] [aria-checked="true"]').textContent();
     if (!(await topicView()).startsWith('Essentials')) throw new Error('Should start in Essentials');
-    const picker = topicPage.getByRole('combobox', { name: 'Topic' });
-    if ((await picker.locator('option').count()) !== 9) throw new Error('The picker should list all 8 topics plus "All topics"');
-    if (!(await picker.locator('option[value="lambda-calculus"]').textContent()).includes('in Practical')) throw new Error('A topic Essentials hides should say which view shows it');
+    const picker = topicPage.getByRole('radiogroup', { name: 'Topic' });
+    const topicItem = (name) => picker.getByRole('radio', { name });
+    const pickedTopic = () => picker.locator('[aria-checked="true"]').textContent();
+    if ((await picker.getByRole('radio').count()) !== 9) throw new Error('The picker should list all 8 topics plus "All topics"');
+    if (!(await topicItem(/Lambda Calculus/).textContent()).includes('in Practical')) throw new Error('A topic Essentials hides should say which view shows it');
     // A topic the view shows keeps the view
-    await picker.selectOption('effects');
+    await topicItem(/Effects/).click();
     if (!(await topicView()).startsWith('Essentials')) throw new Error('Effects is in Essentials; the view should stay');
+    await topicPage.waitForFunction(() => document.title === 'Effects — FP Jargon', null, { timeout: 3000 });
     // A topic it hides widens to the next view that has it
-    await picker.selectOption('lambda-calculus');
+    await topicItem(/Lambda Calculus/).click();
     await topicPage.waitForFunction(() => document.querySelector('[role="radiogroup"][aria-label="Graph view"] [aria-checked="true"]')?.textContent.startsWith('Practical'));
-    if ((await picker.inputValue()) !== 'lambda-calculus') throw new Error('The picked topic should stay selected after widening');
+    if (!(await pickedTopic()).includes('Lambda Calculus')) throw new Error('The picked topic should stay selected after widening');
+    // Zooming far out lets go of the topic
+    await topicPage.mouse.move(640, 400);
+    for (let i = 0; i < 12; i++) await topicPage.mouse.wheel(0, 200);
+    if (!(await pickedTopic()).startsWith('All topics')) throw new Error('Zooming out should go back to all topics');
     // Narrowing the view so the topic disappears drops it; Reset clears it too
+    await topicItem(/Lambda Calculus/).click();
     await topicPage.getByRole('radio', { name: /Essentials/ }).click();
-    await topicPage.waitForFunction(() => document.querySelector('[data-testid="topic-picker"]').value === '');
-    await picker.selectOption('types-data');
+    await topicPage.waitForFunction(() => document.querySelector('[data-testid="topic-picker"] [aria-checked="true"]')?.textContent.startsWith('All topics'));
+    await topicItem(/Types/).first().click();
     await topicPage.getByRole('button', { name: /Reset/ }).click();
-    if ((await picker.inputValue()) !== '') throw new Error('Reset should go back to all topics');
+    if (!(await pickedTopic()).startsWith('All topics')) throw new Error('Reset should go back to all topics');
+    await topicPage.waitForFunction(() => document.title.startsWith('FP Jargon —'), null, { timeout: 3000 });
     await topicPage.close();
-    console.log('✓ Test 10 passed: Topics frame their ring, widen the view when hidden, and reset cleanly.');
+    console.log('✓ Test 10 passed: Topics frame their ring, widen the view when hidden, follow the camera out, and reset cleanly.');
+
+    console.log('Running test 11: View and topic deep links...');
+    const linkPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    await linkPage.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
+    await linkPage.evaluate(() => localStorage.setItem('fp_view', 'essentials'));
+    const linkView = () => linkPage.locator('[role="radiogroup"][aria-label="Graph view"] [aria-checked="true"]').textContent();
+    const linkTopic = () => linkPage.locator('[data-testid="topic-picker"] [aria-checked="true"]').textContent();
+    const query = () => new URL(linkPage.url()).searchParams;
+    // ?view= wins over the remembered view, and ?topic= frames that topic
+    await linkPage.goto(`http://localhost:${PORT}/?view=everything&topic=effects`, { waitUntil: 'networkidle' });
+    if (!(await linkView()).startsWith('Everything')) throw new Error('?view= should win over the remembered view');
+    if (!(await linkTopic()).startsWith('Effects')) throw new Error('?topic= should pick that topic');
+    await linkPage.waitForFunction(() => document.title === 'Effects — FP Jargon', null, { timeout: 3000 });
+    // A topic the linked view hides widens it
+    await linkPage.goto(`http://localhost:${PORT}/?view=essentials&topic=lambda-calculus`, { waitUntil: 'networkidle' });
+    if (!(await linkView()).startsWith('Practical')) throw new Error('A topic Essentials hides should widen the view to Practical');
+    if (!(await linkTopic()).startsWith('Lambda Calculus')) throw new Error('The linked topic should stay picked after widening');
+    // Picking a topic and view writes them back to the URL
+    await linkPage.getByRole('radiogroup', { name: 'Topic' }).getByRole('radio', { name: /Types/ }).click();
+    await linkPage.getByRole('radio', { name: /Everything/ }).click();
+    if (query().get('topic') !== 'types-data' || query().get('view') !== 'everything') throw new Error(`URL should carry the view and topic, got ${linkPage.url()}`);
+    // Selecting and closing a term swaps only the hash
+    await linkPage.goto(`http://localhost:${PORT}/?view=everything&topic=effects#thunk`, { waitUntil: 'networkidle' });
+    if (!(await linkPage.locator('aside').isVisible())) throw new Error('#thunk should open alongside the query');
+    await linkPage.keyboard.press('Escape');
+    await linkPage.waitForTimeout(300);
+    if (linkPage.url().includes('#') || query().get('topic') !== 'effects') throw new Error(`Closing the term should keep the query, got ${linkPage.url()}`);
+    await linkPage.close();
+    console.log('✓ Test 11 passed: ?view= and ?topic= open where they point and follow the picker.');
 
   } catch (err) {
     console.error('Test failed:', err);
