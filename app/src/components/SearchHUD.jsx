@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, X, CornerDownLeft } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
+import TopicTag from './TopicTag';
 
 export default function SearchHUD({
   isOpen,
@@ -232,16 +233,7 @@ export default function SearchHUD({
                       <span className="font-semibold text-xs tracking-tight">
                         {term.isCombinator ? `${term.letter} · ${term.name}` : term.title}
                       </span>
-                      <span
-                        className="text-[9px] px-1.5 py-0.2 border"
-                        style={{
-                          borderColor: `${cat?.color || '#94a3b8'}40`,
-                          color: cat?.color || '#94a3b8',
-                          backgroundColor: `${cat?.color || '#94a3b8'}12`
-                        }}
-                      >
-                        {cat?.name}
-                      </span>
+                      <TopicTag small category={term.isCombinator ? null : term.category} name={cat?.name} color={cat?.color} />
                     </div>
                     <p className="text-[11px] truncate mt-0.5 opacity-70">
                       {term.summary}

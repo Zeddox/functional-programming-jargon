@@ -297,12 +297,12 @@ server.listen(PORT, async () => {
     // ?view= wins over the remembered view, and ?topic= frames that topic
     await linkPage.goto(`http://localhost:${PORT}/?view=everything&topic=effects`, { waitUntil: 'networkidle' });
     if (!(await linkView()).startsWith('Everything')) throw new Error('?view= should win over the remembered view');
-    if (!(await linkTopic()).startsWith('Effects')) throw new Error('?topic= should pick that topic');
+    if (!(await linkTopic()).includes('Effects')) throw new Error('?topic= should pick that topic');
     await linkPage.waitForFunction(() => document.title === 'Effects — FP Jargon', null, { timeout: 3000 });
     // A topic the linked view hides widens it
     await linkPage.goto(`http://localhost:${PORT}/?view=essentials&topic=lambda-calculus`, { waitUntil: 'networkidle' });
     if (!(await linkView()).startsWith('Practical')) throw new Error('A topic Essentials hides should widen the view to Practical');
-    if (!(await linkTopic()).startsWith('Lambda Calculus')) throw new Error('The linked topic should stay picked after widening');
+    if (!(await linkTopic()).includes('Lambda Calculus')) throw new Error('The linked topic should stay picked after widening');
     // Picking a topic and view writes them back to the URL
     await linkPage.getByRole('radiogroup', { name: 'Topic' }).getByRole('radio', { name: /Types/ }).click();
     await linkPage.getByRole('radio', { name: /Everything/ }).click();

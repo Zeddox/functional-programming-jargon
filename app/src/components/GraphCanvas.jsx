@@ -2,22 +2,12 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import { soundEffects } from '../utils/audio';
 import { clusterLayout, REFERENCE_EXTENT, CLUSTER_ORDER } from '../utils/clusterLayout';
 import { VIEW_LEVELS, VIEW_LABELS } from '../utils/learning';
+import TopicTag, { CATEGORY_SYMBOLS, TopicSymbol, topicTagStyle } from './TopicTag';
 
 // Colour of the active learning path's route and step badges
 const PATH_COLOR = '#f59e0b';
 
 
-// Category emblems (math/FP symbols)
-const CATEGORY_SYMBOLS = {
-  'core-functions': 'λ',
-  'composition': '∘',
-  'purity-state': '≡',
-  'category-morphisms': '→',
-  'algebraic-structures': '★',
-  'effects': '↯',
-  'types-data': '∑',
-  'lambda-calculus': 'β'
-};
 
 export default function GraphCanvas({
   graphData,
@@ -1073,14 +1063,12 @@ export default function GraphCanvas({
           }`}
           style={{ left: `${tooltip.x}px`, top: `${tooltip.y - 12}px` }}
         >
-          <div className="flex items-center gap-2 mb-1">
-            <span
-              className="w-2 h-2"
-              style={{ backgroundColor: categories[tooltip.node.category]?.color || '#3b82f6' }}
+          <div className="flex mb-1.5 text-[10px]">
+            <TopicTag
+              category={tooltip.node.category}
+              name={categories[tooltip.node.category]?.name}
+              color={categories[tooltip.node.category]?.color}
             />
-            <span className={`text-[10px] tracking-wider uppercase opacity-75`}>
-              {categories[tooltip.node.category]?.name}
-            </span>
           </div>
           <div className="font-semibold text-xs tracking-tight mb-1">
             {tooltip.node.name}
@@ -1093,13 +1081,13 @@ export default function GraphCanvas({
 
       {/* Frame one topic (a dashed ring): a list down the left, a dropdown on phones */}
       {topicIds.length > 0 && (() => {
-        const fg = isDark ? '#f0f0ee' : '#1a1a19';
         const colorOf = (id) => useCategoryColors ? categories[id].color : (isDark ? '#38bdf8' : '#0284c7');
         const countLabel = (id) => {
           const shown = shownByTopic[id] || 0;
           const wider = shown ? null : viewWithTopic(id);
           return shown ? shown : wider ? `in ${VIEW_LABELS[wider]}` : 0;
         };
+        // Each topic is its tag (as in the term drawer); the picked one is outlined in full
         const item = (id, label, color) => {
           const isActive = id === topic;
           return (
@@ -1108,15 +1096,13 @@ export default function GraphCanvas({
               role="radio"
               aria-checked={isActive}
               onClick={() => handlePickTopic(isActive ? '' : id)}
-              className="flex items-center justify-between gap-3 px-2 py-1 text-left border-l-2 transition-colors"
-              style={{
-                color: fg,
-                borderLeftColor: isActive ? color : `${color}66`,
-                backgroundColor: isActive ? `${color}40` : `${color}14`,
-                boxShadow: isActive ? `inset 0 0 0 1px ${color}` : 'none'
-              }}
+              className="flex items-center justify-between gap-3 px-2 py-1 text-left border font-medium transition-colors hover:brightness-125"
+              style={topicTagStyle(color, isActive)}
             >
-              <span className="truncate">{label}</span>
+              <span className="flex items-center gap-1.5 min-w-0">
+                <TopicSymbol category={id} />
+                <span className="truncate">{label}</span>
+              </span>
               {id && <span className="opacity-60 shrink-0">{countLabel(id)}</span>}
             </button>
           );
@@ -1127,11 +1113,11 @@ export default function GraphCanvas({
               role="radiogroup"
               aria-label="Topic"
               data-testid="topic-picker"
-              className={`hidden sm:flex flex-col gap-px w-60 text-[11px] border backdrop-blur-md ${
+              className={`hidden sm:flex flex-col gap-1 p-1 w-60 text-[11px] border backdrop-blur-md ${
                 isDark ? 'bg-[#1a1a19]/90 border-[rgba(240,240,238,0.18)]' : 'bg-[#eaeae8]/90 border-[rgba(26,26,25,0.18)]'
               }`}
             >
-              {item('', 'All topics', isDark ? '#f0f0ee' : '#1a1a19')}
+              {item('', 'All topics', isDark ? '#a8a8a5' : '#5c5c59')}
               {topicIds.map(id => item(id, categories[id].name, colorOf(id)))}
             </div>
             <select
