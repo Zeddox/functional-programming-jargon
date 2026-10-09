@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   X, ExternalLink, Link2, BookOpen, GitFork, Check, ChevronUp, ChevronDown,
-  Route, ChevronLeft, ChevronRight, Pause, Play, RotateCcw, List, Flag
+  Route, ChevronLeft, ChevronRight, Pause, Play, RotateCcw, List, Flag,
+  SquareTerminal, CheckCircle2, CircleDashed
 } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
 import { splitMarkdownParts, internalLinkTarget } from '../utils/markdown';
@@ -25,6 +26,8 @@ export default function NodeDetailPanel({
   onGoToStep,
   onPausePath,
   onFinishPath,
+  onOpenCodeLab,
+  passedExercises = {},
   soundEnabled,
   useCategoryColors,
   isDark,
@@ -414,7 +417,18 @@ export default function NodeDetailPanel({
         <div className="space-y-3 pt-1" onClick={handleContentClick}>
           <h4 className="text-[10px] uppercase tracking-widest opacity-60 flex items-center justify-between">
             <span>Explanation & Examples</span>
-            {term.codeBlocks?.length > 0 && (
+            {term.hasPlayground && onOpenCodeLab ? (
+              <button
+                type="button"
+                onClick={() => onOpenCodeLab(null)}
+                data-testid="try-it"
+                className={`normal-case tracking-normal text-[11px] inline-flex items-center gap-1 px-2 py-0.5 border transition ${
+                  isDark ? 'border-[rgba(240,240,238,0.2)] hover:bg-[#242422]' : 'border-[rgba(26,26,25,0.2)] hover:bg-[#dcdcd9]'
+                }`}
+              >
+                <SquareTerminal size={12} /> Try it
+              </button>
+            ) : term.codeBlocks?.length > 0 && (
               <span className="text-[10px] opacity-70">
                 {term.codeBlocks.length} code {term.codeBlocks.length === 1 ? 'block' : 'blocks'}
               </span>
@@ -445,6 +459,33 @@ export default function NodeDetailPanel({
             })}
           </div>
         </div>
+
+        {/* Exercises for this term (exercises.md), run in the browser */}
+        {term.exercises?.length > 0 && onOpenCodeLab && (
+          <section data-testid="term-exercises" className={`p-4 border space-y-2 ${
+            isDark ? 'border-emerald-400/25' : 'border-emerald-700/25'
+          }`}>
+            <h4 className="text-[10px] uppercase tracking-widest opacity-60 flex items-center gap-1.5">
+              <SquareTerminal size={12} /> Exercises
+            </h4>
+            {term.exercises.map(exercise => (
+              <button
+                key={exercise.id}
+                type="button"
+                onClick={() => onOpenCodeLab(exercise.id)}
+                className={`w-full text-left flex items-start gap-2 p-2 transition ${isDark ? 'hover:bg-[#242422]' : 'hover:bg-[#dcdcd9]'}`}
+              >
+                {passedExercises[exercise.id]
+                  ? <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-emerald-500" aria-label="Passed" />
+                  : <CircleDashed size={14} className="mt-0.5 shrink-0 opacity-60" aria-label="Not done yet" />}
+                <span className="space-y-0.5">
+                  <span className="block text-[12.5px] font-semibold">{exercise.title}</span>
+                  <span className="block text-[11px] leading-relaxed opacity-70"><InlineText text={exercise.brief} isDark={isDark} /></span>
+                </span>
+              </button>
+            ))}
+          </section>
+        )}
 
         {/* Path mode: preview of the next step */}
         {nextStep && (

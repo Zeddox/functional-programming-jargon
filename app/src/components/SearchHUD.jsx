@@ -22,6 +22,8 @@ export default function SearchHUD({
   // Global hotkey '/' or 'Cmd+K' / 'Ctrl+K' to open search
   useEffect(() => {
     function handleGlobalKeyDown(e) {
+      // Keys typed in the code editor are its own (Ctrl+K starts its chords)
+      if (e.target?.closest?.('.monaco-editor')) return;
       if ((e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') ||
           ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')) {
         e.preventDefault();

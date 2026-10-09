@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import jargonsData from './data/jargons.json';
 import GraphCanvas from './components/GraphCanvas';
 import SearchHUD from './components/SearchHUD';
@@ -6,6 +6,10 @@ import NodeDetailPanel from './components/NodeDetailPanel';
 import CombinatorsModal from './components/CombinatorsModal';
 import PathsModal from './components/PathsModal';
 import { soundEffects } from './utils/audio';
+import { loadExerciseState } from './utils/runner';
+
+// The editor and runner are only downloaded when someone opens "Try it"
+const CodeLab = lazy(() => import('./components/CodeLab'));
 import {
   VIEW_LEVELS, levelRank, viewFor, loadView, saveView,
   loadProgress, saveProgress, stepIndexOf, pausedPath
@@ -53,6 +57,10 @@ export default function App() {
     return next;
   });
   const [isPathsOpen, setIsPathsOpen] = useState(false);
+  // "Try it" panel: { termId, exerciseId } while open
+  const [codeLab, setCodeLab] = useState(null);
+  const [passedExercises, setPassedExercises] = useState(() =>
+    Object.fromEntries(Object.entries(loadExerciseState()).filter(([, v]) => v?.passed).map(([id]) => [id, true])));
   const activePath = paths.find(p => p.id === progress.active) || null;
   const activeStepIndex = activePath ? stepIndexOf(activePath, progress.paths[activePath.id]?.current) : -1;
 
@@ -345,6 +353,8 @@ export default function App() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
+        // The "Try it" panel handles its own Esc
+        if (codeLab) return;
         if (isCombinatorsOpen) {
           handleCloseCombinators();
         } else if (isPathsOpen) {
@@ -359,7 +369,7 @@ export default function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSearchOpen, isPanelOpen, isCombinatorsOpen, isPathsOpen, progress.active]);
+  }, [isSearchOpen, isPanelOpen, isCombinatorsOpen, isPathsOpen, progress.active, codeLab]);
 
   const activeTerm = (selectedNodeId && isPanelOpen) ? allTermsMap[selectedNodeId] : null;
   const resumable = pausedPath(progress, paths);
@@ -634,6 +644,8 @@ export default function App() {
           onGoToStep={handleGoToStep}
           onPausePath={handlePausePath}
           onFinishPath={handleFinishPath}
+          onOpenCodeLab={(exerciseId) => setCodeLab({ termId: activeTerm.id, exerciseId })}
+          passedExercises={passedExercises}
           soundEnabled={soundEnabled}
           useCategoryColors={useCategoryColors}
           isDark={isDark}
@@ -667,6 +679,19 @@ export default function App() {
         soundEnabled={soundEnabled}
         isDark={isDark}
       />
+
+      {codeLab && allTermsMap[codeLab.termId] && (
+        <Suspense fallback={null}>
+          <CodeLab
+            key={`${codeLab.termId}/${codeLab.exerciseId}`}
+            term={allTermsMap[codeLab.termId]}
+            initialExerciseId={codeLab.exerciseId}
+            isDark={isDark}
+            onClose={() => setCodeLab(null)}
+            onExercisePassed={(id) => setPassedExercises(prev => ({ ...prev, [id]: true }))}
+          />
+        </Suspense>
+      )}
 
       {/* Command Palette Search Modal */}
       <SearchHUD

@@ -1,0 +1,5 @@
+{
+  "sum-type": "uses OneOf and its source generator, which the runner does not offer",
+  "either": "uses System.Text.Json, which the runner does not offer",
+  "property-based-testing": "uses CsCheck, which the runner does not offer"
+}

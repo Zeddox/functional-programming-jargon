@@ -17,7 +17,8 @@ const mimeTypes = {
   '.jpg': 'image/jpeg',
   '.svg': 'image/svg+xml',
   '.txt': 'text/plain',
-  '.ico': 'image/x-icon'
+  '.ico': 'image/x-icon',
+  '.wasm': 'application/wasm'
 };
 
 const server = http.createServer((req, res) => {
@@ -201,6 +202,52 @@ server.listen(PORT, async () => {
     if (!(await pathPage.locator('aside h2').textContent()).includes('Category')) throw new Error('Category theory path should start at Category');
     await pathPage.close();
     console.log('✓ Test 8 passed: Paths start, advance, pause on Esc and resume after reload.');
+
+    console.log('Running test 9: Try it and exercises in the in-browser C# runner...');
+    const labPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    await labPage.goto(`http://localhost:${PORT}/#functor`, { waitUntil: 'networkidle' });
+    await labPage.click('[data-testid="try-it"]');
+    await labPage.waitForSelector('[data-testid="codelab"]');
+    const statusText = () => labPage.textContent('[data-testid="runner-status"]');
+    const output = () => labPage.textContent('[data-testid="codelab-output"]');
+    if (!fs.existsSync(path.join(distDir, 'runner/runner-client.js'))) {
+      await labPage.waitForFunction(() => document.querySelector('[data-testid="runner-status"]')?.textContent.includes('isn’t built'));
+      console.log('  (runner not built: checked the "not built" message only; run `npm run build:runner` for the full test)');
+    } else {
+      await labPage.waitForFunction(() => document.querySelector('[data-testid="runner-status"]')?.textContent.startsWith('Ready'), null, { timeout: 120000 });
+      // The readme examples run, each `// =>` line printing its value
+      await labPage.click('[data-testid="codelab-run"]');
+      await labPage.waitForFunction(() => document.querySelector('[data-testid="codelab-output"]')?.textContent.includes('Some(4)'), null, { timeout: 60000 });
+      // The exercise's starter runs but doesn't pass; the solution does
+      await labPage.getByRole('tab', { name: /Shout without unwrapping/ }).click();
+      await labPage.click('[data-testid="codelab-run"]');
+      await labPage.waitForFunction(() => document.querySelector('[data-testid="codelab-output"]')?.textContent.includes('Not yet'), null, { timeout: 30000 });
+      const solution = (await labPage.evaluate(() => fetch('data/jargons.json').then(r => r.json())))
+        .terms.find(t => t.id === 'functor').exercises[0].solution;
+      // Right output but unwrapped with Match: the exercise's rules say not yet
+      const setCode = (code) => labPage.evaluate((c) => window.monaco.editor.getEditors()[0].setValue(c), code);
+      await setCode(solution.replace('FindUser(id).Map(name => name.ToUpper())', 'FindUser(id).Match(name => Some(name.ToUpper()), () => None)'));
+      await labPage.click('[data-testid="codelab-run"]');
+      await labPage.waitForFunction(() => document.querySelector('[data-testid="codelab-output"]')?.textContent.includes('breaks one of the exercise’s rules'), null, { timeout: 30000 });
+      await labPage.waitForSelector('[data-testid="exercise-rules"] li[data-state="broken"]');
+      if (!(await labPage.locator('[data-testid="rule-diagnostic"][data-severity="error"]').count())) throw new Error('The console should list the broken rule');
+      await setCode(solution);
+      await labPage.click('[data-testid="codelab-run"]');
+      await labPage.waitForFunction(() => document.querySelector('[data-testid="codelab-output"]')?.textContent.includes('Passed'), null, { timeout: 30000 });
+      await labPage.waitForFunction(() => [...document.querySelectorAll('[data-testid="exercise-rules"] li')].every(li => li.dataset.state === 'kept'));
+      if (!(await labPage.locator('[data-testid="rule-diagnostic"][data-severity="info"]').count())) throw new Error('Keeping the rules should earn the praise note');
+      // Live diagnostics: a type error is listed without running
+      await labPage.evaluate(() => window.monaco.editor.getEditors()[0].setValue('int x = "nope";'));
+      await labPage.waitForFunction(() => document.querySelector('[data-testid="codelab-output"]')?.textContent.includes('CS0029'), null, { timeout: 30000 });
+      // Esc closes the panel, and the drawer shows the exercise as passed
+      await labPage.keyboard.press('Escape');
+      await labPage.waitForSelector('[data-testid="codelab"]', { state: 'detached' });
+      if (!(await labPage.locator('[data-testid="term-exercises"] [aria-label="Passed"]').count())) throw new Error('The drawer should show the exercise as passed');
+      if (!(await labPage.locator('aside h2').isVisible())) throw new Error('Esc in the code panel should leave the drawer open');
+    }
+    await labPage.close();
+
+    console.log(`✓ Test 9 passed: Try it runs the examples; an exercise fails with the starter or a broken rule and passes with the solution.`);
 
     console.log('Running test 10: Topic picker frames a topic and widens the view when needed...');
     const topicPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });

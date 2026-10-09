@@ -858,6 +858,59 @@ const learningPaths = pathsSource.split(/^## /m).slice(1).map(section => {
   return { id: slugify(title.replace(/C#/g, 'csharp')), title, intro, steps };
 });
 
+// Exercises (exercises.md): each `## [Term](readme.md#id)` section holds
+// `### Title` exercises with a brief, starter code, expected output, hints
+// and a solution inside <details>. See the top of exercises.md.
+const exercisesPath = [path.join(__dirname, '../../exercises.md'), path.join(__dirname, '../exercises.md')]
+  .find(p => fs.existsSync(p));
+const exercisesSource = exercisesPath ? fs.readFileSync(exercisesPath, 'utf8') : '';
+const fence = (text, lang) => new RegExp('```' + lang + '\\n([\\s\\S]*?)\\n```').exec(text)?.[1];
+for (const section of exercisesSource.split(/^## /m).slice(1)) {
+  const termId = /^\[[^\]]+\]\(readme\.md#([\w-]+)\)/.exec(section)?.[1];
+  if (!termId || !termIds.has(termId)) throw new Error(`exercises.md: section doesn't link a known term: ${section.split('\n')[0]}`);
+  const entry = entries.find(e => e.id === termId);
+  entry.exercises = section.split(/^### /m).slice(1).map(block => {
+    const [titleLine, ...rest] = block.split('\n');
+    const title = titleLine.trim();
+    const body = rest.join('\n');
+    const [main, details = ''] = body.split('<details>');
+    const exercise = {
+      id: `${termId}/${slugify(title)}`,
+      title,
+      brief: main.split('```')[0].trim(),
+      starter: fence(main, 'csharp'),
+      expected: fence(main.slice(main.indexOf('Expected output:')), 'text'),
+      hints: [...main.matchAll(/^- Hint:\s*(.+)$/gm)].map(m => m[1].trim()),
+      // Rule lines go to the exercise analyzer as they are (analyzers/)
+      rules: [...main.matchAll(/^- Rule:\s*(.+)$/gm)].map(m => m[1].trim()),
+      solution: fence(details, 'csharp')
+    };
+    for (const key of ['brief', 'starter', 'expected', 'solution'])
+      if (!exercise[key]) throw new Error(`exercises.md: "${title}" has no ${key}`);
+    for (const rule of exercise.rules)
+      if (!/^(avoid|require|pure|check) \S/.test(rule)) throw new Error(`exercises.md: "${title}" has a rule of an unknown kind: ${rule}`);
+    return exercise;
+  });
+}
+
+// Playgrounds: each term's readme snippets as one runnable C# program
+// (samples/csharp/snippets.mjs), fetched by the editor only when needed.
+// Those that can't run in the browser (playground-failures.json) are still
+// written, so tests/runner.test.mjs notices when they start working, but get
+// no "Try it" button.
+const snippetsPath = path.join(__dirname, '../../samples/csharp/snippets.mjs');
+const playgroundFailures = require('./playground-failures.json');
+const playgrounds = {};
+if (fs.existsSync(snippetsPath)) {
+  const { readSections, toPlayground } = require(snippetsPath);
+  for (const section of readSections()) {
+    const id = slugify(section.title);
+    if (section.prefix || section.blocks.length === 0 || !termIds.has(id)) continue;
+    playgrounds[id] = toPlayground(section);
+    if (!playgroundFailures[id]) entries.find(e => e.id === id).hasPlayground = true;
+  }
+}
+
 const output = {
   meta: {
     title: "FP Jargon",
@@ -891,6 +944,7 @@ fs.writeFileSync(outputPath, JSON.stringify(output, null, 2), 'utf8');
 const publicDataDir = path.join(__dirname, '../public/data');
 if (!fs.existsSync(publicDataDir)) fs.mkdirSync(publicDataDir, { recursive: true });
 fs.writeFileSync(path.join(publicDataDir, 'jargons.json'), JSON.stringify(output, null, 2), 'utf8');
+fs.writeFileSync(path.join(publicDataDir, 'playgrounds.json'), JSON.stringify(playgrounds, null, 2), 'utf8');
 
 // Generate agent-readable full text reference (llms-full.txt)
 let llmsFull = `# FP Jargon - Full Reference

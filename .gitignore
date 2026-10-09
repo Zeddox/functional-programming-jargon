@@ -5,3 +5,6 @@ dist
 /site-preview.png
 .DS_Store
 
+
+# Published C# runner (app/scripts/build-runner.mjs)
+app/public/runner/

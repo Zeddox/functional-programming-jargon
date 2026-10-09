@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Exercise rules for exercises.md: "use Map, not Match", "AddTax must stay
+    pure" and per-exercise checks, reported as diagnostics that teach. The
+    browser runner (../../runner) runs them alongside the compiler; they'd
+    also work as an ordinary analyzer in an IDE, hence netstandard2.0.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <!-- Release tracking (AnalyzerReleases.*.md) is for analyzers shipped as packages -->
+    <NoWarn>$(NoWarn);RS2008</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The oldest Roslyn this needs; the runner brings its own (newer) one -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

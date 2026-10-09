@@ -96,7 +96,8 @@
       "relatedIds": [
         "currying"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "first-class-function",
@@ -147,7 +148,8 @@
         "function-composition",
         "currying"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "higher-order-functions-hof",
@@ -194,7 +196,25 @@
         "declarative-programming",
         "pipe"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "exercises": [
+        {
+          "id": "higher-order-functions-hof/twice",
+          "title": "Twice",
+          "brief": "Write `Twice`: it takes a function and returns a new function that applies it two times, so `Twice(addThree)(10)` is `addThree(addThree(10))`.",
+          "starter": "Func<int, int> Twice(Func<int, int> f) => f;\n\nvar addThree = (int x) => x + 3;\nvar square = (int x) => x * x;\n\nConsole.WriteLine(Twice(addThree)(10));\nConsole.WriteLine(Twice(square)(3));",
+          "expected": "16\n81",
+          "hints": [
+            "`Twice` has to return a function, so its body can be a lambda: `x => ...`.",
+            "Inside that lambda, call `f` on the result of calling `f`."
+          ],
+          "rules": [
+            "check returns-new-function in Twice | Return a new function, `x => ...`, that calls `f` twice."
+          ],
+          "solution": "Func<int, int> Twice(Func<int, int> f) => x => f(f(x));\n\nvar addThree = (int x) => x + 3;\nvar square = (int x) => x * x;\n\nConsole.WriteLine(Twice(addThree)(10));\nConsole.WriteLine(Twice(square)(3));"
+        }
+      ],
+      "hasPlayground": true
     },
     {
       "id": "closure",
@@ -231,7 +251,8 @@
         "free-and-bound-variables",
         "first-class-function"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "partial-application",
@@ -259,7 +280,8 @@
         "currying",
         "higher-order-functions-hof"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "currying",
@@ -294,7 +316,8 @@
         "first-class-function",
         "constant-function"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "auto-currying",
@@ -328,7 +351,8 @@
       "relatedIds": [
         "currying"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "function-composition",
@@ -365,7 +389,8 @@
         "pipe",
         "arrow"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "pipe",
@@ -416,7 +441,8 @@
         "point-free-style",
         "higher-order-functions-hof"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "continuation",
@@ -450,7 +476,8 @@
         "continuation-passing-style",
         "continuation-monad"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "continuation-passing-style",
@@ -493,7 +520,8 @@
         "continuation-monad",
         "trampoline"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "io",
@@ -543,7 +571,8 @@
         "free-monad",
         "value"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "recursion",
@@ -589,7 +618,8 @@
         "anamorphism",
         "foldable"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "tail-call",
@@ -638,7 +668,8 @@
         "trampoline",
         "continuation-passing-style"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "trampoline",
@@ -680,7 +711,8 @@
         "tail-call",
         "continuation-passing-style"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "thunk",
@@ -717,7 +749,8 @@
         "reduction-strategy",
         "eager-evaluation"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "algebraic-effects",
@@ -770,7 +803,8 @@
         "free-monad",
         "unit-type"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "declarative-programming",
@@ -810,7 +844,8 @@
         "pure-function",
         "monad-comprehension"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "pure-function",
@@ -859,7 +894,25 @@
         "property-based-testing",
         "either"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "exercises": [
+        {
+          "id": "pure-function/leave-the-input-alone",
+          "title": "Leave the input alone",
+          "brief": "`AddTax` returns the taxed prices, but it also overwrites the caller's list, so `prices` changes behind your back. Make it pure: return a new list and leave `items` untouched.",
+          "starter": "var prices = new List<decimal> { 10m, 20m };\n\nList<decimal> AddTax(List<decimal> items)\n{\n    for (var i = 0; i < items.Count; i++) items[i] *= 1.2m;\n    return items;\n}\n\nvar taxed = AddTax(prices);\nConsole.WriteLine(string.Join(\", \", prices));\nConsole.WriteLine(string.Join(\", \", taxed));",
+          "expected": "10, 20\n12.0, 24.0",
+          "hints": [
+            "Writing to `items[i]` is the side effect. Build the result somewhere else.",
+            "LINQ's `Select` makes a new sequence from an old one, and `ToList` turns it into a list."
+          ],
+          "rules": [
+            "pure AddTax | A pure function hands back new data and leaves what it was given alone. | AddTax leaves its input alone: calling it twice gives the same answer."
+          ],
+          "solution": "var prices = new List<decimal> { 10m, 20m };\n\nList<decimal> AddTax(List<decimal> items) =>\n    items.Select(price => price * 1.2m).ToList();\n\nvar taxed = AddTax(prices);\nConsole.WriteLine(string.Join(\", \", prices));\nConsole.WriteLine(string.Join(\", \", taxed));"
+        }
+      ],
+      "hasPlayground": true
     },
     {
       "id": "immutability",
@@ -916,7 +969,8 @@
         "linear-type",
         "zipper"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "side-effects",
@@ -950,7 +1004,8 @@
         "memoization",
         "function"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "idempotence",
@@ -976,7 +1031,8 @@
         "pure-function",
         "memoization"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "point-free-style",
@@ -1011,7 +1067,8 @@
         "combinatory-logic",
         "pipe"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "predicate",
@@ -1034,7 +1091,8 @@
         "contravariant-functor",
         "refinement-type"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "contracts",
@@ -1055,7 +1113,8 @@
       "relatedIds": [
         "type-signatures"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "category",
@@ -1094,7 +1153,8 @@
         "endofunctor",
         "monoidal-category"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "semigroupoid",
@@ -1129,7 +1189,8 @@
         "function-composition",
         "semigroup"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "value",
@@ -1152,7 +1213,8 @@
         "first-class-function",
         "io"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "constant",
@@ -1181,7 +1243,8 @@
         "constant-function",
         "value"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "constant-function",
@@ -1206,7 +1269,8 @@
         "constant-functor",
         "currying"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "constant-functor",
@@ -1231,7 +1295,8 @@
         "constant-monad",
         "functor"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "constant-monad",
@@ -1255,7 +1320,8 @@
         "constant-functor",
         "monad"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "laws",
@@ -1311,7 +1377,8 @@
         "equational-reasoning",
         "monoid"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "functor",
@@ -1384,7 +1451,26 @@
         "monad-transformer",
         "sum-type"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "exercises": [
+        {
+          "id": "functor/shout-without-unwrapping",
+          "title": "Shout without unwrapping",
+          "brief": "`ShoutName` should return the user's name in capitals, or `None` when there's no such user. Don't take the name out of the `Option` with `Match` or `IfNone`: let `Map` work inside it.",
+          "starter": "Option<string> FindUser(int id) => id == 1 ? Some(\"ada\") : None;\n\nOption<string> ShoutName(int id) => FindUser(id);\n\nConsole.WriteLine(ShoutName(1));\nConsole.WriteLine(ShoutName(2));",
+          "expected": "Some(ADA)\nNone",
+          "hints": [
+            "`Map` takes a function from `string` to something, and runs it only when there's a value.",
+            "`name => name.ToUpper()` is the function you need."
+          ],
+          "rules": [
+            "avoid Option.Match, Option.IfNone, Option.IfNoneUnsafe, Option.Case in ShoutName | That takes the name out of the `Option`, so you have to handle `None` yourself. Let `Map` work inside it instead.",
+            "require Option.Map, Option.Select in ShoutName | `Map` runs your function only when there's a name. | `Map` kept the `None` case for you."
+          ],
+          "solution": "Option<string> FindUser(int id) => id == 1 ? Some(\"ada\") : None;\n\nOption<string> ShoutName(int id) => FindUser(id).Map(name => name.ToUpper());\n\nConsole.WriteLine(ShoutName(1));\nConsole.WriteLine(ShoutName(2));"
+        }
+      ],
+      "hasPlayground": true
     },
     {
       "id": "endofunctor",
@@ -1434,7 +1520,8 @@
         "category",
         "functor-category"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "pointed-functor",
@@ -1458,7 +1545,8 @@
         "lift",
         "monad"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "lift",
@@ -1492,7 +1580,8 @@
         "functor",
         "pointed-functor"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "referential-transparency",
@@ -1525,7 +1614,8 @@
         "immutability",
         "function"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "equational-reasoning",
@@ -1554,7 +1644,8 @@
         "property-based-testing",
         "laws"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "property-based-testing",
@@ -1651,7 +1742,8 @@
         "idempotence",
         "side-effects"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "lambda",
@@ -1687,7 +1779,8 @@
         "expression-tree",
         "type-inference"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "lambda-calculus",
@@ -1738,7 +1831,8 @@
         "combinatory-logic",
         "fixed-point-combinator"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "free-and-bound-variables",
@@ -1782,7 +1876,8 @@
         "alpha-conversion",
         "beta-reduction"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "alpha-conversion",
@@ -1825,7 +1920,8 @@
         "free-and-bound-variables",
         "beta-reduction"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "beta-reduction",
@@ -1875,7 +1971,8 @@
         "reduction-strategy",
         "free-and-bound-variables"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "eta-conversion",
@@ -1915,7 +2012,8 @@
         "point-free-style",
         "fixed-point-combinator"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "reduction-strategy",
@@ -1965,7 +2063,8 @@
         "eager-evaluation",
         "thunk"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "church-encoding",
@@ -2025,7 +2124,8 @@
         "sum-type",
         "combinatory-logic"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "fixed-point-combinator",
@@ -2078,7 +2178,8 @@
         "functional-combinator",
         "lambda-calculus"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "combinatory-logic",
@@ -2137,7 +2238,8 @@
         "lambda-calculus",
         "church-encoding"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "functional-combinator",
@@ -2173,7 +2275,8 @@
         "fixed-point-combinator",
         "combinatory-logic"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "lazy-evaluation",
@@ -2216,7 +2319,8 @@
         "eager-evaluation",
         "generator"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "eager-evaluation",
@@ -2264,7 +2368,8 @@
         "thunk",
         "generator"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "generator",
@@ -2314,7 +2419,8 @@
         "anamorphism",
         "eager-evaluation"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "monoid",
@@ -2386,7 +2492,8 @@
         "homomorphism",
         "newtype"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "group",
@@ -2427,7 +2534,8 @@
         "type-class",
         "semiring"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "semiring",
@@ -2471,7 +2579,8 @@
         "monoid",
         "type-class"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "monad",
@@ -2538,7 +2647,8 @@
         "sum-type",
         "never-type"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "monad-comprehension",
@@ -2596,7 +2706,8 @@
         "continuation-monad",
         "structural-typing"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "comonad",
@@ -2627,7 +2738,8 @@
         "duality",
         "adjunction"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "kleisli-composition",
@@ -2661,7 +2773,8 @@
         "arrow",
         "option"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "kleisli-category",
@@ -2704,7 +2817,8 @@
         "category",
         "option"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "free-monad",
@@ -2753,7 +2867,8 @@
         "algebraic-effects",
         "expression-tree"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "monad-transformer",
@@ -2794,7 +2909,8 @@
         "functor",
         "applicative-functor"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "reader-monad",
@@ -2846,7 +2962,8 @@
         "algebraic-effects",
         "monad-transformer"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "writer-monad",
@@ -2889,7 +3006,8 @@
         "monoid",
         "state-monad"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "state-monad",
@@ -2938,7 +3056,8 @@
         "monad-transformer",
         "adjunction"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "continuation-monad",
@@ -2992,7 +3111,8 @@
         "continuation",
         "monad-comprehension"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "fallible",
@@ -3051,7 +3171,8 @@
         "reader-monad",
         "monad-transformer"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "applicative-functor",
@@ -3101,7 +3222,8 @@
         "monad-transformer",
         "monoidal-category"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "monoidal-functor",
@@ -3155,7 +3277,8 @@
         "functor",
         "monoid"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "bifunctor",
@@ -3204,7 +3327,8 @@
         "profunctor",
         "monoidal-category"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "variance",
@@ -3259,7 +3383,8 @@
         "contravariant-functor",
         "profunctor"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "contravariant-functor",
@@ -3310,7 +3435,8 @@
         "profunctor",
         "variance"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "profunctor",
@@ -3346,7 +3472,8 @@
         "variance",
         "arrow"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "arrow",
@@ -3401,7 +3528,8 @@
         "applicative-functor",
         "monad"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "alternative",
@@ -3444,7 +3572,8 @@
         "monoid",
         "option"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "morphism",
@@ -3507,7 +3636,8 @@
         "isomorphism",
         "monoid"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "endomorphism",
@@ -3531,7 +3661,8 @@
         "homomorphism",
         "endofunctor"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "isomorphism",
@@ -3558,7 +3689,8 @@
         "monoidal-category",
         "morphism"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "catamorphism",
@@ -3589,7 +3721,8 @@
         "recursion",
         "duality"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "anamorphism",
@@ -3650,7 +3783,8 @@
         "foldable",
         "duality"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "hylomorphism",
@@ -3678,7 +3812,8 @@
         "anamorphism",
         "catamorphism"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "paramorphism",
@@ -3702,7 +3837,8 @@
       "relatedIds": [
         "catamorphism"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "apomorphism",
@@ -3767,7 +3903,8 @@
         "functor-category",
         "yoneda-lemma"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "functor-category",
@@ -3812,7 +3949,8 @@
         "endofunctor",
         "adjunction"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "initial-and-terminal-objects",
@@ -3863,7 +4001,8 @@
         "product-type",
         "sum-type"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "product-and-coproduct",
@@ -3912,7 +4051,8 @@
         "either",
         "duality"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "duality",
@@ -4010,7 +4150,8 @@
         "never-type",
         "applicative-functor"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "adjunction",
@@ -4061,7 +4202,8 @@
         "functor-category",
         "monad"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "yoneda-lemma",
@@ -4106,7 +4248,8 @@
         "natural-transformation",
         "functor-category"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "setoid",
@@ -4131,7 +4274,8 @@
       "relatedIds": [
         "semigroup"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "magma",
@@ -4175,7 +4319,8 @@
         "monoid",
         "group"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "semigroup",
@@ -4203,7 +4348,8 @@
         "semigroupoid",
         "magma"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "foldable",
@@ -4229,7 +4375,8 @@
         "recursion",
         "higher-kinded-type"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "traversable",
@@ -4272,7 +4419,8 @@
         "applicative-functor",
         "traversal"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "lens",
@@ -4311,7 +4459,8 @@
         "traversal",
         "zipper"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "prism",
@@ -4352,7 +4501,8 @@
         "iso",
         "traversal"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "iso",
@@ -4392,7 +4542,8 @@
         "prism",
         "isomorphism"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "traversal",
@@ -4424,7 +4575,8 @@
         "traversable",
         "zipper"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "zipper",
@@ -4474,7 +4626,8 @@
         "algebraic-data-type",
         "traversal"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "type-signatures",
@@ -4519,7 +4672,8 @@
         "contracts",
         "type-inference"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "parametricity",
@@ -4569,7 +4723,8 @@
         "rank-n-type",
         "type-inference"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "type-class",
@@ -4630,7 +4785,8 @@
         "group",
         "semiring"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "higher-kinded-type",
@@ -4685,7 +4841,8 @@
         "foldable",
         "expression-problem"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "phantom-type",
@@ -4726,7 +4883,8 @@
         "smart-constructor",
         "refinement-type"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "newtype",
@@ -4782,7 +4940,8 @@
         "refinement-type",
         "monoid"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "smart-constructor",
@@ -4836,7 +4995,8 @@
         "option",
         "either"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "refinement-type",
@@ -4889,7 +5049,8 @@
         "predicate",
         "newtype"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "dependent-type",
@@ -4946,7 +5107,8 @@
         "refinement-type",
         "generalized-algebraic-data-type"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "existential-type",
@@ -4991,7 +5153,8 @@
         "rank-n-type",
         "type-class"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "rank-n-type",
@@ -5040,7 +5203,8 @@
         "parametricity",
         "yoneda-lemma"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "generalized-algebraic-data-type",
@@ -5088,7 +5252,8 @@
         "expression-problem",
         "dependent-type"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "type-inference",
@@ -5138,7 +5303,8 @@
         "parametricity",
         "lambda"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "structural-typing",
@@ -5186,7 +5352,8 @@
         "monad-comprehension",
         "type-class"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "linear-type",
@@ -5234,7 +5401,8 @@
         "side-effects",
         "immutability"
       ],
-      "level": "everything"
+      "level": "everything",
+      "hasPlayground": true
     },
     {
       "id": "expression-problem",
@@ -5285,7 +5453,8 @@
         "generalized-algebraic-data-type",
         "higher-kinded-type"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "algebraic-data-type",
@@ -5412,7 +5581,8 @@
         "product-and-coproduct",
         "initial-and-terminal-objects"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "unit-type",
@@ -5449,7 +5619,8 @@
         "monoidal-category",
         "algebraic-effects"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "never-type",
@@ -5508,7 +5679,8 @@
         "monoidal-category",
         "monad"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "pattern-matching",
@@ -5562,7 +5734,8 @@
         "either",
         "expression-tree"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "option",
@@ -5606,7 +5779,8 @@
         "functor",
         "kleisli-composition"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "either",
@@ -5711,7 +5885,8 @@
         "pattern-matching",
         "lambda"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "function",
@@ -5740,7 +5915,8 @@
         "side-effects",
         "partial-function"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "partial-function",
@@ -5765,7 +5941,8 @@
         "dealing-with-partial-functions",
         "function"
       ],
-      "level": "essentials"
+      "level": "essentials",
+      "hasPlayground": true
     },
     {
       "id": "dealing-with-partial-functions",
@@ -5789,7 +5966,8 @@
         "partial-function",
         "option"
       ],
-      "level": "practical"
+      "level": "practical",
+      "hasPlayground": true
     },
     {
       "id": "total-function",

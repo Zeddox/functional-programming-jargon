@@ -8,9 +8,12 @@
     "build": "node scripts/parse-jargons.js && vite build",
     "preview": "vite preview",
     "test": "node tests/e2e.test.mjs",
-    "parse": "node scripts/parse-jargons.js"
+    "parse": "node scripts/parse-jargons.js",
+    "build:runner": "node scripts/build-runner.mjs",
+    "test:runner": "node tests/runner.test.mjs"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "canvas-confetti": "^1.9.4",
     "lucide-react": "^1.45.0",
     "marked": "^18.0.12",

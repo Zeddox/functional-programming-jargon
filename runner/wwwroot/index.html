@@ -14,7 +14,7 @@
     pre { margin: 0; background: #1a1a19; border: 1px solid var(--line); padding: 12px; white-space: pre-wrap; min-height: 2em; }
     .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     #status { color: var(--muted); }
-    .error { color: var(--err); } .warning { color: var(--warn); } .ok { color: var(--ok); }
+    .error { color: var(--err); } .warning { color: var(--warn); } .info { color: var(--muted); } .ok { color: var(--ok); }
   </style>
 </head>
 <body>
@@ -26,6 +26,7 @@
       <span id="status">Starting .NET…</span>
     </div>
     <textarea id="code" spellcheck="false" aria-label="C# code"></textarea>
+    <textarea id="rules" spellcheck="false" aria-label="Exercise rules, one per line" placeholder="Exercise rules, one per line (see exercises.md)" style="min-height:3em"></textarea>
     <pre id="output" aria-label="Output"></pre>
   </main>
   <script type="module" src="main.js"></script>

@@ -25,6 +25,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
     <PackageReference Include="LanguageExt.Core" Version="5.0.0-beta-77" GeneratePathProperty="true" />
+    <!-- Exercise rules, run alongside the compiler (outside runner/, which compiles every .cs under it) -->
+    <ProjectReference Include="../analyzers/Jargon.Exercises.Analyzers/Jargon.Exercises.Analyzers.csproj" />
   </ItemGroup>
 
   <!--
@@ -70,6 +72,7 @@
     <!-- Roslyn isn't annotated for trimming, so keep it whole -->
     <TrimmerRootAssembly Include="Microsoft.CodeAnalysis" />
     <TrimmerRootAssembly Include="Microsoft.CodeAnalysis.CSharp" />
+    <TrimmerRootAssembly Include="Jargon.Exercises.Analyzers" />
   </ItemGroup>
 
 </Project>

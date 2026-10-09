@@ -30,7 +30,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: app/package.json
 
@@ -38,6 +38,26 @@ jobs:
         run: |
           cd app
           npm ci || npm install
+
+      # The in-browser C# runner (runner/) needs the .NET 11 SDK pinned in global.json
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('runner/Runner.csproj', 'analyzers/**/*.csproj', 'global.json') }}
+
+      - name: Test exercise analyzer
+        run: dotnet test analyzers/Jargon.Exercises.Analyzers.Tests
+
+      - name: Build C# runner
+        run: |
+          cd app
+          npm run build:runner
 
       - name: Build
         run: |
