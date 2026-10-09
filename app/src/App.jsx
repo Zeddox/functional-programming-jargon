@@ -30,20 +30,36 @@ const defaultPanelWidth = (winW) => (winW >= 1024 ? 560 : 500);
 const clampPanelWidth = (width, winW) =>
   Math.max(MIN_PANEL_WIDTH, Math.min(width, winW - MIN_CANVAS_WIDTH));
 
+// Swap the URL's #term without touching its ?view=&topic= query
+const setUrlHash = (id) =>
+  window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${id ? `#${id}` : ''}`);
+
 export default function App() {
   const { meta, categories, terms, graph, combinators, paths = [] } = jargonsData;
 
+  // Deep links: /?view=practical&topic=lambda-calculus#y-combinator
+  const [urlParams] = useState(() => new URLSearchParams(typeof window !== 'undefined' ? window.location.search : ''));
+  const [initialTopic] = useState(() => categories[urlParams.get('topic')] ? urlParams.get('topic') : '');
+
   // Graph view: how much of the jargon to show. A link or search result for a
   // term outside the view widens the view to include it.
+  // A ?view= in the URL wins over the remembered one; a ?topic= or #term the
+  // view hides widens it to the first view that shows them
   const [view, setViewState] = useState(() => {
-    const saved = loadView();
+    let view = VIEW_LEVELS.includes(urlParams.get('view')) ? urlParams.get('view') : loadView();
     const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : '';
     const term = terms.find(t => t.id === hash);
-    return term ? viewFor(term.level, saved) : saved;
+    if (term) view = viewFor(term.level, view);
+    const topicTerms = terms.filter(t => t.category === initialTopic);
+    if (topicTerms.length && !topicTerms.some(t => levelRank(t.level) <= levelRank(view))) {
+      view = topicTerms.reduce((v, t) => levelRank(t.level) < levelRank(v) ? t.level : v, 'everything');
+    }
+    return view;
   });
   const setView = setViewState;
   // Remember whichever view is showing, including one widened by a link
   useEffect(() => saveView(view), [view]);
+
 
   // Learning-path progress (see utils/learning.js for the stored shape)
   const [progress, setProgressState] = useState(() => loadProgress(paths));
@@ -57,9 +73,17 @@ export default function App() {
   const activeStepIndex = activePath ? stepIndexOf(activePath, progress.paths[activePath.id]?.current) : -1;
 
   
-  // Highlighted node on the graph (from the initial URL hash); null shows the overview
   // Topic (category) the graph frames; GraphCanvas owns it and reports changes
-  const [framedTopic, setFramedTopic] = useState('');
+  const [framedTopic, setFramedTopic] = useState(initialTopic);
+  // Keep the view and framed topic in the query string so the URL can be shared
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('view', view);
+    if (framedTopic) params.set('topic', framedTopic); else params.delete('topic');
+    window.history.replaceState(null, '', `${window.location.pathname}?${params}${window.location.hash}`);
+  }, [view, framedTopic]);
+
+  // Highlighted node on the graph (from the initial URL hash); null shows the overview
   const [selectedNodeId, setSelectedNodeId] = useState(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash.replace(/^#/, '');
@@ -233,7 +257,7 @@ export default function App() {
     setSelectedNodeId(termId);
     setSearchQuery('');
     setIsPanelOpen(true);
-    window.history.replaceState(null, '', `#${termId}`);
+    setUrlHash(termId);
   };
 
   // Begin (or continue) a path at a step: its first step by default
@@ -294,11 +318,11 @@ export default function App() {
     setSearchQuery('');
     if (nodeId) {
       setIsPanelOpen(true);
-      window.history.replaceState(null, '', `#${nodeId}`);
+      setUrlHash(nodeId);
     } else {
       if (activePath) handlePausePath();
       setIsPanelOpen(false);
-      window.history.replaceState(null, '', window.location.pathname);
+      setUrlHash('');
     }
   };
 
@@ -307,7 +331,7 @@ export default function App() {
     if (activePath) handlePausePath();
     setIsPanelOpen(false);
     setSelectedNodeId(null);
-    window.history.replaceState(null, '', window.location.pathname);
+    setUrlHash('');
   };
 
   // Pick a random term from the current view
@@ -339,7 +363,7 @@ export default function App() {
   const handleCloseCombinators = () => {
     setIsCombinatorsOpen(false);
     if (window.location.hash === '#combinators') {
-      window.history.replaceState(null, '', isPanelOpen && selectedNodeId ? `#${selectedNodeId}` : window.location.pathname);
+      setUrlHash(isPanelOpen && selectedNodeId ? selectedNodeId : '');
     }
   };
 
@@ -553,6 +577,7 @@ export default function App() {
           view={view}
           viewCounts={viewCounts}
           topicCounts={topicCounts}
+          initialTopic={initialTopic}
           onTopicChange={setFramedTopic}
           onViewChange={(next) => {
             setView(next);

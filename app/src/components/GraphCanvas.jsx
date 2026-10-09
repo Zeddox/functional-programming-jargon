@@ -37,6 +37,7 @@ export default function GraphCanvas({
   view,
   viewCounts = {},
   topicCounts = {},
+  initialTopic = '',
   onTopicChange,
   onViewChange
 }) {
@@ -45,7 +46,7 @@ export default function GraphCanvas({
   const [hoveredNodeId, setHoveredNodeId] = useState(null);
   const [tooltip, setTooltip] = useState(null);
   // Topic (category) the camera frames instead of the whole graph; '' for all
-  const [topic, setTopic] = useState('');
+  const [topic, setTopic] = useState(initialTopic);
 
   // Simulation and camera state refs (mutable for 60fps render loop)
   const stateRef = useRef({
